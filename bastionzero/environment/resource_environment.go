@@ -139,7 +139,7 @@ func (r *environmentResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 	if !found {
-		// The next terraform plan will recreate thre resource
+		// The next terraform plan will recreate the resource
 		resp.State.RemoveResource(ctx)
 		return
 	}
