@@ -1,0 +1,6 @@
+examples/*/*.log
+examples/*/*.tfstate
+examples/*/*.tfstate.backup
+.terraform
+.terraform.lock.hcl
+examples/test
