@@ -28,6 +28,9 @@ func makeTargetConnectPolicyResourceSchema() map[string]schema.Attribute {
 		"name": schema.StringAttribute{
 			Required:    true,
 			Description: "The policy's name.",
+			Validators: []validator.String{
+				stringvalidator.LengthAtLeast(1),
+			},
 		},
 		"description": schema.StringAttribute{
 			Optional:    true,
@@ -47,7 +50,8 @@ func makeTargetConnectPolicyResourceSchema() map[string]schema.Attribute {
 			Description: fmt.Sprintf("Set of actions allowed by this policy %s.", internal.PrettyOneOf(verbtype.VerbTypeValues())),
 			ElementType: types.StringType,
 			Validators: []validator.Set{
-				setvalidator.ValueStringsAre(stringvalidator.OneOfCaseInsensitive(bastionzero.ToStringSlice(verbtype.VerbTypeValues())...)),
+				setvalidator.ValueStringsAre(stringvalidator.OneOf(bastionzero.ToStringSlice(verbtype.VerbTypeValues())...)),
+				setvalidator.SizeAtLeast(1),
 			},
 		},
 	}

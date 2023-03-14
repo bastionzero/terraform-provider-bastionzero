@@ -3,8 +3,10 @@ package targetconnect
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/apierror"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
@@ -102,16 +104,6 @@ func (r *targetConnectPolicyResource) Create(ctx context.Context, req resource.C
 		return
 	}
 
-	// Prevent empty string for policy name
-	if plan.Name.ValueString() == "" {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("name"),
-			"Empty policy name",
-			"All policies require a name. Set the name value in the configuration. Do not use an empty string.",
-		)
-		return
-	}
-
 	// Generate API request body from plan
 	p := new(policies.TargetConnectPolicy)
 	p.Name = plan.Name.ValueString()
@@ -146,76 +138,90 @@ func (r *targetConnectPolicyResource) Create(ctx context.Context, req resource.C
 
 // Read refreshes the target connect policy Terraform state with the latest data.
 func (r *targetConnectPolicyResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	// // Read Terraform prior state data into the model
-	// var state environmentModel
-	// resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-	// if resp.Diagnostics.HasError() {
-	// 	return
-	// }
-	// ctx = tflog.SetField(ctx, "environment_id", state.ID.ValueString())
+	// Read Terraform prior state data into the model
+	var state targetConnectPolicyModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	ctx = tflog.SetField(ctx, "policy_id", state.ID.ValueString())
 
-	// // Read environment
-	// found, diags := readEnvironment(ctx, &state, r.client)
-	// resp.Diagnostics.Append(diags...)
-	// if resp.Diagnostics.HasError() {
-	// 	return
-	// }
-	// if !found {
-	// 	// The next terraform plan will recreate thre resource
-	// 	resp.State.RemoveResource(ctx)
-	// 	return
-	// }
+	// Get refreshed environment value from BastionZero
+	tflog.Debug(ctx, "Querying for target connect policy")
+	p, _, err := r.client.Policies.GetTargetConnectPolicy(ctx, state.ID.ValueString())
+	if apierror.IsAPIErrorStatusCode(err, http.StatusNotFound) {
+		// The next terraform plan will recreate the resource
+		resp.State.RemoveResource(ctx)
+		return
+	} else if err != nil {
+		resp.Diagnostics.AddError(
+			"Error reading target connect policy",
+			"Could not read target connect policy, unexpected error: "+err.Error())
+		return
+	}
+	tflog.Debug(ctx, "Queried for target connect policy")
 
-	// // Overwrite with refreshed state
-	// resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+	setTargetConnectPolicyAttributes(ctx, &state, p)
+
+	// Overwrite with refreshed state
+	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
 // Update updates the target connect policy resource and sets the updated Terraform state
 // on success.
 func (r *targetConnectPolicyResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	// // Read Terraform plan and current state data into the model
-	// var plan, state environmentModel
+	// Read Terraform plan and current state data into the model
+	var plan, state targetConnectPolicyModel
 
-	// resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
-	// resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-	// if resp.Diagnostics.HasError() {
-	// 	return
-	// }
-	// ctx = tflog.SetField(ctx, "environment_id", plan.ID.ValueString())
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	ctx = tflog.SetField(ctx, "policy_id", plan.ID.ValueString())
 
-	// // Generate API request body from plan. Only include things in request that
-	// // have changed between plan and current state
-	// modifyReq := new(environments.ModifyEnvironmentRequest)
-	// if !plan.Description.Equal(state.Description) {
-	// 	modifyReq.Description = bastionzero.PtrTo(plan.Description.ValueString())
-	// }
-	// if !plan.OfflineCleanupTimeoutHours.Equal(state.OfflineCleanupTimeoutHours) {
-	// 	modifyReq.OfflineCleanupTimeoutHours = bastionzero.PtrTo(uint(plan.OfflineCleanupTimeoutHours.ValueInt64()))
-	// }
+	// Generate API request body from plan. Only include things in request that
+	// have changed between plan and current state
+	modPolicy := new(policies.TargetConnectPolicy)
+	if !plan.Name.Equal(state.Name) {
+		modPolicy.Name = plan.Name.ValueString()
+	}
+	if !plan.Description.Equal(state.Description) {
+		modPolicy.Description = bastionzero.PtrTo(plan.Description.ValueString())
+	}
+	if !plan.Subjects.Equal(state.Subjects) {
+		modPolicy.Subjects = policy.ExpandPolicySubjects(ctx, plan.Subjects)
+	}
+	if !plan.Groups.Equal(state.Groups) {
+		modPolicy.Groups = policy.ExpandPolicyGroups(ctx, plan.Groups)
+	}
+	if !plan.Environments.Equal(state.Environments) {
+		modPolicy.Environments = policy.ExpandPolicyEnvironments(ctx, plan.Environments)
+	}
+	if !plan.Targets.Equal(state.Targets) {
+		modPolicy.Targets = policy.ExpandPolicyTargets(ctx, plan.Targets)
+	}
+	if !plan.TargetUsers.Equal(state.TargetUsers) {
+		modPolicy.TargetUsers = ExpandPolicyTargetUsers(ctx, plan.TargetUsers)
+	}
+	if !plan.Verbs.Equal(state.Verbs) {
+		modPolicy.Verbs = ExpandPolicyVerbs(ctx, plan.Verbs)
+	}
 
-	// // Update existing environment
-	// _, err := r.client.Environments.ModifyEnvironment(ctx, plan.ID.ValueString(), modifyReq)
-	// if err != nil {
-	// 	resp.Diagnostics.AddError(
-	// 		"Error updating environment",
-	// 		"Could not update environment, unexpected error: "+err.Error(),
-	// 	)
-	// 	return
-	// }
+	// Update existing policy
+	updateResp, _, err := r.client.Policies.ModifyTargetConnectPolicy(ctx, plan.ID.ValueString(), modPolicy)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error updating target connect policy",
+			"Could not update target connect policy, unexpected error: "+err.Error(),
+		)
+		return
+	}
 
-	// // Query using the GET API to populate other attributes
-	// found, diags := readEnvironment(ctx, &plan, r.client)
-	// resp.Diagnostics.Append(diags...)
-	// if resp.Diagnostics.HasError() {
-	// 	return
-	// }
-	// if !found {
-	// 	resp.Diagnostics.AddError("Failed to find environment after update", "")
-	// 	return
-	// }
+	setTargetConnectPolicyAttributes(ctx, &plan, updateResp)
 
-	// // Overwrite with refreshed state
-	// resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+	// Overwrite with refreshed state
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 // Delete deletes the target connect policy resource and removes the Terraform state on

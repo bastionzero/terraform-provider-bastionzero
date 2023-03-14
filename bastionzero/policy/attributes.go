@@ -36,7 +36,7 @@ func PolicySubjectsAttribute() schema.Attribute {
 					Required:    true,
 					Description: fmt.Sprintf("The subject's type %s.", internal.PrettyOneOf(subjecttype.SubjectTypeValues())),
 					Validators: []validator.String{
-						stringvalidator.OneOfCaseInsensitive(bastionzero.ToStringSlice(subjecttype.SubjectTypeValues())...),
+						stringvalidator.OneOf(bastionzero.ToStringSlice(subjecttype.SubjectTypeValues())...),
 					},
 				},
 			},
@@ -46,17 +46,17 @@ func PolicySubjectsAttribute() schema.Attribute {
 
 func ExpandPolicySubjects(ctx context.Context, tfSet types.Set) *[]policies.PolicySubject {
 	if tfSet.IsNull() || tfSet.IsUnknown() {
-		return nil
+		return bastionzero.PtrTo([]policies.PolicySubject{})
 	}
 
 	var data []PolicySubjectModel
 
 	if diags := tfSet.ElementsAs(ctx, &data, false); diags.HasError() {
-		return nil
+		return bastionzero.PtrTo([]policies.PolicySubject{})
 	}
 
 	if len(data) == 0 {
-		return nil
+		return bastionzero.PtrTo([]policies.PolicySubject{})
 	}
 
 	apiObject := make([]policies.PolicySubject, len(data))
@@ -113,17 +113,17 @@ func PolicyGroupsAttribute() schema.Attribute {
 
 func ExpandPolicyGroups(ctx context.Context, tfSet types.Set) *[]policies.PolicyGroup {
 	if tfSet.IsNull() || tfSet.IsUnknown() {
-		return nil
+		return bastionzero.PtrTo([]policies.PolicyGroup{})
 	}
 
 	var data []PolicyGroupModel
 
 	if diags := tfSet.ElementsAs(ctx, &data, false); diags.HasError() {
-		return nil
+		return bastionzero.PtrTo([]policies.PolicyGroup{})
 	}
 
 	if len(data) == 0 {
-		return nil
+		return bastionzero.PtrTo([]policies.PolicyGroup{})
 	}
 
 	apiObject := make([]policies.PolicyGroup, len(data))
@@ -205,7 +205,7 @@ func PolicyTargetsAttribute() schema.Attribute {
 					Required:    true,
 					Description: fmt.Sprintf("The target's type %s.", internal.PrettyOneOf(targettype.TargetTypeValues())),
 					Validators: []validator.String{
-						stringvalidator.OneOfCaseInsensitive(bastionzero.ToStringSlice(targettype.TargetTypeValues())...),
+						stringvalidator.OneOf(bastionzero.ToStringSlice(targettype.TargetTypeValues())...),
 					},
 				},
 			},
@@ -215,17 +215,17 @@ func PolicyTargetsAttribute() schema.Attribute {
 
 func ExpandPolicyTargets(ctx context.Context, tfSet types.Set) *[]policies.PolicyTarget {
 	if tfSet.IsNull() || tfSet.IsUnknown() {
-		return nil
+		return bastionzero.PtrTo([]policies.PolicyTarget{})
 	}
 
 	var data []PolicyTargetModel
 
 	if diags := tfSet.ElementsAs(ctx, &data, false); diags.HasError() {
-		return nil
+		return bastionzero.PtrTo([]policies.PolicyTarget{})
 	}
 
 	if len(data) == 0 {
-		return nil
+		return bastionzero.PtrTo([]policies.PolicyTarget{})
 	}
 
 	apiObject := make([]policies.PolicyTarget, len(data))
