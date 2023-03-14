@@ -227,40 +227,28 @@ func (r *targetConnectPolicyResource) Update(ctx context.Context, req resource.U
 // Delete deletes the target connect policy resource and removes the Terraform state on
 // success.
 func (r *targetConnectPolicyResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	// // Retrieve values from state
-	// var state environmentModel
-	// resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-	// if resp.Diagnostics.HasError() {
-	// 	return
-	// }
-	// ctx = tflog.SetField(ctx, "environment_id", state.ID.ValueString())
+	// Retrieve values from state
+	var state targetConnectPolicyModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	ctx = tflog.SetField(ctx, "policy_id", state.ID.ValueString())
 
-	// // Present user-friendly error instead of internal server error if
-	// // environment contains targets
-	// if len(state.Targets.Elements()) > 0 {
-	// 	resp.Diagnostics.AddError(
-	// 		"Error deleting environment",
-	// 		fmt.Sprintf("Cannot delete an environment with targets in it. Environment %s contains %d target(s).\n", state.ID.ValueString(), len(state.Targets.Elements()))+
-	// 			"Please remove all targets from this environment before destroying.",
-	// 	)
-	// 	return
-	// }
+	// Delete existing environment
+	tflog.Debug(ctx, "Deleting target connect policy")
+	_, err := r.client.Policies.DeleteTargetConnectPolicy(ctx, state.ID.ValueString())
+	if apierror.IsAPIErrorStatusCode(err, http.StatusNotFound) {
+		// Return early without error if policy is already deleted
+		return
+	} else if err != nil {
+		resp.Diagnostics.AddError(
+			"Error deleting target connect policy",
+			"Could not delete target connect policy, unexpected error: "+err.Error())
+		return
+	}
 
-	// // Delete existing environment
-	// tflog.Debug(ctx, "Deleting environment")
-	// httpResp, err := r.client.Environments.DeleteEnvironment(ctx, state.ID.ValueString())
-	// if httpResp.StatusCode == http.StatusNotFound {
-	// 	// Return early without error if environment is already deleted
-	// 	return
-	// }
-	// if err != nil {
-	// 	resp.Diagnostics.AddError(
-	// 		"Error deleting environment",
-	// 		"Could not delete environment, unexpected error: "+err.Error(),
-	// 	)
-	// 	return
-	// }
-	// tflog.Debug(ctx, "Deleted environment")
+	tflog.Debug(ctx, "Deleted target connect policy")
 }
 
 func (r *targetConnectPolicyResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
