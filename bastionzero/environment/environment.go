@@ -2,12 +2,14 @@ package environment
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/apierror"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/environments"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/targettype"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
 	bzplanmodifier "github.com/bastionzero/terraform-provider-bastionzero/internal/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -147,7 +149,7 @@ func makeEnvironmentResourceSchema() map[string]schema.Attribute {
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
-						Description: `This value is one of "Bzero", "Cluster", "DynamicAccessConfig", "Web", or "Db"`,
+						Description: fmt.Sprintf("The target's type %s.", internal.PrettyOneOf(targettype.TargetTypeValues())),
 					},
 				},
 			},
