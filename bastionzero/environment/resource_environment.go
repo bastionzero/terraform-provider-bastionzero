@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/apierror"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/environments"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -220,12 +221,12 @@ func (r *environmentResource) Delete(ctx context.Context, req resource.DeleteReq
 
 	// Delete existing environment
 	tflog.Debug(ctx, "Deleting environment")
-	httpResp, err := r.client.Environments.DeleteEnvironment(ctx, state.ID.ValueString())
-	if httpResp.StatusCode == http.StatusNotFound {
+	_, err := r.client.Environments.DeleteEnvironment(ctx, state.ID.ValueString())
+
+	if apierror.IsAPIErrorStatusCode(err, http.StatusNotFound) {
 		// Return early without error if environment is already deleted
 		return
-	}
-	if err != nil {
+	} else if err != nil {
 		resp.Diagnostics.AddError(
 			"Error deleting environment",
 			"Could not delete environment, unexpected error: "+err.Error(),

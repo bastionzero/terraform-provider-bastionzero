@@ -6,10 +6,11 @@ import (
 	"time"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/apierror"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/environments"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal"
 	bzplanmodifier "github.com/bastionzero/terraform-provider-bastionzero/internal/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
@@ -37,13 +38,6 @@ type environmentTargetModel struct {
 	ID   types.String `tfsdk:"id"`
 	Type types.String `tfsdk:"type"`
 }
-
-var (
-	environmentTargetModelAttrTypes = map[string]attr.Type{
-		"id":   types.StringType,
-		"type": types.StringType,
-	}
-)
 
 // setEnvironmentAttributes populates the TF schema data from an environment
 func setEnvironmentAttributes(ctx context.Context, schema *environmentModel, env *environments.Environment) diag.Diagnostics {
@@ -75,7 +69,8 @@ func setEnvironmentAttributes(ctx context.Context, schema *environmentModel, env
 			Type: types.StringValue(string(target.Type)),
 		}
 	}
-	targets, diags := types.MapValueFrom(ctx, types.ObjectType{AttrTypes: environmentTargetModelAttrTypes}, targetsMap)
+	attributeTypes, _ := internal.AttributeTypes[environmentTargetModel](ctx)
+	targets, diags := types.MapValueFrom(ctx, types.ObjectType{AttrTypes: attributeTypes}, targetsMap)
 	schema.Targets = targets
 
 	return diags
@@ -173,11 +168,10 @@ func readEnvironment(ctx context.Context, schema *environmentModel, client *bast
 
 	// Get refreshed environment value from BastionZero
 	tflog.Debug(ctx, "Querying for environment")
-	env, httpResp, err := client.Environments.GetEnvironment(ctx, schema.ID.ValueString())
-	if httpResp.StatusCode == http.StatusNotFound {
+	env, _, err := client.Environments.GetEnvironment(ctx, schema.ID.ValueString())
+	if apierror.IsAPIErrorStatusCode(err, http.StatusNotFound) {
 		return false, diags
-	}
-	if err != nil {
+	} else if err != nil {
 		diags.AddError(
 			"Error reading environment",
 			"Could not read environment, unexpected error: "+err.Error())
