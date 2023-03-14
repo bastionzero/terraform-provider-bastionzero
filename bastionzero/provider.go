@@ -8,6 +8,7 @@ import (
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/environment"
+	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/targetconnect"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/user"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -177,6 +178,7 @@ func (p *BastionZeroProvider) Configure(ctx context.Context, req provider.Config
 func (p *BastionZeroProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		environment.NewEnvironmentResource,
+		targetconnect.NewTargetConnectPolicyResource,
 	}
 }
 

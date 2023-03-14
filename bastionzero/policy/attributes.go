@@ -16,14 +16,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// policySubjectModel maps policy subject data.
-type policySubjectModel struct {
+// PolicySubjectModel maps policy subject data.
+type PolicySubjectModel struct {
 	ID   types.String `tfsdk:"id"`
 	Type types.String `tfsdk:"type"`
 }
 
-func policySubjectsAttribute() schema.Attribute {
+func PolicySubjectsAttribute() schema.Attribute {
 	return schema.SetNestedAttribute{
+		Optional:    true,
 		Description: "Set of subjects that this policy applies to.",
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: map[string]schema.Attribute{
@@ -43,14 +44,14 @@ func policySubjectsAttribute() schema.Attribute {
 	}
 }
 
-func expandPolicySubjects(ctx context.Context, tfList types.List) *[]policies.PolicySubject {
-	if tfList.IsNull() || tfList.IsUnknown() {
+func ExpandPolicySubjects(ctx context.Context, tfSet types.Set) *[]policies.PolicySubject {
+	if tfSet.IsNull() || tfSet.IsUnknown() {
 		return nil
 	}
 
-	var data []policySubjectModel
+	var data []PolicySubjectModel
 
-	if diags := tfList.ElementsAs(ctx, &data, false); diags.HasError() {
+	if diags := tfSet.ElementsAs(ctx, &data, false); diags.HasError() {
 		return nil
 	}
 
@@ -66,8 +67,8 @@ func expandPolicySubjects(ctx context.Context, tfList types.List) *[]policies.Po
 	return &apiObject
 }
 
-func flattenPolicySubjects(ctx context.Context, apiObject *[]policies.PolicySubject) types.Set {
-	attributeTypes, _ := internal.AttributeTypes[policySubjectModel](ctx)
+func FlattenPolicySubjects(ctx context.Context, apiObject *[]policies.PolicySubject) types.Set {
+	attributeTypes, _ := internal.AttributeTypes[PolicySubjectModel](ctx)
 	elementType := types.ObjectType{AttrTypes: attributeTypes}
 
 	if apiObject == nil || len(*apiObject) == 0 {
@@ -85,14 +86,15 @@ func flattenPolicySubjects(ctx context.Context, apiObject *[]policies.PolicySubj
 	return types.SetValueMust(elementType, elements)
 }
 
-// policyGroupModel maps policy group data.
-type policyGroupModel struct {
+// PolicyGroupModel maps policy group data.
+type PolicyGroupModel struct {
 	ID   types.String `tfsdk:"id"`
 	Name types.String `tfsdk:"name"`
 }
 
 func PolicyGroupsAttribute() schema.Attribute {
 	return schema.SetNestedAttribute{
+		Optional:    true,
 		Description: "Set of IdP groups that this policy applies to.",
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: map[string]schema.Attribute{
@@ -109,14 +111,14 @@ func PolicyGroupsAttribute() schema.Attribute {
 	}
 }
 
-func expandPolicyGroups(ctx context.Context, tfList types.List) *[]policies.PolicyGroup {
-	if tfList.IsNull() || tfList.IsUnknown() {
+func ExpandPolicyGroups(ctx context.Context, tfSet types.Set) *[]policies.PolicyGroup {
+	if tfSet.IsNull() || tfSet.IsUnknown() {
 		return nil
 	}
 
-	var data []policyGroupModel
+	var data []PolicyGroupModel
 
-	if diags := tfList.ElementsAs(ctx, &data, false); diags.HasError() {
+	if diags := tfSet.ElementsAs(ctx, &data, false); diags.HasError() {
 		return nil
 	}
 
@@ -132,8 +134,8 @@ func expandPolicyGroups(ctx context.Context, tfList types.List) *[]policies.Poli
 	return &apiObject
 }
 
-func flattenPolicyGroups(ctx context.Context, apiObject *[]policies.PolicyGroup) types.Set {
-	attributeTypes, _ := internal.AttributeTypes[policyGroupModel](ctx)
+func FlattenPolicyGroups(ctx context.Context, apiObject *[]policies.PolicyGroup) types.Set {
+	attributeTypes, _ := internal.AttributeTypes[PolicyGroupModel](ctx)
 	elementType := types.ObjectType{AttrTypes: attributeTypes}
 
 	if apiObject == nil || len(*apiObject) == 0 {
@@ -151,22 +153,48 @@ func flattenPolicyGroups(ctx context.Context, apiObject *[]policies.PolicyGroup)
 	return types.SetValueMust(elementType, elements)
 }
 
-func policyEnvironmentsAttribute() schema.Attribute {
+func PolicyEnvironmentsAttribute() schema.Attribute {
 	return schema.SetAttribute{
 		Description: "Set of environments that this policy applies to.",
 		ElementType: types.StringType,
+		Optional:    true,
 	}
 }
 
+func ExpandPolicyEnvironments(ctx context.Context, tfSet types.Set) *[]policies.PolicyEnvironment {
+	envIds := internal.ExpandFrameworkStringValueSet(ctx, tfSet)
+
+	apiObject := make([]policies.PolicyEnvironment, len(envIds))
+	for i, id := range envIds {
+		apiObject[i] = policies.PolicyEnvironment{ID: id}
+	}
+
+	return &apiObject
+}
+
+func FlattenPolicyEnvironments(ctx context.Context, apiObject *[]policies.PolicyEnvironment) types.Set {
+	if apiObject == nil || len(*apiObject) == 0 {
+		return types.SetNull(types.StringType)
+	}
+
+	elements := make([]attr.Value, len(*apiObject))
+	for i, v := range *apiObject {
+		elements[i] = types.StringValue(v.ID)
+	}
+
+	return types.SetValueMust(types.StringType, elements)
+}
+
 // policyTargetModel maps policy target data.
-type policyTargetModel struct {
+type PolicyTargetModel struct {
 	ID   types.String `tfsdk:"id"`
 	Type types.String `tfsdk:"type"`
 }
 
-func policyTargetsAttribute() schema.Attribute {
+func PolicyTargetsAttribute() schema.Attribute {
 	return schema.SetNestedAttribute{
 		Description: "Set of targets that this policy applies to.",
+		Optional:    true,
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: map[string]schema.Attribute{
 				"id": schema.StringAttribute{
@@ -185,14 +213,14 @@ func policyTargetsAttribute() schema.Attribute {
 	}
 }
 
-func expandPolicyTargets(ctx context.Context, tfList types.List) *[]policies.PolicyTarget {
-	if tfList.IsNull() || tfList.IsUnknown() {
+func ExpandPolicyTargets(ctx context.Context, tfSet types.Set) *[]policies.PolicyTarget {
+	if tfSet.IsNull() || tfSet.IsUnknown() {
 		return nil
 	}
 
-	var data []policyTargetModel
+	var data []PolicyTargetModel
 
-	if diags := tfList.ElementsAs(ctx, &data, false); diags.HasError() {
+	if diags := tfSet.ElementsAs(ctx, &data, false); diags.HasError() {
 		return nil
 	}
 
@@ -208,8 +236,8 @@ func expandPolicyTargets(ctx context.Context, tfList types.List) *[]policies.Pol
 	return &apiObject
 }
 
-func flattenPolicyTargets(ctx context.Context, apiObject *[]policies.PolicyTarget) types.Set {
-	attributeTypes, _ := internal.AttributeTypes[policyTargetModel](ctx)
+func FlattenPolicyTargets(ctx context.Context, apiObject *[]policies.PolicyTarget) types.Set {
+	attributeTypes, _ := internal.AttributeTypes[PolicyTargetModel](ctx)
 	elementType := types.ObjectType{AttrTypes: attributeTypes}
 
 	if apiObject == nil || len(*apiObject) == 0 {
