@@ -18,6 +18,8 @@ Provides a BastionZero target connect policy. Target connect policies provide ac
 ### Required
 
 - `name` (String) The policy's name.
+- `target_users` (Set of String) Set of Unix usernames that this policy applies to.
+- `verbs` (Set of String) Set of actions allowed by this policy (one of "Shell", "FileTransfer", or "Tunnel").
 
 ### Optional
 
@@ -25,9 +27,7 @@ Provides a BastionZero target connect policy. Target connect policies provide ac
 - `environments` (Set of String) Set of environments that this policy applies to.
 - `groups` (Attributes Set) Set of IdP groups that this policy applies to. (see [below for nested schema](#nestedatt--groups))
 - `subjects` (Attributes Set) Set of subjects that this policy applies to. (see [below for nested schema](#nestedatt--subjects))
-- `target_users` (Set of String) Set of Unix usernames that this policy applies to.
 - `targets` (Attributes Set) Set of targets that this policy applies to. (see [below for nested schema](#nestedatt--targets))
-- `verbs` (Set of String) Set of actions allowed by this policy (one of "Shell", "FileTransfer", or "Tunnel").
 
 ### Read-Only
 

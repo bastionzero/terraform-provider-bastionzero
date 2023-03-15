@@ -190,6 +190,7 @@ func (p *BastionZeroProvider) DataSources(ctx context.Context) []func() datasour
 		organization.NewGroupsDataSource,
 		serviceaccount.NewServiceAccountsDataSource,
 		environment.NewEnvironmentDataSource,
+		environment.NewEnvironmentsDataSource,
 	}
 }
 
