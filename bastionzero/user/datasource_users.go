@@ -24,7 +24,7 @@ type usersDataSource struct {
 	client *bastionzero.Client
 }
 
-// usersDataSourceModel describes the user data source data model.
+// usersDataSourceModel describes the users data source data model.
 type usersDataSourceModel struct {
 	Users []userModel `tfsdk:"users"`
 }

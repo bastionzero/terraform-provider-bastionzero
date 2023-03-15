@@ -8,6 +8,7 @@ import (
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/environment"
+	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/organization"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/targetconnect"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/user"
 
@@ -185,6 +186,7 @@ func (p *BastionZeroProvider) Resources(ctx context.Context) []func() resource.R
 func (p *BastionZeroProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		user.NewUsersDataSource,
+		organization.NewGroupsDataSource,
 		environment.NewEnvironmentDataSource,
 	}
 }
