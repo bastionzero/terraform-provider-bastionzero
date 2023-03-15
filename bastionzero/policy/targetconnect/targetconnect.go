@@ -43,10 +43,13 @@ func makeTargetConnectPolicyResourceSchema() map[string]schema.Attribute {
 		"target_users": schema.SetAttribute{
 			Description: "Set of Unix usernames that this policy applies to.",
 			ElementType: types.StringType,
-			Optional:    true,
+			Required:    true,
+			Validators: []validator.Set{
+				setvalidator.SizeAtLeast(1),
+			},
 		},
 		"verbs": schema.SetAttribute{
-			Optional:    true,
+			Required:    true,
 			Description: fmt.Sprintf("Set of actions allowed by this policy %s.", internal.PrettyOneOf(verbtype.VerbTypeValues())),
 			ElementType: types.StringType,
 			Validators: []validator.Set{
