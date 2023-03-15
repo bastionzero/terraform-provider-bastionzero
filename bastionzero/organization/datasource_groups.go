@@ -89,7 +89,7 @@ func (d *groupsDataSource) Configure(_ context.Context, req datasource.Configure
 func (d *groupsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state groupsDataSourceModel
 
-	// Query BastionZero for users
+	// Query BastionZero for groups
 	tflog.Debug(ctx, "Querying for groups")
 	groups, _, err := d.client.Organization.ListGroups(ctx)
 	if err != nil {

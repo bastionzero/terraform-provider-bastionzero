@@ -10,6 +10,7 @@ import (
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/environment"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/organization"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/targetconnect"
+	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/serviceaccount"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/user"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -187,6 +188,7 @@ func (p *BastionZeroProvider) DataSources(ctx context.Context) []func() datasour
 	return []func() datasource.DataSource{
 		user.NewUsersDataSource,
 		organization.NewGroupsDataSource,
+		serviceaccount.NewServiceAccountsDataSource,
 		environment.NewEnvironmentDataSource,
 	}
 }
