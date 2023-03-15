@@ -11,6 +11,7 @@ import (
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal/typesext"
+	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -20,9 +21,10 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.Resource                = &targetConnectPolicyResource{}
-	_ resource.ResourceWithConfigure   = &targetConnectPolicyResource{}
-	_ resource.ResourceWithImportState = &targetConnectPolicyResource{}
+	_ resource.Resource                     = &targetConnectPolicyResource{}
+	_ resource.ResourceWithConfigure        = &targetConnectPolicyResource{}
+	_ resource.ResourceWithImportState      = &targetConnectPolicyResource{}
+	_ resource.ResourceWithConfigValidators = &targetConnectPolicyResource{}
 )
 
 func NewTargetConnectPolicyResource() resource.Resource {
@@ -254,4 +256,15 @@ func (r *targetConnectPolicyResource) Delete(ctx context.Context, req resource.D
 func (r *targetConnectPolicyResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func (r *targetConnectPolicyResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
+	return []resource.ConfigValidator{
+		// Validate that policy is not configured with both environments and
+		// targets (known, non-null values).
+		resourcevalidator.Conflicting(
+			path.MatchRoot("environments"),
+			path.MatchRoot("targets"),
+		),
+	}
 }
