@@ -185,7 +185,7 @@ func FlattenPolicyEnvironments(ctx context.Context, apiObject *[]policies.Policy
 	return types.SetValueMust(types.StringType, elements)
 }
 
-// policyTargetModel maps policy target data.
+// PolicyTargetModel maps policy target data.
 type PolicyTargetModel struct {
 	ID   types.String `tfsdk:"id"`
 	Type types.String `tfsdk:"type"`
