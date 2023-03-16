@@ -17,7 +17,7 @@ Get a list of all environments in your BastionZero organization.
 
 ### Read-Only
 
-- `environments` (Attributes List) List of environments in your organization. (see [below for nested schema](#nestedatt--environments))
+- `environments` (Attributes List) List of environments. (see [below for nested schema](#nestedatt--environments))
 
 <a id="nestedatt--environments"></a>
 ### Nested Schema for `environments`
