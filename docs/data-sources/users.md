@@ -22,7 +22,7 @@ data "bastionzero_users" "example" {
 
 ### Read-Only
 
-- `users` (Attributes List) List of users in your organization. (see [below for nested schema](#nestedatt--users))
+- `users` (Attributes List) List of users. (see [below for nested schema](#nestedatt--users))
 
 <a id="nestedatt--users"></a>
 ### Nested Schema for `users`
