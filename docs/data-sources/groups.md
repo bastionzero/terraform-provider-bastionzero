@@ -17,7 +17,7 @@ Get a list of all groups in your BastionZero organization.
 
 ### Read-Only
 
-- `groups` (Attributes List) List of groups in your organization. (see [below for nested schema](#nestedatt--groups))
+- `groups` (Attributes List) List of groups. (see [below for nested schema](#nestedatt--groups))
 
 <a id="nestedatt--groups"></a>
 ### Nested Schema for `groups`
