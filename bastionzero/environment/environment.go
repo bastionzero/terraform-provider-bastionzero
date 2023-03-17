@@ -13,6 +13,7 @@ import (
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
 	bzplanmodifier "github.com/bastionzero/terraform-provider-bastionzero/internal/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
@@ -42,7 +43,7 @@ type environmentTargetModel struct {
 }
 
 // setEnvironmentAttributes populates the TF schema data from an environment
-func setEnvironmentAttributes(ctx context.Context, schema *environmentModel, env *environments.Environment) diag.Diagnostics {
+func setEnvironmentAttributes(ctx context.Context, schema *environmentModel, env *environments.Environment) {
 	schema.Name = types.StringValue(env.Name)
 
 	// Use StringEmptyIsNullValue to normalize "" to Terraform Null value (since
@@ -64,18 +65,16 @@ func setEnvironmentAttributes(ctx context.Context, schema *environmentModel, env
 	schema.IsDefault = types.BoolValue(env.IsDefault)
 	schema.TimeCreated = types.StringValue(env.TimeCreated.UTC().Format(time.RFC3339))
 
-	targetsMap := make(map[string]environmentTargetModel)
-	for _, target := range env.Targets {
-		targetsMap[target.ID] = environmentTargetModel{
-			ID:   types.StringValue(target.ID),
-			Type: types.StringValue(string(target.Type)),
-		}
-	}
+	targetsMap := make(map[string]attr.Value)
 	attributeTypes, _ := internal.AttributeTypes[environmentTargetModel](ctx)
-	targets, diags := types.MapValueFrom(ctx, types.ObjectType{AttrTypes: attributeTypes}, targetsMap)
-	schema.Targets = targets
-
-	return diags
+	elementType := types.ObjectType{AttrTypes: attributeTypes}
+	for _, target := range env.Targets {
+		targetsMap[target.ID] = types.ObjectValueMust(attributeTypes, map[string]attr.Value{
+			"id":   types.StringValue(target.ID),
+			"type": types.StringValue(string(target.Type)),
+		})
+	}
+	schema.Targets = types.MapValueMust(elementType, targetsMap)
 }
 
 func makeEnvironmentResourceSchema() map[string]schema.Attribute {
@@ -181,6 +180,6 @@ func readEnvironment(ctx context.Context, schema *environmentModel, client *bast
 	}
 	tflog.Debug(ctx, "Queried for environment")
 
-	diags.Append(setEnvironmentAttributes(ctx, schema, env)...)
+	setEnvironmentAttributes(ctx, schema, env)
 	return true, diags
 }

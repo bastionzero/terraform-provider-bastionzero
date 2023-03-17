@@ -12,15 +12,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
-// ResourceConfig is the configuration for a list data source. It represents the
-// schema and operations needed to create the list data source.
-type ResourceConfig[TFModel any, APIModel any] struct {
-	// The schema for a single instance of the resource.
+// ListDataSourceConfig is the configuration for a list data source. It
+// represents the schema and operations needed to create the list data source.
+type ListDataSourceConfig[TFModel any, APIModel any] struct {
+	// RecordSchema is the TF schema that models a single instance of the API
+	// object. Required.
 	RecordSchema map[string]schema.Attribute
 
-	// The name of the attribute in the resource through which to expose
-	// results.
+	// The name of the attribute in the data source through which to expose a
+	// list of results. Cannot be the empty string.
 	ResultAttributeName string
+
+	// PrettyAttributeName is the name of the attribute used for logging and
+	// documentation purposes. Cannot be the empty string.
+	PrettyAttributeName string
 
 	// Given a model returned from the ListAPIModels function, flatten the API
 	// model to a TF model.
@@ -43,8 +48,19 @@ type ResourceConfig[TFModel any, APIModel any] struct {
 	DeprecationMessage string
 }
 
-// Returns a new list data source given the specified configuration.
-func NewListDataSource[TFModel any, APIModel any](config *ResourceConfig[TFModel, APIModel]) datasource.DataSourceWithConfigure {
+// Returns a new list data source given the specified configuration. The
+// function panics if the config is invalid.
+func NewListDataSource[TFModel any, APIModel any](config *ListDataSourceConfig[TFModel, APIModel]) datasource.DataSourceWithConfigure {
+	if config.RecordSchema == nil {
+		panic("RecordSchema cannot be nil")
+	}
+	if config.ResultAttributeName == "" {
+		panic("ResultAttributeName cannot be empty")
+	}
+	if config.PrettyAttributeName == "" {
+		panic("PrettyAttributeName cannot be empty")
+	}
+
 	t := struct{ protoDataSource }{}
 	t.metadataFunc = func(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 		resp.TypeName = req.ProviderTypeName + fmt.Sprintf("_%s", config.ResultAttributeName)
@@ -56,7 +72,7 @@ func NewListDataSource[TFModel any, APIModel any](config *ResourceConfig[TFModel
 			DeprecationMessage:  config.DeprecationMessage,
 			Attributes: map[string]schema.Attribute{
 				config.ResultAttributeName: schema.ListNestedAttribute{
-					Description: fmt.Sprintf("List of %s.", config.ResultAttributeName),
+					Description: fmt.Sprintf("List of %s.", config.PrettyAttributeName),
 					Computed:    true,
 					NestedObject: schema.NestedAttributeObject{
 						Attributes: config.RecordSchema,
@@ -86,16 +102,16 @@ func NewListDataSource[TFModel any, APIModel any](config *ResourceConfig[TFModel
 		stateScaffold := struct{ Records []TFModel }{}
 
 		// Query BastionZero for list of API objects
-		tflog.Debug(ctx, fmt.Sprintf("Querying for %s", config.ResultAttributeName))
+		tflog.Debug(ctx, fmt.Sprintf("Querying for %s", config.PrettyAttributeName))
 		apiObjects, err := config.ListAPIModels(ctx, t.client)
 		if err != nil {
 			resp.Diagnostics.AddError(
-				fmt.Sprintf("Unable to list %s", config.ResultAttributeName),
+				fmt.Sprintf("Unable to list %s", config.PrettyAttributeName),
 				err.Error(),
 			)
 			return
 		}
-		tflog.Debug(ctx, fmt.Sprintf("Queried for %s", config.ResultAttributeName), map[string]any{fmt.Sprintf("num_%s", config.ResultAttributeName): len(apiObjects)})
+		tflog.Debug(ctx, fmt.Sprintf("Queried for %s", config.PrettyAttributeName), map[string]any{fmt.Sprintf("num_%s", config.ResultAttributeName): len(apiObjects)})
 
 		// Map response body to model
 		for _, apiObj := range apiObjects {
