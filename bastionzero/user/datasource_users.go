@@ -59,23 +59,23 @@ func NewUsersDataSource() datasource.DataSource {
 		},
 		ResultAttributeName: "users",
 		PrettyAttributeName: "users",
-		FlattenAPIModel: func(ctx context.Context, apiObject users.User) (userModelState *userModel, diags diag.Diagnostics) {
-			userModelState = new(userModel)
+		FlattenAPIModel: func(ctx context.Context, apiObject users.User) (state *userModel, diags diag.Diagnostics) {
+			state = new(userModel)
 
-			userModelState.ID = types.StringValue(apiObject.ID)
-			userModelState.OrganizationID = types.StringValue(apiObject.OrganizationID)
-			userModelState.FullName = types.StringValue(apiObject.FullName)
-			userModelState.Email = types.StringValue(apiObject.Email)
-			userModelState.IsAdmin = types.BoolValue(apiObject.IsAdmin)
-			userModelState.TimeCreated = types.StringValue(apiObject.TimeCreated.UTC().Format(time.RFC3339))
+			state.ID = types.StringValue(apiObject.ID)
+			state.OrganizationID = types.StringValue(apiObject.OrganizationID)
+			state.FullName = types.StringValue(apiObject.FullName)
+			state.Email = types.StringValue(apiObject.Email)
+			state.IsAdmin = types.BoolValue(apiObject.IsAdmin)
+			state.TimeCreated = types.StringValue(apiObject.TimeCreated.UTC().Format(time.RFC3339))
 
 			if apiObject.LastLogin != nil {
-				userModelState.LastLogin = types.StringValue(apiObject.LastLogin.UTC().Format(time.RFC3339))
+				state.LastLogin = types.StringValue(apiObject.LastLogin.UTC().Format(time.RFC3339))
 			} else {
-				userModelState.LastLogin = types.StringNull()
+				state.LastLogin = types.StringNull()
 			}
 
-			return userModelState, diags
+			return
 		},
 		ListAPIModels: func(ctx context.Context, client *bastionzero.Client) ([]users.User, error) {
 			users, _, err := client.Users.ListUsers(ctx)

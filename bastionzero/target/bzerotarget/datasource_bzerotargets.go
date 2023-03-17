@@ -47,11 +47,11 @@ func NewBzeroTargetsDataSource() datasource.DataSource {
 		RecordSchema:        bzeroTargetAttributes,
 		ResultAttributeName: "bzero_targets",
 		PrettyAttributeName: "Bzero targets",
-		FlattenAPIModel: func(ctx context.Context, apiObject targets.BzeroTarget) (targetModelState *bzeroTargetModel, diags diag.Diagnostics) {
-			targetModelState = new(bzeroTargetModel)
-			target.SetBaseTargetAttributes(ctx, targetModelState, &apiObject)
-			targetModelState.ControlChannel = target.FlattenControlChannelSummary(ctx, apiObject.ControlChannel)
-			return targetModelState, diags
+		FlattenAPIModel: func(ctx context.Context, apiObject targets.BzeroTarget) (state *bzeroTargetModel, diags diag.Diagnostics) {
+			state = new(bzeroTargetModel)
+			target.SetBaseTargetAttributes(ctx, state, &apiObject)
+			state.ControlChannel = target.FlattenControlChannelSummary(ctx, apiObject.ControlChannel)
+			return
 		},
 		ListAPIModels: func(ctx context.Context, client *bastionzero.Client) ([]targets.BzeroTarget, error) {
 			targets, _, err := client.Targets.ListBzeroTargets(ctx)

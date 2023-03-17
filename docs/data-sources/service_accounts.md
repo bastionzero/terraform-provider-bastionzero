@@ -17,7 +17,7 @@ Get a list of all service accounts in your BastionZero organization.
 
 ### Read-Only
 
-- `service_accounts` (Attributes List) List of service accounts in your organization. (see [below for nested schema](#nestedatt--service_accounts))
+- `service_accounts` (Attributes List) List of service accounts. (see [below for nested schema](#nestedatt--service_accounts))
 
 <a id="nestedatt--service_accounts"></a>
 ### Nested Schema for `service_accounts`
