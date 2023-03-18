@@ -1,4 +1,4 @@
-package listdatasource
+package bzdatasource
 
 import (
 	"context"
@@ -49,7 +49,8 @@ type ListDataSourceConfig[TFModel any, APIModel any] struct {
 }
 
 // Returns a new list data source given the specified configuration. The
-// function panics if the config is invalid.
+// function panics if the config is invalid. A list data source abstracts
+// calling a GET BastionZero API endpoint that returns a list of objects.
 func NewListDataSource[TFModel any, APIModel any](config *ListDataSourceConfig[TFModel, APIModel]) datasource.DataSourceWithConfigure {
 	if config.RecordSchema == nil {
 		panic("RecordSchema cannot be nil")
@@ -141,33 +142,4 @@ func NewListDataSource[TFModel any, APIModel any](config *ListDataSourceConfig[T
 	}
 
 	return &t
-}
-
-// Anonymous interface implementation via prototype struct and embedding
-//
-// Source: https://stackoverflow.com/a/31362378
-
-// Ensure prototype implements data source framework interface
-var _ datasource.DataSourceWithConfigure = &protoDataSource{}
-
-type protoDataSource struct {
-	client *bastionzero.Client
-
-	metadataFunc  func(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse)
-	schemaFunc    func(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse)
-	configureFunc func(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse)
-	readFunc      func(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse)
-}
-
-func (t *protoDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	t.metadataFunc(ctx, req, resp)
-}
-func (t *protoDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	t.schemaFunc(ctx, req, resp)
-}
-func (t *protoDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	t.configureFunc(ctx, req, resp)
-}
-func (t *protoDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	t.readFunc(ctx, req, resp)
 }

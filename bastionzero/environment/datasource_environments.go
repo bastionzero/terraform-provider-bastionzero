@@ -6,13 +6,13 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/environments"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
-	"github.com/bastionzero/terraform-provider-bastionzero/internal/listdatasource"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal/bzdatasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 )
 
 func NewEnvironmentsDataSource() datasource.DataSource {
-	return listdatasource.NewListDataSource(&listdatasource.ListDataSourceConfig[environmentModel, environments.Environment]{
+	return bzdatasource.NewListDataSource(&bzdatasource.ListDataSourceConfig[environmentModel, environments.Environment]{
 		RecordSchema:        internal.ResourceSchemaToDataSourceSchema(makeEnvironmentResourceSchema(), nil),
 		ResultAttributeName: "environments",
 		PrettyAttributeName: "environments",

@@ -6,7 +6,7 @@ import (
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/serviceaccounts"
-	"github.com/bastionzero/terraform-provider-bastionzero/internal/listdatasource"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal/bzdatasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -29,7 +29,7 @@ type serviceAccountModel struct {
 }
 
 func NewServiceAccountsDataSource() datasource.DataSource {
-	return listdatasource.NewListDataSource(&listdatasource.ListDataSourceConfig[serviceAccountModel, serviceaccounts.ServiceAccount]{
+	return bzdatasource.NewListDataSource(&bzdatasource.ListDataSourceConfig[serviceAccountModel, serviceaccounts.ServiceAccount]{
 		RecordSchema: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,

@@ -6,7 +6,7 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/target"
-	"github.com/bastionzero/terraform-provider-bastionzero/internal/listdatasource"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal/bzdatasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -43,7 +43,7 @@ func NewBzeroTargetsDataSource() datasource.DataSource {
 	// Add common base target attributes
 	maps.Copy(bzeroTargetAttributes, target.BaseTargetDataSourceAttributes())
 
-	return listdatasource.NewListDataSource(&listdatasource.ListDataSourceConfig[bzeroTargetModel, targets.BzeroTarget]{
+	return bzdatasource.NewListDataSource(&bzdatasource.ListDataSourceConfig[bzeroTargetModel, targets.BzeroTarget]{
 		RecordSchema:        bzeroTargetAttributes,
 		ResultAttributeName: "bzero_targets",
 		PrettyAttributeName: "Bzero targets",

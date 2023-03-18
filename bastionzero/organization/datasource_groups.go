@@ -5,7 +5,7 @@ import (
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/organization"
-	"github.com/bastionzero/terraform-provider-bastionzero/internal/listdatasource"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal/bzdatasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -19,7 +19,7 @@ type groupModel struct {
 }
 
 func NewGroupsDataSource() datasource.DataSource {
-	return listdatasource.NewListDataSource(&listdatasource.ListDataSourceConfig[groupModel, organization.Group]{
+	return bzdatasource.NewListDataSource(&bzdatasource.ListDataSourceConfig[groupModel, organization.Group]{
 		RecordSchema: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
