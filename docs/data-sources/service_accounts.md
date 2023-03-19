@@ -38,5 +38,6 @@ Read-Only:
 - `jwks_url_pattern` (String) A URL pattern that all service accounts of the same service account provider follow in their JWKS URL.
 - `organization_id` (String) The service account's organization's ID.
 - `time_created` (String) The time this service account was created in BastionZero formatted as a UTC timestamp string in RFC 3339 format.
+- `type` (String) The subject's type (constant value "ServiceAccount").
 
 

@@ -2,9 +2,11 @@ package serviceaccount
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/serviceaccounts"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/subjecttype"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -12,6 +14,7 @@ import (
 // serviceAccountModel maps service account schema data.
 type serviceAccountModel struct {
 	ID             types.String `tfsdk:"id"`
+	Type           types.String `tfsdk:"type"`
 	OrganizationID types.String `tfsdk:"organization_id"`
 	Email          types.String `tfsdk:"email"`
 	ExternalID     types.String `tfsdk:"external_id"`
@@ -30,6 +33,7 @@ func (m serviceAccountModel) GetID() types.String { return m.ID }
 // account API object.
 func setServiceAccountAttributes(ctx context.Context, schema *serviceAccountModel, serviceAccount *serviceaccounts.ServiceAccount) {
 	schema.ID = types.StringValue(serviceAccount.ID)
+	schema.Type = types.StringValue(string(subjecttype.ServiceAccount))
 	schema.OrganizationID = types.StringValue(serviceAccount.OrganizationID)
 	schema.Email = types.StringValue(serviceAccount.Email)
 	schema.ExternalID = types.StringValue(serviceAccount.ExternalID)
@@ -53,6 +57,10 @@ func makeServiceAccountDataSourceSchema(withRequiredID bool) map[string]schema.A
 			Computed:    !withRequiredID,
 			Required:    withRequiredID,
 			Description: "The service account's unique ID.",
+		},
+		"type": schema.StringAttribute{
+			Computed:    true,
+			Description: fmt.Sprintf("The subject's type (constant value \"%s\").", subjecttype.ServiceAccount),
 		},
 		"organization_id": schema.StringAttribute{
 			Computed:    true,
