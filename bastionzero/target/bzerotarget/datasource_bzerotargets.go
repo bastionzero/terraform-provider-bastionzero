@@ -5,6 +5,7 @@ import (
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/targettype"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/target"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal/bzdatasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -18,6 +19,7 @@ import (
 type bzeroTargetModel struct {
 	ID              types.String `tfsdk:"id"`
 	Name            types.String `tfsdk:"name"`
+	Type            types.String `tfsdk:"type"`
 	Status          types.String `tfsdk:"status"`
 	EnvironmentID   types.String `tfsdk:"environment_id"`
 	LastAgentUpdate types.String `tfsdk:"last_agent_update"`
@@ -29,6 +31,7 @@ type bzeroTargetModel struct {
 
 func (t *bzeroTargetModel) SetID(value types.String)              { t.ID = value }
 func (t *bzeroTargetModel) SetName(value types.String)            { t.Name = value }
+func (t *bzeroTargetModel) SetType(value types.String)            { t.Type = value }
 func (t *bzeroTargetModel) SetStatus(value types.String)          { t.Status = value }
 func (t *bzeroTargetModel) SetEnvironmentID(value types.String)   { t.EnvironmentID = value }
 func (t *bzeroTargetModel) SetLastAgentUpdate(value types.String) { t.LastAgentUpdate = value }
@@ -41,7 +44,7 @@ func NewBzeroTargetsDataSource() datasource.DataSource {
 		"control_channel": target.ControlChannelSummaryAttribute(),
 	}
 	// Add common base target attributes
-	maps.Copy(bzeroTargetAttributes, target.BaseTargetDataSourceAttributes())
+	maps.Copy(bzeroTargetAttributes, target.BaseTargetDataSourceAttributes(targettype.Bzero))
 
 	return bzdatasource.NewListDataSource(&bzdatasource.ListDataSourceConfig[bzeroTargetModel, targets.BzeroTarget]{
 		RecordSchema:        bzeroTargetAttributes,

@@ -8,6 +8,7 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets/targetstatus"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/targettype"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -23,6 +24,8 @@ type TargetModelInterface interface {
 	SetID(value types.String)
 	// SetName sets the target model's name attribute.
 	SetName(value types.String)
+	// SetType sets the target model's type attribute.
+	SetType(value types.String)
 	// SetStatus sets the target model's status attribute.
 	SetStatus(value types.String)
 	// SetEnvironmentID sets the target model's environment ID attribute.
@@ -42,6 +45,7 @@ type TargetModelInterface interface {
 func SetBaseTargetAttributes(ctx context.Context, schema TargetModelInterface, baseTarget targets.TargetInterface) {
 	schema.SetID(types.StringValue(baseTarget.GetID()))
 	schema.SetName(types.StringValue(baseTarget.GetName()))
+	schema.SetType(types.StringValue(string(baseTarget.GetTargetType())))
 	schema.SetStatus(types.StringValue(string(baseTarget.GetStatus())))
 	schema.SetEnvironmentID(types.StringValue(baseTarget.GetEnvironmentID()))
 
@@ -58,7 +62,7 @@ func SetBaseTargetAttributes(ctx context.Context, schema TargetModelInterface, b
 
 // BaseTargetDataSourceAttributes returns a map of common TF attributes used by
 // the bzero, database, kube, and web data source schemas.
-func BaseTargetDataSourceAttributes() map[string]schema.Attribute {
+func BaseTargetDataSourceAttributes(targetType targettype.TargetType) map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"id": schema.StringAttribute{
 			Computed:    true,
@@ -67,6 +71,10 @@ func BaseTargetDataSourceAttributes() map[string]schema.Attribute {
 		"name": schema.StringAttribute{
 			Computed:    true,
 			Description: "The target's name.",
+		},
+		"type": schema.StringAttribute{
+			Computed:    true,
+			Description: fmt.Sprintf("The target's type (constant value \"%s\").", targetType),
 		},
 		"status": schema.StringAttribute{
 			Computed:    true,

@@ -36,6 +36,7 @@ Read-Only:
 - `name` (String) The target's name.
 - `region` (String) The BastionZero region that this target has connected to (follows same naming convention as AWS regions).
 - `status` (String) The target's status (one of "NotActivated", "Offline", "Online", "Terminated", "Error", or "Restarting").
+- `type` (String) The target's type (constant value "Bzero").
 
 <a id="nestedatt--bzero_targets--control_channel"></a>
 ### Nested Schema for `bzero_targets.control_channel`
