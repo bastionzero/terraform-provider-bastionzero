@@ -32,7 +32,7 @@ func NewGroupsDataSource() datasource.DataSource {
 		},
 		ResultAttributeName: "groups",
 		PrettyAttributeName: "groups",
-		FlattenAPIModel: func(ctx context.Context, apiObject organization.Group) (state *groupModel, diags diag.Diagnostics) {
+		FlattenAPIModel: func(ctx context.Context, apiObject *organization.Group) (state *groupModel, diags diag.Diagnostics) {
 			state = new(groupModel)
 			state.ID = types.StringValue(apiObject.ID)
 			state.Name = types.StringValue(apiObject.Name)

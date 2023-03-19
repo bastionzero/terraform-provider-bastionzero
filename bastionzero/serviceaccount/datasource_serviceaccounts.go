@@ -79,7 +79,7 @@ func NewServiceAccountsDataSource() datasource.DataSource {
 		},
 		ResultAttributeName: "service_accounts",
 		PrettyAttributeName: "service accounts",
-		FlattenAPIModel: func(ctx context.Context, apiObject serviceaccounts.ServiceAccount) (state *serviceAccountModel, diags diag.Diagnostics) {
+		FlattenAPIModel: func(ctx context.Context, apiObject *serviceaccounts.ServiceAccount) (state *serviceAccountModel, diags diag.Diagnostics) {
 			state = new(serviceAccountModel)
 			state.ID = types.StringValue(apiObject.ID)
 			state.OrganizationID = types.StringValue(apiObject.OrganizationID)

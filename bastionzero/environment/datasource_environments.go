@@ -16,9 +16,9 @@ func NewEnvironmentsDataSource() datasource.DataSource {
 		RecordSchema:        internal.ResourceSchemaToDataSourceSchema(makeEnvironmentResourceSchema(), nil),
 		ResultAttributeName: "environments",
 		PrettyAttributeName: "environments",
-		FlattenAPIModel: func(ctx context.Context, apiObject environments.Environment) (state *environmentModel, diags diag.Diagnostics) {
+		FlattenAPIModel: func(ctx context.Context, apiObject *environments.Environment) (state *environmentModel, diags diag.Diagnostics) {
 			state = new(environmentModel)
-			setEnvironmentAttributes(ctx, state, &apiObject)
+			setEnvironmentAttributes(ctx, state, apiObject)
 			return
 		},
 		ListAPIModels: func(ctx context.Context, client *bastionzero.Client) ([]environments.Environment, error) {

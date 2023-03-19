@@ -29,7 +29,7 @@ type ListDataSourceConfig[TFModel any, APIModel any] struct {
 
 	// Given a model returned from the ListAPIModels function, flatten the API
 	// model to a TF model.
-	FlattenAPIModel func(ctx context.Context, apiObject APIModel) (*TFModel, diag.Diagnostics)
+	FlattenAPIModel func(ctx context.Context, apiObject *APIModel) (*TFModel, diag.Diagnostics)
 
 	// ListAPIModels returns all of the API models on which the data source
 	// should expose.
@@ -116,7 +116,7 @@ func NewListDataSource[TFModel any, APIModel any](config *ListDataSourceConfig[T
 
 		// Map response body to model
 		for _, apiObj := range apiObjects {
-			tfModel, diags := config.FlattenAPIModel(ctx, apiObj)
+			tfModel, diags := config.FlattenAPIModel(ctx, &apiObj)
 			resp.Diagnostics.Append(diags...)
 			if resp.Diagnostics.HasError() {
 				// Return early because something went wrong

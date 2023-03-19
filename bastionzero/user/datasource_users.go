@@ -59,7 +59,7 @@ func NewUsersDataSource() datasource.DataSource {
 		},
 		ResultAttributeName: "users",
 		PrettyAttributeName: "users",
-		FlattenAPIModel: func(ctx context.Context, apiObject users.User) (state *userModel, diags diag.Diagnostics) {
+		FlattenAPIModel: func(ctx context.Context, apiObject *users.User) (state *userModel, diags diag.Diagnostics) {
 			state = new(userModel)
 
 			state.ID = types.StringValue(apiObject.ID)
