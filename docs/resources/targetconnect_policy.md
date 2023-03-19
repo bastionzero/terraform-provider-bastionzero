@@ -32,6 +32,7 @@ Provides a BastionZero target connect policy. Target connect policies provide ac
 ### Read-Only
 
 - `id` (String) The policy's unique ID.
+- `type` (String) The policy's type (constant value "TargetConnect").
 
 <a id="nestedatt--groups"></a>
 ### Nested Schema for `groups`

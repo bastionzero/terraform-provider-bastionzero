@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/policytype"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/verbtype"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
@@ -32,6 +33,7 @@ func makeTargetConnectPolicyResourceSchema() map[string]schema.Attribute {
 				stringvalidator.LengthAtLeast(1),
 			},
 		},
+		"type": policy.PolicyTypeAttribute(policytype.TargetConnect),
 		"description": schema.StringAttribute{
 			Optional:    true,
 			Description: "The policy's description.",

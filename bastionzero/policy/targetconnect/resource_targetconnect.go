@@ -35,6 +35,7 @@ func NewTargetConnectPolicyResource() resource.Resource {
 type targetConnectPolicyModel struct {
 	ID           types.String `tfsdk:"id"`
 	Name         types.String `tfsdk:"name"`
+	Type         types.String `tfsdk:"type"`
 	Description  types.String `tfsdk:"description"`
 	Subjects     types.Set    `tfsdk:"subjects"`
 	Groups       types.Set    `tfsdk:"groups"`
@@ -54,6 +55,7 @@ type targetConnectPolicyResource struct {
 func setTargetConnectPolicyAttributes(ctx context.Context, schema *targetConnectPolicyModel, apiPolicy *policies.TargetConnectPolicy) {
 	schema.ID = types.StringValue(apiPolicy.ID)
 	schema.Name = types.StringValue(apiPolicy.Name)
+	schema.Type = types.StringValue(string(apiPolicy.GetPolicyType()))
 	schema.Description = typesext.StringEmptyIsNullValue(apiPolicy.Description)
 	schema.Subjects = policy.FlattenPolicySubjects(ctx, apiPolicy.Subjects)
 	schema.Groups = policy.FlattenPolicyGroups(ctx, apiPolicy.Groups)
