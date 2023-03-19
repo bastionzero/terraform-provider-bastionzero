@@ -187,6 +187,7 @@ func (p *BastionZeroProvider) Resources(ctx context.Context) []func() resource.R
 
 func (p *BastionZeroProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
+		user.NewUserDataSource,
 		user.NewUsersDataSource,
 		organization.NewGroupsDataSource,
 		serviceaccount.NewServiceAccountsDataSource,

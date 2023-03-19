@@ -20,6 +20,8 @@ type userModel struct {
 	LastLogin      types.String `tfsdk:"last_login"`
 }
 
+func (m userModel) GetID() types.String { return m.ID }
+
 // setUserAttributes populates the TF schema data from a user API object.
 func setUserAttributes(ctx context.Context, schema *userModel, user *users.User) {
 	schema.ID = types.StringValue(user.ID)
