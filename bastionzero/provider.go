@@ -194,6 +194,7 @@ func (p *BastionZeroProvider) DataSources(ctx context.Context) []func() datasour
 		serviceaccount.NewServiceAccountsDataSource,
 		environment.NewEnvironmentDataSource,
 		environment.NewEnvironmentsDataSource,
+		bzerotarget.NewBzeroTargetDataSource,
 		bzerotarget.NewBzeroTargetsDataSource,
 	}
 }

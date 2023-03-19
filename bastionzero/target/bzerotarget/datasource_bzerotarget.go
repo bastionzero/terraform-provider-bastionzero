@@ -10,20 +10,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 )
 
-func NewBzeroTargetsDataSource() datasource.DataSource {
-	return bzdatasource.NewListDataSource(&bzdatasource.ListDataSourceConfig[bzeroTargetModel, targets.BzeroTarget]{
-		RecordSchema:        makeBzeroTargetDataSourceSchema(false),
-		ResultAttributeName: "bzero_targets",
-		PrettyAttributeName: "Bzero targets",
+func NewBzeroTargetDataSource() datasource.DataSource {
+	return bzdatasource.NewSingleDataSource(&bzdatasource.SingleDataSourceConfig[bzeroTargetModel, targets.BzeroTarget]{
+		RecordSchema:        makeBzeroTargetDataSourceSchema(true),
+		ResultAttributeName: "bzero_target",
+		PrettyAttributeName: "Bzero target",
 		FlattenAPIModel: func(ctx context.Context, apiObject *targets.BzeroTarget) (state *bzeroTargetModel, diags diag.Diagnostics) {
 			state = new(bzeroTargetModel)
 			setBzeroTargetAttributes(ctx, state, apiObject)
 			return
 		},
-		ListAPIModels: func(ctx context.Context, client *bastionzero.Client) ([]targets.BzeroTarget, error) {
-			targets, _, err := client.Targets.ListBzeroTargets(ctx)
+		GetAPIModel: func(ctx context.Context, client *bastionzero.Client, id string) (*targets.BzeroTarget, error) {
+			targets, _, err := client.Targets.GetBzeroTarget(ctx, id)
 			return targets, err
 		},
-		Description: "Get a list of all Bzero targets in your BastionZero organization.",
+		Description: "Get information about a specific Bzero target in your BastionZero organization.",
 	})
+
 }

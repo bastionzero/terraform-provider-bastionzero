@@ -62,10 +62,11 @@ func SetBaseTargetAttributes(ctx context.Context, schema TargetModelInterface, b
 
 // BaseTargetDataSourceAttributes returns a map of common TF attributes used by
 // the bzero, database, kube, and web data source schemas.
-func BaseTargetDataSourceAttributes(targetType targettype.TargetType) map[string]schema.Attribute {
+func BaseTargetDataSourceAttributes(targetType targettype.TargetType, withRequiredID bool) map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"id": schema.StringAttribute{
-			Computed:    true,
+			Computed:    !withRequiredID,
+			Required:    withRequiredID,
 			Description: "The target's unique ID.",
 		},
 		"name": schema.StringAttribute{
