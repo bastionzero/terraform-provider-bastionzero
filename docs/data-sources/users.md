@@ -39,5 +39,6 @@ Read-Only:
 - `is_admin` (Boolean) If true, the user is an administrator. False otherwise.
 - `organization_id` (String) The user's organization's ID.
 - `time_created` (String) The time this user was created in BastionZero formatted as a UTC timestamp string in RFC 3339 format.
+- `type` (String) The subject's type (constant value "User").
 
 
