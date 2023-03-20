@@ -10,6 +10,7 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets/targetstatus"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/targettype"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal/typesext"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -64,6 +65,7 @@ func SetBaseTargetAttributes(ctx context.Context, schema TargetModelInterface, b
 // list of common TF attributes used by the bzero, database, kube, and web data
 // source schemas.
 type BaseTargetDataSourceAttributeOptions struct {
+	IsIDRequired bool
 	IsIDOptional bool
 	IsIDComputed bool
 
@@ -74,8 +76,9 @@ type BaseTargetDataSourceAttributeOptions struct {
 // BaseTargetDataSourceAttributes returns a map of common TF attributes used by
 // the bzero, database, kube, and web data source schemas.
 func BaseTargetDataSourceAttributes(targetType targettype.TargetType, opts *BaseTargetDataSourceAttributeOptions) map[string]schema.Attribute {
-	baseTargetAttributes := map[string]schema.Attribute{
+	return map[string]schema.Attribute{
 		"id": schema.StringAttribute{
+			Required:    opts.IsIDRequired,
 			Computed:    opts.IsIDComputed,
 			Optional:    opts.IsIDOptional,
 			Description: "The target's unique ID.",
@@ -117,8 +120,58 @@ func BaseTargetDataSourceAttributes(targetType targettype.TargetType, opts *Base
 			Description: "The target's backing agent's public key.",
 		},
 	}
+}
 
-	return baseTargetAttributes
+func TargetDataSourceWithTimeoutMarkdownDescription(baseDescription string, targetType targettype.TargetType) string {
+	return fmt.Sprintf("%v"+
+		"\n\nSpecify exactly one of `id` or `name`. When specifying a `name`, an error is triggered if more than one %v target is found. "+
+		"This data source retries with exponential backoff (provide optional `timeouts.read` [duration](https://pkg.go.dev/time#ParseDuration) to control how long to retry. Defaults to 15 mintues.) until the %v target is found. "+
+		"This is useful if there is a chance the target does not exist yet (e.g. the target is in the process of registering to BastionZero).", baseDescription, targetType, targetType)
+}
+
+// BaseVirtualTargetDataSourceAttributes returns a map of common TF attributes
+// used by the database and web data source schemas.
+func BaseVirtualTargetDataSourceAttributes(targetType targettype.TargetType) map[string]schema.Attribute {
+	return map[string]schema.Attribute{
+		"proxy_target_id": schema.StringAttribute{
+			Computed:    true,
+			Description: "The target's proxy target's ID.",
+		},
+		"remote_host": schema.StringAttribute{
+			Computed:    true,
+			Description: "The target's hostname or IP address.",
+		},
+		"remote_port": schema.NumberAttribute{
+			Computed:    true,
+			Description: fmt.Sprintf("The port of the %v server accessible via the target.", targetType),
+		},
+		"local_port": schema.NumberAttribute{
+			Computed:    true,
+			Description: fmt.Sprintf("The port of the %v daemon's localhost server that is spawned on the user's machine on connect. Null if not configured.", targetType),
+		},
+	}
+}
+
+// VirtualTargetModelInterface lets you work with common attributes from any
+// kind of virtual target model
+type VirtualTargetModelInterface interface {
+	// SetProxyTargetID sets the target model's proxy_target_id attribute.
+	SetProxyTargetID(value types.String)
+	// SetRemoteHost sets the target model's remote_host attribute.
+	SetRemoteHost(value types.String)
+	// SetRemotePort sets the target model's remote_port attribute.
+	SetRemotePort(value types.Number)
+	// SetLocalPort sets the target model's local_port attribute.
+	SetLocalPort(value types.Number)
+}
+
+// SetBaseVirtualTargetAttributes populates base virtual target attributes in
+// the TF schema from a virtual target
+func SetBaseVirtualTargetAttributes(ctx context.Context, schema VirtualTargetModelInterface, virtualTarget targets.VirtualTargetInterface) {
+	schema.SetProxyTargetID(types.StringValue(virtualTarget.GetProxyTargetID()))
+	schema.SetRemoteHost(types.StringValue(virtualTarget.GetRemoteHost()))
+	schema.SetRemotePort(typesext.NumberPointerValue(virtualTarget.GetRemotePort().Value))
+	schema.SetLocalPort(typesext.NumberPointerValue(virtualTarget.GetLocalPort().Value))
 }
 
 // ControlChannelSummaryModel maps control channel summary data.
@@ -127,13 +180,6 @@ type ControlChannelSummaryModel struct {
 	ConnectionNodeID types.String `tfsdk:"connection_node_id"`
 	StartTime        types.String `tfsdk:"start_time"`
 	EndTime          types.String `tfsdk:"end_time"`
-}
-
-func TargetDataSourceWithTimeoutMarkdownDescription(baseDescription string, targetType targettype.TargetType) string {
-	return fmt.Sprintf("%v"+
-		"\n\nSpecify exactly one of `id` or `name`. When specifying a `name`, an error is triggered if more than one %v target is found. "+
-		"This data source retries with exponential backoff (provide optional `timeouts.read` [duration](https://pkg.go.dev/time#ParseDuration) to control how long to retry. Defaults to 15 mintues.) until the %v target is found. "+
-		"This is useful if there is a chance the target does not exist yet (e.g. the target is in the process of registering to BastionZero).", baseDescription, targetType, targetType)
 }
 
 func ControlChannelSummaryAttribute() schema.Attribute {
