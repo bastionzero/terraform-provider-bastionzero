@@ -1,4 +1,4 @@
-package bzerotarget
+package clustertarget
 
 import (
 	"context"
@@ -20,16 +20,16 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ datasource.DataSource                     = &bzeroTargetDataSource{}
-	_ datasource.DataSourceWithConfigure        = &bzeroTargetDataSource{}
-	_ datasource.DataSourceWithConfigValidators = &bzeroTargetDataSource{}
+	_ datasource.DataSource                     = &clusterTargetDataSource{}
+	_ datasource.DataSourceWithConfigure        = &clusterTargetDataSource{}
+	_ datasource.DataSourceWithConfigValidators = &clusterTargetDataSource{}
 )
 
-type bzeroTargetDataSource struct {
+type clusterTargetDataSource struct {
 	datasource.DataSourceWithConfigure
 }
 
-func (*bzeroTargetDataSource) ConfigValidators(context.Context) []datasource.ConfigValidator {
+func (*clusterTargetDataSource) ConfigValidators(context.Context) []datasource.ConfigValidator {
 	return []datasource.ConfigValidator{
 		// Validate only one of the schema defined attributes named id and name
 		// has a known, non-null value.
@@ -40,46 +40,46 @@ func (*bzeroTargetDataSource) ConfigValidators(context.Context) []datasource.Con
 	}
 }
 
-func NewBzeroTargetDataSource() datasource.DataSource {
-	baseDesc := "Get information about a specific Bzero target in your BastionZero organization."
-	return &bzeroTargetDataSource{
+func NewClusterTargetDataSource() datasource.DataSource {
+	baseDesc := "Get information about a specific Cluster target in your BastionZero organization."
+	return &clusterTargetDataSource{
 		DataSourceWithConfigure: bzdatasource.NewSingleDataSourceWithTimeout(
-			&bzdatasource.SingleDataSourceConfigWithTimeout[bzeroTargetModel, targets.BzeroTarget]{
-				BaseSingleDataSourceConfig: &bzdatasource.BaseSingleDataSourceConfig[bzeroTargetModel, targets.BzeroTarget]{
-					RecordSchema: makeBzeroTargetDataSourceSchema(
+			&bzdatasource.SingleDataSourceConfigWithTimeout[clusterTargetModel, targets.ClusterTarget]{
+				BaseSingleDataSourceConfig: &bzdatasource.BaseSingleDataSourceConfig[clusterTargetModel, targets.ClusterTarget]{
+					RecordSchema: makeClusterTargetDataSourceSchema(
 						&target.BaseTargetDataSourceAttributeOptions{
 							IsIDComputed:   true,
 							IsNameComputed: true,
 							IsIDOptional:   true,
 							IsNameOptional: true,
 						}),
-					ResultAttributeName: "bzero_target",
-					PrettyAttributeName: "Bzero target",
-					FlattenAPIModel: func(ctx context.Context, apiObject *targets.BzeroTarget) (state *bzeroTargetModel, diags diag.Diagnostics) {
-						state = new(bzeroTargetModel)
-						setBzeroTargetAttributes(ctx, state, apiObject)
+					ResultAttributeName: "cluster_target",
+					PrettyAttributeName: "Cluster target",
+					FlattenAPIModel: func(ctx context.Context, apiObject *targets.ClusterTarget) (state *clusterTargetModel, diags diag.Diagnostics) {
+						state = new(clusterTargetModel)
+						setClusterTargetAttributes(ctx, state, apiObject)
 						return
 					},
 					Description:         baseDesc,
-					MarkdownDescription: target.TargetDataSourceWithTimeoutMarkdownDescription(baseDesc, targettype.Bzero),
+					MarkdownDescription: target.TargetDataSourceWithTimeoutMarkdownDescription(baseDesc, targettype.Cluster),
 				},
 				DefaultTimeout: 15 * time.Minute,
-				GetAPIModelWithTimeout: func(ctx context.Context, tfModel bzeroTargetModel, client *bastionzero.Client, timeout time.Duration) (*targets.BzeroTarget, error) {
+				GetAPIModelWithTimeout: func(ctx context.Context, tfModel clusterTargetModel, client *bastionzero.Client, timeout time.Duration) (*targets.ClusterTarget, error) {
 					// An operation that may fail.
-					operation := func() (*targets.BzeroTarget, error) {
+					operation := func() (*targets.ClusterTarget, error) {
 						if !tfModel.ID.IsNull() {
 							// ID provided. Use GET API for single target with ID.
-							target, _, err := client.Targets.GetBzeroTarget(ctx, tfModel.ID.ValueString())
+							target, _, err := client.Targets.GetClusterTarget(ctx, tfModel.ID.ValueString())
 							return target, err
 						} else if !tfModel.Name.IsNull() {
 							// Name provided. List targets and find target with
 							// specified name.
-							targets, _, err := client.Targets.ListBzeroTargets(ctx)
+							targets, _, err := client.Targets.ListClusterTargets(ctx)
 							if err != nil {
 								return nil, err
 							}
 
-							return findBzeroTargetByName(targets, tfModel.Name.ValueString())
+							return findClusterTargetByName(targets, tfModel.Name.ValueString())
 						}
 
 						// This should never happen due to
@@ -107,8 +107,8 @@ func NewBzeroTargetDataSource() datasource.DataSource {
 	}
 }
 
-func findBzeroTargetByName(targetList []targets.BzeroTarget, name string) (*targets.BzeroTarget, error) {
-	results := make([]targets.BzeroTarget, 0)
+func findClusterTargetByName(targetList []targets.ClusterTarget, name string) (*targets.ClusterTarget, error) {
+	results := make([]targets.ClusterTarget, 0)
 	for _, target := range targetList {
 		if target.Name == name {
 			results = append(results, target)
@@ -118,7 +118,7 @@ func findBzeroTargetByName(targetList []targets.BzeroTarget, name string) (*targ
 		return &results[0], nil
 	}
 	if len(results) == 0 {
-		return nil, fmt.Errorf("No bzero target found with name %s", name)
+		return nil, fmt.Errorf("No cluster target found with name %s", name)
 	}
-	return nil, &backoff.PermanentError{Err: fmt.Errorf("Too many bzero targets found with name %s (found %d, expected 1)", name, len(results))}
+	return nil, &backoff.PermanentError{Err: fmt.Errorf("Too many cluster targets found with name %s (found %d, expected 1)", name, len(results))}
 }

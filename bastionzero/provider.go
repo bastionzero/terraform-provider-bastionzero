@@ -12,6 +12,7 @@ import (
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/targetconnect"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/serviceaccount"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/target/bzerotarget"
+	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/target/clustertarget"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/user"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -196,6 +197,8 @@ func (p *BastionZeroProvider) DataSources(ctx context.Context) []func() datasour
 		environment.NewEnvironmentsDataSource,
 		bzerotarget.NewBzeroTargetDataSource,
 		bzerotarget.NewBzeroTargetsDataSource,
+		clustertarget.NewClusterTargetDataSource,
+		clustertarget.NewClusterTargetsDataSource,
 	}
 }
 
