@@ -161,7 +161,7 @@ type getAPIResult[APIModel any] struct {
 // Returns a new single data source given the specified configuration. The
 // function panics if the config is invalid. A single data source abstracts
 // calling a BastionZero API endpoint that returns a single object.
-
+//
 // Reflection is used to add a "timeouts" field to the TF schema which allows
 // the practitioner to configure how long to retry calling the BastionZero API
 // for a resource.
