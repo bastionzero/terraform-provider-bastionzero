@@ -27,8 +27,6 @@ type serviceAccountModel struct {
 	Enabled        types.Bool   `tfsdk:"enabled"`
 }
 
-func (m serviceAccountModel) GetID() types.String { return m.ID }
-
 // setServiceAccountAttributes populates the TF schema data from a service
 // account API object.
 func setServiceAccountAttributes(ctx context.Context, schema *serviceAccountModel, serviceAccount *serviceaccounts.ServiceAccount) {

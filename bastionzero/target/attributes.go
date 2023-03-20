@@ -60,17 +60,31 @@ func SetBaseTargetAttributes(ctx context.Context, schema TargetModelInterface, b
 	schema.SetAgentPublicKey(types.StringValue(baseTarget.GetAgentPublicKey()))
 }
 
+// BaseTargetDataSourceAttributeOptions are options to use when constructing the
+// list of common TF attributes used by the bzero, database, kube, and web data
+// source schemas.
+type BaseTargetDataSourceAttributeOptions struct {
+	IsIDRequired bool
+	IsIDComputed bool
+	IsIDOptional bool
+
+	IsNameOptional bool
+	IsNameComputed bool
+}
+
 // BaseTargetDataSourceAttributes returns a map of common TF attributes used by
 // the bzero, database, kube, and web data source schemas.
-func BaseTargetDataSourceAttributes(targetType targettype.TargetType, withRequiredID bool) map[string]schema.Attribute {
-	return map[string]schema.Attribute{
+func BaseTargetDataSourceAttributes(targetType targettype.TargetType, opts *BaseTargetDataSourceAttributeOptions) map[string]schema.Attribute {
+	baseTargetAttributes := map[string]schema.Attribute{
 		"id": schema.StringAttribute{
-			Computed:    !withRequiredID,
-			Required:    withRequiredID,
+			Computed:    opts.IsIDComputed,
+			Required:    opts.IsIDRequired,
+			Optional:    opts.IsIDOptional,
 			Description: "The target's unique ID.",
 		},
 		"name": schema.StringAttribute{
-			Computed:    true,
+			Computed:    opts.IsNameComputed,
+			Optional:    opts.IsNameOptional,
 			Description: "The target's name.",
 		},
 		"type": schema.StringAttribute{
@@ -90,8 +104,7 @@ func BaseTargetDataSourceAttributes(targetType targettype.TargetType, withRequir
 		},
 		"last_agent_update": schema.StringAttribute{
 			Computed:    true,
-			Description: "The time this target's backing agent last had a transition change in status formatted as a UTC timestamp string in RFC 3339 format.",
-			Optional:    true,
+			Description: "The time this target's backing agent last had a transition change in status formatted as a UTC timestamp string in RFC 3339 format. Null if there has not been a single transition change.",
 		},
 		"agent_version": schema.StringAttribute{
 			Computed:    true,
@@ -106,6 +119,8 @@ func BaseTargetDataSourceAttributes(targetType targettype.TargetType, withRequir
 			Description: "The target's backing agent's public key.",
 		},
 	}
+
+	return baseTargetAttributes
 }
 
 // ControlChannelSummaryModel maps control channel summary data.
@@ -119,8 +134,7 @@ type ControlChannelSummaryModel struct {
 func ControlChannelSummaryAttribute() schema.Attribute {
 	return schema.SingleNestedAttribute{
 		Computed:    true,
-		Description: "Information about the target's backing agent's currently active control channel.",
-		Optional:    true,
+		Description: "Information about the target's backing agent's currently active control channel. Null if the target has no active control channel.",
 		Attributes: map[string]schema.Attribute{
 			"control_channel_id": schema.StringAttribute{
 				Computed:    true,
@@ -137,7 +151,6 @@ func ControlChannelSummaryAttribute() schema.Attribute {
 			"end_time": schema.StringAttribute{
 				Computed:    true,
 				Description: "The time this control channel disconnected from the connection node formatted as a UTC timestamp string in RFC 3339 format. Null if the control channel is still active.",
-				Optional:    true,
 			},
 		},
 	}

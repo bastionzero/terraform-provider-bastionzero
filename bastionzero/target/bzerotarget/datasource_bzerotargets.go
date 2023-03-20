@@ -5,6 +5,7 @@ import (
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets"
+	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/target"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal/bzdatasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -12,7 +13,11 @@ import (
 
 func NewBzeroTargetsDataSource() datasource.DataSource {
 	return bzdatasource.NewListDataSource(&bzdatasource.ListDataSourceConfig[bzeroTargetModel, targets.BzeroTarget]{
-		RecordSchema:        makeBzeroTargetDataSourceSchema(false),
+		RecordSchema: makeBzeroTargetDataSourceSchema(
+			&target.BaseTargetDataSourceAttributeOptions{
+				IsIDComputed:   true,
+				IsNameComputed: true,
+			}),
 		ResultAttributeName: "bzero_targets",
 		PrettyAttributeName: "Bzero targets",
 		FlattenAPIModel: func(ctx context.Context, apiObject *targets.BzeroTarget) (state *bzeroTargetModel, diags diag.Diagnostics) {

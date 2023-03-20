@@ -8,7 +8,6 @@ import (
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/target"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"golang.org/x/exp/maps"
 )
 
 // bzeroTargetModel maps the bzero target schema data.
@@ -25,7 +24,6 @@ type bzeroTargetModel struct {
 	ControlChannel  types.Object `tfsdk:"control_channel"`
 }
 
-func (t bzeroTargetModel) GetID() types.String                    { return t.ID }
 func (t *bzeroTargetModel) SetID(value types.String)              { t.ID = value }
 func (t *bzeroTargetModel) SetName(value types.String)            { t.Name = value }
 func (t *bzeroTargetModel) SetType(value types.String)            { t.Type = value }
@@ -43,12 +41,9 @@ func setBzeroTargetAttributes(ctx context.Context, schema *bzeroTargetModel, bze
 	schema.ControlChannel = target.FlattenControlChannelSummary(ctx, bzeroTarget.ControlChannel)
 }
 
-func makeBzeroTargetDataSourceSchema(withRequiredID bool) map[string]schema.Attribute {
-	bzeroTargetAttributes := map[string]schema.Attribute{
-		"control_channel": target.ControlChannelSummaryAttribute(),
-	}
-	// Add common base target attributes
-	maps.Copy(bzeroTargetAttributes, target.BaseTargetDataSourceAttributes(targettype.Bzero, withRequiredID))
+func makeBzeroTargetDataSourceSchema(opts *target.BaseTargetDataSourceAttributeOptions) map[string]schema.Attribute {
+	bzeroTargetAttributes := target.BaseTargetDataSourceAttributes(targettype.Bzero, opts)
+	bzeroTargetAttributes["control_channel"] = target.ControlChannelSummaryAttribute()
 
 	return bzeroTargetAttributes
 }

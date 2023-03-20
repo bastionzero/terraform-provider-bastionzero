@@ -36,8 +36,6 @@ type environmentModel struct {
 	Targets                    types.Map    `tfsdk:"targets"` // key is target id. value is environmentTargetModel
 }
 
-func (m environmentModel) GetID() types.String { return m.ID }
-
 // environmentTargetModel maps target summary data.
 type environmentTargetModel struct {
 	ID   types.String `tfsdk:"id"`

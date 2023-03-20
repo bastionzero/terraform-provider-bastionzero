@@ -11,19 +11,23 @@ import (
 )
 
 func NewUserDataSource() datasource.DataSource {
-	return bzdatasource.NewSingleDataSource(&bzdatasource.SingleDataSourceConfig[userModel, users.User]{
-		RecordSchema:        makeUserDataSourceSchema(true),
-		ResultAttributeName: "user",
-		PrettyAttributeName: "user",
-		FlattenAPIModel: func(ctx context.Context, apiObject *users.User) (state *userModel, diags diag.Diagnostics) {
-			state = new(userModel)
-			setUserAttributes(ctx, state, apiObject)
-			return
+	return bzdatasource.NewSingleDataSource(
+		&bzdatasource.SingleDataSourceConfig[userModel, users.User]{
+			BaseSingleDataSourceConfig: &bzdatasource.BaseSingleDataSourceConfig[userModel, users.User]{
+				RecordSchema:        makeUserDataSourceSchema(true),
+				ResultAttributeName: "user",
+				PrettyAttributeName: "user",
+				FlattenAPIModel: func(ctx context.Context, apiObject *users.User) (state *userModel, diags diag.Diagnostics) {
+					state = new(userModel)
+					setUserAttributes(ctx, state, apiObject)
+					return
+				},
+				Description: "Get information on a user in your BastionZero organization. Provide the user's unique ID or email address in the \"id\" field.",
+			},
+			GetAPIModel: func(ctx context.Context, tfModel userModel, client *bastionzero.Client) (*users.User, error) {
+				user, _, err := client.Users.GetUser(ctx, tfModel.ID.ValueString())
+				return user, err
+			},
 		},
-		GetAPIModel: func(ctx context.Context, client *bastionzero.Client, id string) (*users.User, error) {
-			user, _, err := client.Users.GetUser(ctx, id)
-			return user, err
-		},
-		Description: "Get information on a user in your BastionZero organization. Provide the user's unique ID or email address in the \"id\" field.",
-	})
+	)
 }
