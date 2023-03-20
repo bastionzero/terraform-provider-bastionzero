@@ -13,6 +13,7 @@ import (
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/serviceaccount"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/target/bzerotarget"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/target/clustertarget"
+	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/target/dactarget"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/target/dbtarget"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/target/webtarget"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/user"
@@ -205,6 +206,8 @@ func (p *BastionZeroProvider) DataSources(ctx context.Context) []func() datasour
 		dbtarget.NewDbTargetsDataSource,
 		webtarget.NewWebTargetDataSource,
 		webtarget.NewWebTargetsDataSource,
+		dactarget.NewDacTargetDataSource,
+		dactarget.NewDacTargetsDataSource,
 	}
 }
 
