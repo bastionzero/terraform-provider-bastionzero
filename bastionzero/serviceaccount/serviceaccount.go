@@ -90,8 +90,7 @@ func makeServiceAccountDataSourceSchema(withRequiredID bool) map[string]schema.A
 		},
 		"last_login": schema.StringAttribute{
 			Computed:    true,
-			Description: "The time this service account last logged into BastionZero formatted as a UTC timestamp string in RFC 3339 format.",
-			Optional:    true,
+			Description: "The time this service account last logged into BastionZero formatted as a UTC timestamp string in RFC 3339 format. Null if the service account has never logged in.",
 		},
 		"created_by": schema.StringAttribute{
 			Computed:    true,

@@ -22,10 +22,6 @@ Get a list of all service accounts in your BastionZero organization.
 <a id="nestedatt--service_accounts"></a>
 ### Nested Schema for `service_accounts`
 
-Optional:
-
-- `last_login` (String) The time this service account last logged into BastionZero formatted as a UTC timestamp string in RFC 3339 format.
-
 Read-Only:
 
 - `created_by` (String) Unique identifier for the subject that created this service account.
@@ -36,6 +32,7 @@ Read-Only:
 - `is_admin` (Boolean) If true, the service account is an administrator. False otherwise.
 - `jwks_url` (String) The service account's publicly available JWKS URL that provides the public key that can be used to verify the tokens signed by the private key of this service account.
 - `jwks_url_pattern` (String) A URL pattern that all service accounts of the same service account provider follow in their JWKS URL.
+- `last_login` (String) The time this service account last logged into BastionZero formatted as a UTC timestamp string in RFC 3339 format. Null if the service account has never logged in.
 - `organization_id` (String) The service account's organization's ID.
 - `time_created` (String) The time this service account was created in BastionZero formatted as a UTC timestamp string in RFC 3339 format.
 - `type` (String) The subject's type (constant value "ServiceAccount").

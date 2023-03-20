@@ -19,15 +19,12 @@ Get information on a user in your BastionZero organization. Provide the user's u
 
 - `id` (String) The user's unique ID.
 
-### Optional
-
-- `last_login` (String) The time this user last logged into BastionZero formatted as a UTC timestamp string in RFC 3339 format.
-
 ### Read-Only
 
 - `email` (String) The user's email address.
 - `full_name` (String) The user's full name.
 - `is_admin` (Boolean) If true, the user is an administrator. False otherwise.
+- `last_login` (String) The time this user last logged into BastionZero formatted as a UTC timestamp string in RFC 3339 format. Null if the user has never logged in.
 - `organization_id` (String) The user's organization's ID.
 - `time_created` (String) The time this user was created in BastionZero formatted as a UTC timestamp string in RFC 3339 format.
 - `type` (String) The subject's type (constant value "User").

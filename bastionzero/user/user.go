@@ -73,8 +73,7 @@ func makeUserDataSourceSchema(withRequiredID bool) map[string]schema.Attribute {
 		},
 		"last_login": schema.StringAttribute{
 			Computed:    true,
-			Description: "The time this user last logged into BastionZero formatted as a UTC timestamp string in RFC 3339 format.",
-			Optional:    true,
+			Description: "The time this user last logged into BastionZero formatted as a UTC timestamp string in RFC 3339 format. Null if the user has never logged in.",
 		},
 	}
 }
