@@ -134,8 +134,9 @@ func TargetDataSourceWithTimeoutMarkdownDescription(baseDescription string, targ
 func BaseVirtualTargetDataSourceAttributes(targetType targettype.TargetType) map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"proxy_target_id": schema.StringAttribute{
-			Computed:    true,
-			Description: "The target's proxy target's ID.",
+			Computed:            true,
+			Description:         "The target's proxy target's ID (ID of a Bzero or Cluster target).",
+			MarkdownDescription: "The target's proxy target's ID (ID of a [Bzero](#bastionzero_bzero_target) or [Cluster](#bastionzero_cluster_target) target).",
 		},
 		"remote_host": schema.StringAttribute{
 			Computed:    true,

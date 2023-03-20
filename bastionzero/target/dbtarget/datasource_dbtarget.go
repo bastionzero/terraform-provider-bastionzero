@@ -30,8 +30,8 @@ func NewDbTargetDataSource() datasource.DataSource {
 				Description: "Get information about a specific Db target in your BastionZero organization.",
 			},
 			GetAPIModel: func(ctx context.Context, tfModel dbTargetModel, client *bastionzero.Client) (*targets.DatabaseTarget, error) {
-				env, _, err := client.Targets.GetDatabaseTarget(ctx, tfModel.ID.ValueString())
-				return env, err
+				target, _, err := client.Targets.GetDatabaseTarget(ctx, tfModel.ID.ValueString())
+				return target, err
 			},
 		},
 	)
