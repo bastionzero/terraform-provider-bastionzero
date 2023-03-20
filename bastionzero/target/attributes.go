@@ -64,9 +64,8 @@ func SetBaseTargetAttributes(ctx context.Context, schema TargetModelInterface, b
 // list of common TF attributes used by the bzero, database, kube, and web data
 // source schemas.
 type BaseTargetDataSourceAttributeOptions struct {
-	IsIDRequired bool
-	IsIDComputed bool
 	IsIDOptional bool
+	IsIDComputed bool
 
 	IsNameOptional bool
 	IsNameComputed bool
@@ -78,7 +77,6 @@ func BaseTargetDataSourceAttributes(targetType targettype.TargetType, opts *Base
 	baseTargetAttributes := map[string]schema.Attribute{
 		"id": schema.StringAttribute{
 			Computed:    opts.IsIDComputed,
-			Required:    opts.IsIDRequired,
 			Optional:    opts.IsIDOptional,
 			Description: "The target's unique ID.",
 		},
