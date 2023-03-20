@@ -56,7 +56,15 @@ func setTargetConnectPolicyAttributes(ctx context.Context, schema *targetConnect
 	schema.ID = types.StringValue(apiPolicy.ID)
 	schema.Name = types.StringValue(apiPolicy.Name)
 	schema.Type = types.StringValue(string(apiPolicy.GetPolicyType()))
-	schema.Description = typesext.StringEmptyIsNullValue(apiPolicy.Description)
+
+	// Preserve null in TF schema. We say that "" is semantically equivalent to
+	// null for the policy schema
+	if schema.Description.IsNull() && apiPolicy.GetDescription() == "" {
+		schema.Description = types.StringNull()
+	} else {
+		schema.Description = typesext.StringPointerValue(apiPolicy.Description)
+	}
+
 	schema.Subjects = policy.FlattenPolicySubjects(ctx, apiPolicy.Subjects)
 	schema.Groups = policy.FlattenPolicyGroups(ctx, apiPolicy.Groups)
 	schema.Environments = policy.FlattenPolicyEnvironments(ctx, apiPolicy.Environments)

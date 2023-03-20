@@ -12,6 +12,7 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/targettype"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
 	bzplanmodifier "github.com/bastionzero/terraform-provider-bastionzero/internal/planmodifier"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal/typesext"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -46,16 +47,12 @@ type environmentTargetModel struct {
 func setEnvironmentAttributes(ctx context.Context, schema *environmentModel, env *environments.Environment) {
 	schema.Name = types.StringValue(env.Name)
 
-	// Use StringEmptyIsNullValue to normalize "" to Terraform Null value (since
-	// the schema says description is optional/nullable)
-	// schema.Description = typesext.StringEmptyIsNullValue(&env.Description)
-
 	// Preserve null in TF schema. We say that "" is semantically equivalent to
 	// null for the environment schema
-	if schema.Description.IsNull() && env.Description == "" {
+	if schema.Description.IsNull() && env.GetDescription() == "" {
 		schema.Description = types.StringNull()
 	} else {
-		schema.Description = types.StringValue(env.Description)
+		schema.Description = typesext.StringPointerValue(env.Description)
 	}
 
 	schema.OfflineCleanupTimeoutHours = types.Int64Value(int64(env.OfflineCleanupTimeoutHours))
