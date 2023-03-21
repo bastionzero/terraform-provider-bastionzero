@@ -18,7 +18,7 @@ import (
 )
 
 func makeTargetConnectPolicyResourceSchema() map[string]schema.Attribute {
-	res := map[string]schema.Attribute{
+	return map[string]schema.Attribute{
 		"id": schema.StringAttribute{
 			Computed: true,
 			PlanModifiers: []planmodifier.String{
@@ -60,6 +60,4 @@ func makeTargetConnectPolicyResourceSchema() map[string]schema.Attribute {
 			},
 		},
 	}
-
-	return res
 }
