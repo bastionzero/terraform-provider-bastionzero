@@ -8,7 +8,6 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/apierror"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/environments"
-	"github.com/bastionzero/terraform-provider-bastionzero/internal"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -78,7 +77,7 @@ func (r *environmentResource) Create(ctx context.Context, req resource.CreateReq
 	// Generate API request body from plan
 	createReq := new(environments.CreateEnvironmentRequest)
 	createReq.Name = plan.Name.ValueString()
-	createReq.Description = internal.StringFromFramework(ctx, plan.Description)
+	createReq.Description = plan.Description.ValueString()
 	createReq.OfflineCleanupTimeoutHours = uint(plan.OfflineCleanupTimeoutHours.ValueInt64())
 
 	ctx = tflog.SetField(ctx, "environment_name", createReq.Name)

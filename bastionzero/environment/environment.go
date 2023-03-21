@@ -12,7 +12,6 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/targettype"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
 	bzplanmodifier "github.com/bastionzero/terraform-provider-bastionzero/internal/planmodifier"
-	"github.com/bastionzero/terraform-provider-bastionzero/internal/typesext"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -47,15 +46,7 @@ type environmentTargetModel struct {
 // setEnvironmentAttributes populates the TF schema data from an environment
 func setEnvironmentAttributes(ctx context.Context, schema *environmentModel, env *environments.Environment) {
 	schema.Name = types.StringValue(env.Name)
-
-	// Preserve null in TF schema. We say that "" is semantically equivalent to
-	// null for the environment schema
-	if schema.Description.IsNull() && env.GetDescription() == "" {
-		schema.Description = types.StringNull()
-	} else {
-		schema.Description = typesext.StringPointerValue(env.Description)
-	}
-
+	schema.Description = types.StringValue(env.Description)
 	schema.OfflineCleanupTimeoutHours = types.Int64Value(int64(env.OfflineCleanupTimeoutHours))
 
 	schema.ID = types.StringValue(env.ID)
@@ -110,7 +101,21 @@ func makeEnvironmentResourceSchema() map[string]schema.Attribute {
 			},
 		},
 		"description": schema.StringAttribute{
-			Optional:    true,
+			Optional: true,
+			Computed: true,
+			PlanModifiers: []planmodifier.String{
+				// Prevent null in TF config to make it easier when parsing
+				// results from BastionZero and converting back to TF. For
+				// example, if we allowed a null description in TF but
+				// BastionZero returned an empty string, then Terraform would
+				// complain with error "Provider produced inconsistent result
+				// after apply". By forcing it to the empty string, we won't run
+				// into this issue and it simplifies the conversion code back to
+				// a TF model.
+				//
+				// Related: https://github.com/hashicorp/terraform-plugin-framework/issues/305#issuecomment-1256319576
+				bzplanmodifier.StringDefaultValue(types.StringValue("")),
+			},
 			Description: "The environment's description.",
 		},
 		"time_created": schema.StringAttribute{

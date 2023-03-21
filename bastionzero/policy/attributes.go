@@ -142,7 +142,9 @@ func FlattenPolicyGroups(ctx context.Context, apiObject *[]policies.PolicyGroup)
 	attributeTypes, _ := internal.AttributeTypes[PolicyGroupModel](ctx)
 	elementType := types.ObjectType{AttrTypes: attributeTypes}
 
+	// TODO: Preserve semantics
 	if apiObject == nil || len(*apiObject) == 0 {
+		// return types.SetValueMust(elementType, make([]attr.Value, 0))
 		return types.SetNull(elementType)
 	}
 
