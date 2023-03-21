@@ -11,6 +11,7 @@ import (
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/organization"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/targetconnect"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/serviceaccount"
+	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/target"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/target/bzerotarget"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/target/clustertarget"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/target/dactarget"
@@ -186,6 +187,7 @@ func (p *BastionZeroProvider) Resources(ctx context.Context) []func() resource.R
 	return []func() resource.Resource{
 		environment.NewEnvironmentResource,
 		targetconnect.NewTargetConnectPolicyResource,
+		target.NewTargetEnvironmentResource,
 	}
 }
 
