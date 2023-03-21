@@ -1,4 +1,4 @@
-package planmodifier
+package bzplanmodifier
 
 import (
 	"context"

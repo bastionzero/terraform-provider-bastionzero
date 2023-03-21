@@ -10,7 +10,7 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/subjecttype"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/targettype"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
-	bzplanmodifier "github.com/bastionzero/terraform-provider-bastionzero/internal/planmodifier"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal/bzplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
