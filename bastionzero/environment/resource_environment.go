@@ -75,16 +75,6 @@ func (r *environmentResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	// Prevent empty string for environment name
-	if plan.Name.ValueString() == "" {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("name"),
-			"Empty environment name",
-			"All environments require a name. Set the name value in the configuration. Do not use an empty string.",
-		)
-		return
-	}
-
 	// Generate API request body from plan
 	createReq := new(environments.CreateEnvironmentRequest)
 	createReq.Name = plan.Name.ValueString()

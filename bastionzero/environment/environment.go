@@ -14,6 +14,7 @@ import (
 	bzplanmodifier "github.com/bastionzero/terraform-provider-bastionzero/internal/planmodifier"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal/typesext"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -103,6 +104,9 @@ func makeEnvironmentResourceSchema() map[string]schema.Attribute {
 			Description: "The environment's name.",
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.RequiresReplace(),
+			},
+			Validators: []validator.String{
+				stringvalidator.LengthAtLeast(1),
 			},
 		},
 		"description": schema.StringAttribute{
