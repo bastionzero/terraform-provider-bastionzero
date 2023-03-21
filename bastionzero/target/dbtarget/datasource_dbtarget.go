@@ -22,7 +22,7 @@ func NewDbTargetDataSource() datasource.DataSource {
 					}),
 				ResultAttributeName: "db_target",
 				PrettyAttributeName: "Db target",
-				FlattenAPIModel: func(ctx context.Context, apiObject *targets.DatabaseTarget) (state *dbTargetModel, diags diag.Diagnostics) {
+				FlattenAPIModel: func(ctx context.Context, apiObject *targets.DatabaseTarget, _ dbTargetModel) (state *dbTargetModel, diags diag.Diagnostics) {
 					state = new(dbTargetModel)
 					setDbTargetAttributes(ctx, state, apiObject)
 					return

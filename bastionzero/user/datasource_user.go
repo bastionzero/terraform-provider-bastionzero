@@ -17,7 +17,7 @@ func NewUserDataSource() datasource.DataSource {
 				RecordSchema:        makeUserDataSourceSchema(true),
 				ResultAttributeName: "user",
 				PrettyAttributeName: "user",
-				FlattenAPIModel: func(ctx context.Context, apiObject *users.User) (state *userModel, diags diag.Diagnostics) {
+				FlattenAPIModel: func(ctx context.Context, apiObject *users.User, _ userModel) (state *userModel, diags diag.Diagnostics) {
 					state = new(userModel)
 					setUserAttributes(ctx, state, apiObject)
 					return

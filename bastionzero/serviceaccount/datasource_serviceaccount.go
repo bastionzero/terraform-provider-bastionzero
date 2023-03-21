@@ -17,7 +17,7 @@ func NewServiceAccountDataSource() datasource.DataSource {
 				RecordSchema:        makeServiceAccountDataSourceSchema(true),
 				ResultAttributeName: "service_account",
 				PrettyAttributeName: "service account",
-				FlattenAPIModel: func(ctx context.Context, apiObject *serviceaccounts.ServiceAccount) (state *serviceAccountModel, diags diag.Diagnostics) {
+				FlattenAPIModel: func(ctx context.Context, apiObject *serviceaccounts.ServiceAccount, _ serviceAccountModel) (state *serviceAccountModel, diags diag.Diagnostics) {
 					state = new(serviceAccountModel)
 					setServiceAccountAttributes(ctx, state, apiObject)
 					return

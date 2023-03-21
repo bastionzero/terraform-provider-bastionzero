@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
+	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/autodiscoveryscript"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/environment"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/organization"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/targetconnect"
@@ -208,6 +209,7 @@ func (p *BastionZeroProvider) DataSources(ctx context.Context) []func() datasour
 		webtarget.NewWebTargetsDataSource,
 		dactarget.NewDacTargetDataSource,
 		dactarget.NewDacTargetsDataSource,
+		autodiscoveryscript.NewAdBashDataSource,
 	}
 }
 

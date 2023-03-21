@@ -22,7 +22,7 @@ func NewWebTargetDataSource() datasource.DataSource {
 					}),
 				ResultAttributeName: "web_target",
 				PrettyAttributeName: "Web target",
-				FlattenAPIModel: func(ctx context.Context, apiObject *targets.WebTarget) (state *webTargetModel, diags diag.Diagnostics) {
+				FlattenAPIModel: func(ctx context.Context, apiObject *targets.WebTarget, _ webTargetModel) (state *webTargetModel, diags diag.Diagnostics) {
 					state = new(webTargetModel)
 					setWebTargetAttributes(ctx, state, apiObject)
 					return

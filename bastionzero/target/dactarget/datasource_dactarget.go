@@ -20,7 +20,7 @@ func NewDacTargetDataSource() datasource.DataSource {
 					}),
 				ResultAttributeName: "dac_target",
 				PrettyAttributeName: "Dynamic access configuration target",
-				FlattenAPIModel: func(ctx context.Context, apiObject *targets.DynamicAccessConfiguration) (state *dacTargetModel, diags diag.Diagnostics) {
+				FlattenAPIModel: func(ctx context.Context, apiObject *targets.DynamicAccessConfiguration, _ dacTargetModel) (state *dacTargetModel, diags diag.Diagnostics) {
 					state = new(dacTargetModel)
 					setDacTargetAttributes(ctx, state, apiObject)
 					return

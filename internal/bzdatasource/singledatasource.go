@@ -19,6 +19,14 @@ import (
 	dynamicstruct "github.com/ompluscator/dynamic-struct"
 )
 
+// TODO: Refactor FlattenAPIModel and GetAPIModel functions to take in req +
+// resp similar to the Terraform plugin framework, so that we can add new fields
+// without having to refactor every instance of these structs
+
+// TODO: FlattenAPIModel: Potentially consider taking pointer to state that was
+// read previously instead of asking for new value to be returned and passing
+// copy of current value read
+
 type BaseSingleDataSourceConfig[TFModel any, APIModel any] struct {
 	// RecordSchema is the TF schema that models a single instance of the API
 	// object. Required. Schema must contain a required attribute with name
@@ -35,7 +43,7 @@ type BaseSingleDataSourceConfig[TFModel any, APIModel any] struct {
 
 	// Given a model returned from the GetAPIModel function, flatten the API
 	// model to a TF model.
-	FlattenAPIModel func(ctx context.Context, apiObject *APIModel) (*TFModel, diag.Diagnostics)
+	FlattenAPIModel func(ctx context.Context, apiObject *APIModel, tfModel TFModel) (*TFModel, diag.Diagnostics)
 
 	// Description is passed as the data source schema's Description field
 	// during construction.
@@ -124,7 +132,7 @@ func NewSingleDataSource[TFModel any, APIModel any](config *SingleDataSourceConf
 		tflog.Debug(ctx, fmt.Sprintf("Queried for %s", config.PrettyAttributeName))
 
 		// Convert to TFModel
-		tfModel, diags := config.FlattenAPIModel(ctx, apiObject)
+		tfModel, diags := config.FlattenAPIModel(ctx, apiObject, T)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
 			return
@@ -293,7 +301,7 @@ func NewSingleDataSourceWithTimeout[TFModel any, APIModel any](config *SingleDat
 		tflog.Debug(ctx, fmt.Sprintf("Queried for %s", config.PrettyAttributeName))
 
 		// Convert to TFModel
-		tfModel, diags := config.FlattenAPIModel(ctx, apiObject)
+		tfModel, diags := config.FlattenAPIModel(ctx, apiObject, T)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
 			return

@@ -55,7 +55,7 @@ func NewClusterTargetDataSource() datasource.DataSource {
 						}),
 					ResultAttributeName: "cluster_target",
 					PrettyAttributeName: "Cluster target",
-					FlattenAPIModel: func(ctx context.Context, apiObject *targets.ClusterTarget) (state *clusterTargetModel, diags diag.Diagnostics) {
+					FlattenAPIModel: func(ctx context.Context, apiObject *targets.ClusterTarget, _ clusterTargetModel) (state *clusterTargetModel, diags diag.Diagnostics) {
 						state = new(clusterTargetModel)
 						setClusterTargetAttributes(ctx, state, apiObject)
 						return

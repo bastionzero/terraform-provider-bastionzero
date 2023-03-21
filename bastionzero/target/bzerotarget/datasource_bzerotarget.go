@@ -55,7 +55,7 @@ func NewBzeroTargetDataSource() datasource.DataSource {
 						}),
 					ResultAttributeName: "bzero_target",
 					PrettyAttributeName: "Bzero target",
-					FlattenAPIModel: func(ctx context.Context, apiObject *targets.BzeroTarget) (state *bzeroTargetModel, diags diag.Diagnostics) {
+					FlattenAPIModel: func(ctx context.Context, apiObject *targets.BzeroTarget, _ bzeroTargetModel) (state *bzeroTargetModel, diags diag.Diagnostics) {
 						state = new(bzeroTargetModel)
 						setBzeroTargetAttributes(ctx, state, apiObject)
 						return
