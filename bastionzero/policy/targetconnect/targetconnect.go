@@ -1,9 +1,11 @@
 package targetconnect
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/policytype"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/verbtype"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy"
@@ -11,6 +13,7 @@ import (
 	"github.com/bastionzero/terraform-provider-bastionzero/internal/bzplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -18,7 +21,31 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-func makeTargetConnectPolicyResourceSchema() map[string]schema.Attribute {
+func ExpandPolicyTargetUsers(ctx context.Context, tfSet types.Set) []policies.TargetUser {
+	return internal.ExpandFrameworkSet(ctx, tfSet, func(m string) policies.TargetUser {
+		return policies.TargetUser{Username: m}
+	})
+}
+
+func FlattenPolicyTargetUsers(ctx context.Context, apiObject []policies.TargetUser) types.Set {
+	return internal.FlattenFrameworkSet(ctx, types.StringType, apiObject, func(m policies.TargetUser) attr.Value {
+		return types.StringValue(m.Username)
+	})
+}
+
+func ExpandPolicyVerbs(ctx context.Context, tfSet types.Set) []policies.Verb {
+	return internal.ExpandFrameworkSet(ctx, tfSet, func(m string) policies.Verb {
+		return policies.Verb{Type: verbtype.VerbType(m)}
+	})
+}
+
+func FlattenPolicyVerbs(ctx context.Context, apiObject []policies.Verb) types.Set {
+	return internal.FlattenFrameworkSet(ctx, types.StringType, apiObject, func(m policies.Verb) attr.Value {
+		return types.StringValue(string(m.Type))
+	})
+}
+
+func makeTargetConnectPolicyResourceSchema(ctx context.Context) map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"id": schema.StringAttribute{
 			Computed: true,
@@ -45,10 +72,10 @@ func makeTargetConnectPolicyResourceSchema() map[string]schema.Attribute {
 				bzplanmodifier.StringDefaultValue(types.StringValue("")),
 			},
 		},
-		"subjects":     policy.PolicySubjectsAttribute(),
-		"groups":       policy.PolicyGroupsAttribute(),
+		"subjects":     policy.PolicySubjectsAttribute(ctx),
+		"groups":       policy.PolicyGroupsAttribute(ctx),
 		"environments": policy.PolicyEnvironmentsAttribute(),
-		"targets":      policy.PolicyTargetsAttribute(),
+		"targets":      policy.PolicyTargetsAttribute(ctx),
 		"target_users": schema.SetAttribute{
 			Description: "Set of Unix usernames that this policy applies to.",
 			ElementType: types.StringType,

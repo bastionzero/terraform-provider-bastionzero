@@ -26,8 +26,14 @@ type PolicySubjectModel struct {
 	Type types.String `tfsdk:"type"`
 }
 
-func PolicySubjectsAttribute() schema.Attribute {
+func GetPolicySubjectModelType(ctx context.Context) types.ObjectType {
+	attributeTypes, _ := internal.AttributeTypes[PolicySubjectModel](ctx)
+	return types.ObjectType{AttrTypes: attributeTypes}
+}
+
+func PolicySubjectsAttribute(ctx context.Context) schema.Attribute {
 	return schema.SetNestedAttribute{
+		Computed:    true,
 		Optional:    true,
 		Description: "Set of subjects that this policy applies to.",
 		NestedObject: schema.NestedAttributeObject{
@@ -45,49 +51,30 @@ func PolicySubjectsAttribute() schema.Attribute {
 				},
 			},
 		},
+		PlanModifiers: []planmodifier.Set{
+			bzplanmodifier.SetDefaultValue(types.SetValueMust(GetPolicySubjectModelType(ctx), []attr.Value{})),
+		},
 	}
 }
 
-func ExpandPolicySubjects(ctx context.Context, tfSet types.Set) *[]policies.PolicySubject {
-	if tfSet.IsNull() || tfSet.IsUnknown() {
-		return bastionzero.PtrTo([]policies.PolicySubject{})
-	}
-
-	var data []PolicySubjectModel
-
-	if diags := tfSet.ElementsAs(ctx, &data, false); diags.HasError() {
-		return bastionzero.PtrTo([]policies.PolicySubject{})
-	}
-
-	if len(data) == 0 {
-		return bastionzero.PtrTo([]policies.PolicySubject{})
-	}
-
-	apiObject := make([]policies.PolicySubject, len(data))
-	for i, obj := range data {
-		apiObject[i] = policies.PolicySubject{ID: obj.ID.ValueString(), Type: subjecttype.SubjectType(obj.Type.ValueString())}
-	}
-
-	return &apiObject
+func ExpandPolicySubjects(ctx context.Context, tfSet types.Set) []policies.Subject {
+	return internal.ExpandFrameworkSet(ctx, tfSet, func(m PolicySubjectModel) policies.Subject {
+		return policies.Subject{
+			ID:   m.ID.ValueString(),
+			Type: subjecttype.SubjectType(m.Type.ValueString()),
+		}
+	})
 }
 
-func FlattenPolicySubjects(ctx context.Context, apiObject *[]policies.PolicySubject) types.Set {
-	attributeTypes, _ := internal.AttributeTypes[PolicySubjectModel](ctx)
-	elementType := types.ObjectType{AttrTypes: attributeTypes}
-
-	if apiObject == nil || len(*apiObject) == 0 {
-		return types.SetNull(elementType)
-	}
-
-	elements := make([]attr.Value, len(*apiObject))
-	for i, obj := range *apiObject {
-		elements[i] = types.ObjectValueMust(attributeTypes, map[string]attr.Value{
-			"id":   types.StringValue(obj.ID),
-			"type": types.StringValue(string(obj.Type)),
+func FlattenPolicySubjects(ctx context.Context, apiObject []policies.Subject) types.Set {
+	elementType := GetPolicySubjectModelType(ctx)
+	attributeTypes := elementType.AttrTypes
+	return internal.FlattenFrameworkSet(ctx, elementType, apiObject, func(m policies.Subject) attr.Value {
+		return types.ObjectValueMust(attributeTypes, map[string]attr.Value{
+			"id":   types.StringValue(m.ID),
+			"type": types.StringValue(string(m.Type)),
 		})
-	}
-
-	return types.SetValueMust(elementType, elements)
+	})
 }
 
 // PolicyGroupModel maps policy group data.
@@ -96,8 +83,14 @@ type PolicyGroupModel struct {
 	Name types.String `tfsdk:"name"`
 }
 
-func PolicyGroupsAttribute() schema.Attribute {
+func GetPolicyGroupModelType(ctx context.Context) types.ObjectType {
+	attributeTypes, _ := internal.AttributeTypes[PolicyGroupModel](ctx)
+	return types.ObjectType{AttrTypes: attributeTypes}
+}
+
+func PolicyGroupsAttribute(ctx context.Context) schema.Attribute {
 	return schema.SetNestedAttribute{
+		Computed:    true,
 		Optional:    true,
 		Description: "Set of IdP groups that this policy applies to.",
 		NestedObject: schema.NestedAttributeObject{
@@ -112,83 +105,54 @@ func PolicyGroupsAttribute() schema.Attribute {
 				},
 			},
 		},
+		PlanModifiers: []planmodifier.Set{
+			bzplanmodifier.SetDefaultValue(types.SetValueMust(GetPolicyGroupModelType(ctx), []attr.Value{})),
+		},
 	}
 }
 
-func ExpandPolicyGroups(ctx context.Context, tfSet types.Set) *[]policies.PolicyGroup {
-	if tfSet.IsNull() || tfSet.IsUnknown() {
-		return bastionzero.PtrTo([]policies.PolicyGroup{})
-	}
-
-	var data []PolicyGroupModel
-
-	if diags := tfSet.ElementsAs(ctx, &data, false); diags.HasError() {
-		return bastionzero.PtrTo([]policies.PolicyGroup{})
-	}
-
-	if len(data) == 0 {
-		return bastionzero.PtrTo([]policies.PolicyGroup{})
-	}
-
-	apiObject := make([]policies.PolicyGroup, len(data))
-	for i, obj := range data {
-		apiObject[i] = policies.PolicyGroup{ID: obj.ID.ValueString(), Name: obj.Name.ValueString()}
-	}
-
-	return &apiObject
+func ExpandPolicyGroups(ctx context.Context, tfSet types.Set) []policies.Group {
+	return internal.ExpandFrameworkSet(ctx, tfSet, func(m PolicyGroupModel) policies.Group {
+		return policies.Group{
+			ID:   m.ID.ValueString(),
+			Name: m.Name.ValueString(),
+		}
+	})
 }
 
-func FlattenPolicyGroups(ctx context.Context, apiObject *[]policies.PolicyGroup) types.Set {
-	attributeTypes, _ := internal.AttributeTypes[PolicyGroupModel](ctx)
-	elementType := types.ObjectType{AttrTypes: attributeTypes}
-
-	// TODO: Preserve semantics
-	if apiObject == nil || len(*apiObject) == 0 {
-		// return types.SetValueMust(elementType, make([]attr.Value, 0))
-		return types.SetNull(elementType)
-	}
-
-	elements := make([]attr.Value, len(*apiObject))
-	for i, obj := range *apiObject {
-		elements[i] = types.ObjectValueMust(attributeTypes, map[string]attr.Value{
-			"id":   types.StringValue(obj.ID),
-			"name": types.StringValue(obj.Name),
+func FlattenPolicyGroups(ctx context.Context, apiObject []policies.Group) types.Set {
+	elementType := GetPolicyGroupModelType(ctx)
+	attributeTypes := elementType.AttrTypes
+	return internal.FlattenFrameworkSet(ctx, elementType, apiObject, func(m policies.Group) attr.Value {
+		return types.ObjectValueMust(attributeTypes, map[string]attr.Value{
+			"id":   types.StringValue(m.ID),
+			"name": types.StringValue(m.Name),
 		})
-	}
-
-	return types.SetValueMust(elementType, elements)
+	})
 }
 
 func PolicyEnvironmentsAttribute() schema.Attribute {
 	return schema.SetAttribute{
 		Description: "Set of environments that this policy applies to.",
 		ElementType: types.StringType,
+		Computed:    true,
 		Optional:    true,
+		PlanModifiers: []planmodifier.Set{
+			bzplanmodifier.SetDefaultValue(types.SetValueMust(types.StringType, []attr.Value{})),
+		},
 	}
 }
 
-func ExpandPolicyEnvironments(ctx context.Context, tfSet types.Set) *[]policies.PolicyEnvironment {
-	envIds := internal.ExpandFrameworkStringValueSet(ctx, tfSet)
-
-	apiObject := make([]policies.PolicyEnvironment, len(envIds))
-	for i, id := range envIds {
-		apiObject[i] = policies.PolicyEnvironment{ID: id}
-	}
-
-	return &apiObject
+func ExpandPolicyEnvironments(ctx context.Context, tfSet types.Set) []policies.Environment {
+	return internal.ExpandFrameworkSet(ctx, tfSet, func(m string) policies.Environment {
+		return policies.Environment{ID: m}
+	})
 }
 
-func FlattenPolicyEnvironments(ctx context.Context, apiObject *[]policies.PolicyEnvironment) types.Set {
-	if apiObject == nil || len(*apiObject) == 0 {
-		return types.SetNull(types.StringType)
-	}
-
-	elements := make([]attr.Value, len(*apiObject))
-	for i, v := range *apiObject {
-		elements[i] = types.StringValue(v.ID)
-	}
-
-	return types.SetValueMust(types.StringType, elements)
+func FlattenPolicyEnvironments(ctx context.Context, apiObject []policies.Environment) types.Set {
+	return internal.FlattenFrameworkSet(ctx, types.StringType, apiObject, func(m policies.Environment) attr.Value {
+		return types.StringValue(m.ID)
+	})
 }
 
 // PolicyTargetModel maps policy target data.
@@ -197,9 +161,15 @@ type PolicyTargetModel struct {
 	Type types.String `tfsdk:"type"`
 }
 
-func PolicyTargetsAttribute() schema.Attribute {
+func GetPolicyTargetModelType(ctx context.Context) types.ObjectType {
+	attributeTypes, _ := internal.AttributeTypes[PolicyTargetModel](ctx)
+	return types.ObjectType{AttrTypes: attributeTypes}
+}
+
+func PolicyTargetsAttribute(ctx context.Context) schema.Attribute {
 	return schema.SetNestedAttribute{
 		Description: "Set of targets that this policy applies to.",
+		Computed:    true,
 		Optional:    true,
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: map[string]schema.Attribute{
@@ -216,49 +186,30 @@ func PolicyTargetsAttribute() schema.Attribute {
 				},
 			},
 		},
+		PlanModifiers: []planmodifier.Set{
+			bzplanmodifier.SetDefaultValue(types.SetValueMust(GetPolicyTargetModelType(ctx), []attr.Value{})),
+		},
 	}
 }
 
-func ExpandPolicyTargets(ctx context.Context, tfSet types.Set) *[]policies.PolicyTarget {
-	if tfSet.IsNull() || tfSet.IsUnknown() {
-		return bastionzero.PtrTo([]policies.PolicyTarget{})
-	}
-
-	var data []PolicyTargetModel
-
-	if diags := tfSet.ElementsAs(ctx, &data, false); diags.HasError() {
-		return bastionzero.PtrTo([]policies.PolicyTarget{})
-	}
-
-	if len(data) == 0 {
-		return bastionzero.PtrTo([]policies.PolicyTarget{})
-	}
-
-	apiObject := make([]policies.PolicyTarget, len(data))
-	for i, obj := range data {
-		apiObject[i] = policies.PolicyTarget{ID: obj.ID.ValueString(), Type: targettype.TargetType(obj.Type.ValueString())}
-	}
-
-	return &apiObject
+func ExpandPolicyTargets(ctx context.Context, tfSet types.Set) []policies.Target {
+	return internal.ExpandFrameworkSet(ctx, tfSet, func(m PolicyTargetModel) policies.Target {
+		return policies.Target{
+			ID:   m.ID.ValueString(),
+			Type: targettype.TargetType(m.Type.ValueString()),
+		}
+	})
 }
 
-func FlattenPolicyTargets(ctx context.Context, apiObject *[]policies.PolicyTarget) types.Set {
-	attributeTypes, _ := internal.AttributeTypes[PolicyTargetModel](ctx)
-	elementType := types.ObjectType{AttrTypes: attributeTypes}
-
-	if apiObject == nil || len(*apiObject) == 0 {
-		return types.SetNull(elementType)
-	}
-
-	elements := make([]attr.Value, len(*apiObject))
-	for i, obj := range *apiObject {
-		elements[i] = types.ObjectValueMust(attributeTypes, map[string]attr.Value{
-			"id":   types.StringValue(obj.ID),
-			"type": types.StringValue(string(obj.Type)),
+func FlattenPolicyTargets(ctx context.Context, apiObject []policies.Target) types.Set {
+	elementType := GetPolicyTargetModelType(ctx)
+	attributeTypes := elementType.AttrTypes
+	return internal.FlattenFrameworkSet(ctx, elementType, apiObject, func(m policies.Target) attr.Value {
+		return types.ObjectValueMust(attributeTypes, map[string]attr.Value{
+			"id":   types.StringValue(m.ID),
+			"type": types.StringValue(string(m.Type)),
 		})
-	}
-
-	return types.SetValueMust(elementType, elements)
+	})
 }
 
 func PolicyTypeAttribute(policyType policytype.PolicyType) schema.Attribute {

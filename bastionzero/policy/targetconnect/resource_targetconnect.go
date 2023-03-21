@@ -56,12 +56,12 @@ func setTargetConnectPolicyAttributes(ctx context.Context, schema *targetConnect
 	schema.Name = types.StringValue(apiPolicy.Name)
 	schema.Type = types.StringValue(string(apiPolicy.GetPolicyType()))
 	schema.Description = types.StringValue(apiPolicy.GetDescription())
-	schema.Subjects = policy.FlattenPolicySubjects(ctx, apiPolicy.Subjects)
-	schema.Groups = policy.FlattenPolicyGroups(ctx, apiPolicy.Groups)
-	schema.Environments = policy.FlattenPolicyEnvironments(ctx, apiPolicy.Environments)
-	schema.Targets = policy.FlattenPolicyTargets(ctx, apiPolicy.Targets)
-	schema.TargetUsers = FlattenPolicyTargetUsers(ctx, apiPolicy.TargetUsers)
-	schema.Verbs = FlattenPolicyVerbs(ctx, apiPolicy.Verbs)
+	schema.Subjects = policy.FlattenPolicySubjects(ctx, apiPolicy.GetSubjects())
+	schema.Groups = policy.FlattenPolicyGroups(ctx, apiPolicy.GetGroups())
+	schema.Environments = policy.FlattenPolicyEnvironments(ctx, apiPolicy.GetEnvironments())
+	schema.Targets = policy.FlattenPolicyTargets(ctx, apiPolicy.GetTargets())
+	schema.TargetUsers = FlattenPolicyTargetUsers(ctx, apiPolicy.GetTargetUsers())
+	schema.Verbs = FlattenPolicyVerbs(ctx, apiPolicy.GetVerbs())
 }
 
 // Configure adds the provider configured BastionZero API client to the
@@ -91,10 +91,10 @@ func (r *targetConnectPolicyResource) Metadata(_ context.Context, req resource.M
 }
 
 // Schema defines the schema for the target connect policy resource.
-func (r *targetConnectPolicyResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *targetConnectPolicyResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "Provides a BastionZero target connect policy. Target connect policies provide access to Bzero and DynamicAccessConfig targets.",
-		Attributes:  makeTargetConnectPolicyResourceSchema(),
+		Attributes:  makeTargetConnectPolicyResourceSchema(ctx),
 	}
 }
 
@@ -111,12 +111,12 @@ func (r *targetConnectPolicyResource) Create(ctx context.Context, req resource.C
 	p := new(policies.TargetConnectPolicy)
 	p.Name = plan.Name.ValueString()
 	p.Description = internal.StringFromFramework(ctx, plan.Description)
-	p.Subjects = policy.ExpandPolicySubjects(ctx, plan.Subjects)
-	p.Groups = policy.ExpandPolicyGroups(ctx, plan.Groups)
-	p.Environments = policy.ExpandPolicyEnvironments(ctx, plan.Environments)
-	p.Targets = policy.ExpandPolicyTargets(ctx, plan.Targets)
-	p.TargetUsers = ExpandPolicyTargetUsers(ctx, plan.TargetUsers)
-	p.Verbs = ExpandPolicyVerbs(ctx, plan.Verbs)
+	p.Subjects = bastionzero.PtrTo(policy.ExpandPolicySubjects(ctx, plan.Subjects))
+	p.Groups = bastionzero.PtrTo(policy.ExpandPolicyGroups(ctx, plan.Groups))
+	p.Environments = bastionzero.PtrTo(policy.ExpandPolicyEnvironments(ctx, plan.Environments))
+	p.Targets = bastionzero.PtrTo(policy.ExpandPolicyTargets(ctx, plan.Targets))
+	p.TargetUsers = bastionzero.PtrTo(ExpandPolicyTargetUsers(ctx, plan.TargetUsers))
+	p.Verbs = bastionzero.PtrTo(ExpandPolicyVerbs(ctx, plan.Verbs))
 
 	ctx = tflog.SetField(ctx, "policy_name", p.Name)
 
@@ -193,22 +193,22 @@ func (r *targetConnectPolicyResource) Update(ctx context.Context, req resource.U
 		modPolicy.Description = bastionzero.PtrTo(plan.Description.ValueString())
 	}
 	if !plan.Subjects.Equal(state.Subjects) {
-		modPolicy.Subjects = policy.ExpandPolicySubjects(ctx, plan.Subjects)
+		modPolicy.Subjects = bastionzero.PtrTo(policy.ExpandPolicySubjects(ctx, plan.Subjects))
 	}
 	if !plan.Groups.Equal(state.Groups) {
-		modPolicy.Groups = policy.ExpandPolicyGroups(ctx, plan.Groups)
+		modPolicy.Groups = bastionzero.PtrTo(policy.ExpandPolicyGroups(ctx, plan.Groups))
 	}
 	if !plan.Environments.Equal(state.Environments) {
-		modPolicy.Environments = policy.ExpandPolicyEnvironments(ctx, plan.Environments)
+		modPolicy.Environments = bastionzero.PtrTo(policy.ExpandPolicyEnvironments(ctx, plan.Environments))
 	}
 	if !plan.Targets.Equal(state.Targets) {
-		modPolicy.Targets = policy.ExpandPolicyTargets(ctx, plan.Targets)
+		modPolicy.Targets = bastionzero.PtrTo(policy.ExpandPolicyTargets(ctx, plan.Targets))
 	}
 	if !plan.TargetUsers.Equal(state.TargetUsers) {
-		modPolicy.TargetUsers = ExpandPolicyTargetUsers(ctx, plan.TargetUsers)
+		modPolicy.TargetUsers = bastionzero.PtrTo(ExpandPolicyTargetUsers(ctx, plan.TargetUsers))
 	}
 	if !plan.Verbs.Equal(state.Verbs) {
-		modPolicy.Verbs = ExpandPolicyVerbs(ctx, plan.Verbs)
+		modPolicy.Verbs = bastionzero.PtrTo(ExpandPolicyVerbs(ctx, plan.Verbs))
 	}
 
 	// Update existing policy
