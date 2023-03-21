@@ -10,7 +10,6 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
-	"github.com/bastionzero/terraform-provider-bastionzero/internal/typesext"
 	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -56,15 +55,7 @@ func setTargetConnectPolicyAttributes(ctx context.Context, schema *targetConnect
 	schema.ID = types.StringValue(apiPolicy.ID)
 	schema.Name = types.StringValue(apiPolicy.Name)
 	schema.Type = types.StringValue(string(apiPolicy.GetPolicyType()))
-
-	// Preserve null in TF schema. We say that "" is semantically equivalent to
-	// null for the policy schema
-	if schema.Description.IsNull() && apiPolicy.GetDescription() == "" {
-		schema.Description = types.StringNull()
-	} else {
-		schema.Description = typesext.StringPointerValue(apiPolicy.Description)
-	}
-
+	schema.Description = types.StringValue(apiPolicy.GetDescription())
 	schema.Subjects = policy.FlattenPolicySubjects(ctx, apiPolicy.Subjects)
 	schema.Groups = policy.FlattenPolicyGroups(ctx, apiPolicy.Groups)
 	schema.Environments = policy.FlattenPolicyEnvironments(ctx, apiPolicy.Environments)

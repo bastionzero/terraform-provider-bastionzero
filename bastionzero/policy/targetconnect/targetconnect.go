@@ -8,6 +8,7 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/verbtype"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
+	bzplanmodifier "github.com/bastionzero/terraform-provider-bastionzero/internal/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -36,7 +37,13 @@ func makeTargetConnectPolicyResourceSchema() map[string]schema.Attribute {
 		"type": policy.PolicyTypeAttribute(policytype.TargetConnect),
 		"description": schema.StringAttribute{
 			Optional:    true,
+			Computed:    true,
 			Description: "The policy's description.",
+			PlanModifiers: []planmodifier.String{
+				// Don't allow null description to make it easier when parsing
+				// results back into TF
+				bzplanmodifier.StringDefaultValue(types.StringValue("")),
+			},
 		},
 		"subjects":     policy.PolicySubjectsAttribute(),
 		"groups":       policy.PolicyGroupsAttribute(),
