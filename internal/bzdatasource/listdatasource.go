@@ -3,7 +3,6 @@ package bzdatasource
 import (
 	"context"
 	"fmt"
-	"reflect"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -15,26 +14,36 @@ import (
 	"golang.org/x/exp/maps"
 )
 
-type BaseListDataSourceConfig[TFComputedModel any, APIModel any] struct {
+// TFComputedModel is a struct that models a collection of TF schema attributes
+// that are Computed (Optional and Required should both be set to false).
+type TFComputedModel = interface{}
+
+// APIModel is a BastionZero API object struct.
+type APIModel = interface{}
+
+// BaseListDataSourceConfig contains common options used for creating any type
+// of ListDataSource data source.
+type BaseListDataSourceConfig[T TFComputedModel, T2 APIModel] struct {
 	// RecordSchema is the TF schema that models a single instance of the API
-	// object. Required.
+	// object. There should be a key for each field in TFComputedModel.
+	// Required.
 	RecordSchema map[string]schema.Attribute
 
-	// The name of the attribute in the data source through which to expose a
-	// list of results. Cannot be the empty string.
+	// ResultAttributeName is the name of the TF attribute in the data source
+	// through which to expose a list of results. Cannot be the empty string.
 	ResultAttributeName string
 
-	// The suffix name to use for the data source name. Optional. If not set,
-	// then PrettyAttributeName is used.
+	// MetadataTypeName is the suffix to use for the name of the data source.
+	// Optional. If not set, then ResultAttributeName is used.
 	MetadataTypeName string
 
-	// PrettyAttributeName is the name of the attribute used for logging and
+	// PrettyAttributeName is a descriptive name used for logging and
 	// documentation purposes. Cannot be the empty string.
 	PrettyAttributeName string
 
-	// Given a model returned from the ListAPIModels function, flatten the API
-	// model to a TF model.
-	FlattenAPIModel func(ctx context.Context, apiObject *APIModel) (*TFComputedModel, diag.Diagnostics)
+	// FlattenAPIModel takes a model returned from the ListAPIModels function
+	// and converts it to a TF model
+	FlattenAPIModel func(ctx context.Context, apiObject *T2) (*T, diag.Diagnostics)
 
 	// Description is passed as the data source schema's Description field
 	// during construction.
@@ -49,32 +58,49 @@ type BaseListDataSourceConfig[TFComputedModel any, APIModel any] struct {
 	DeprecationMessage string
 }
 
+// Validate checks for errors in the base list data source config and fills in
+// required values that were not set
+func (c *BaseListDataSourceConfig[T, T2]) Validate() error {
+	if c.RecordSchema == nil {
+		return fmt.Errorf("RecordSchema cannot be nil")
+	}
+	if c.ResultAttributeName == "" {
+		return fmt.Errorf("ResultAttributeName cannot be empty")
+	}
+	if c.PrettyAttributeName == "" {
+		return fmt.Errorf("PrettyAttributeName cannot be empty")
+	}
+	if c.MetadataTypeName == "" {
+		c.MetadataTypeName = c.ResultAttributeName
+	}
+
+	return nil
+}
+
+// ListDataSource is a data source that calls a BastionZero API endpoint which
+// returns a list of objects. It abstracts common, boilerplate code that
+// typically accompanies a data source that exposes a list of items.
+//
+// If the API endpoint takes in additional parameters, and you wish to expose
+// these to the practitioner for configuration in the TF schema, then use
+// bzdatasource.ListDataSourceWithPractitionerParameters instead.
+type ListDataSource datasource.DataSourceWithConfigure
+
 // ListDataSourceConfig is the configuration for a list data source. It
-// represents the schema and operations needed to create the list data source.
-type ListDataSourceConfig[TFComputedModel any, APIModel any] struct {
-	*BaseListDataSourceConfig[TFComputedModel, APIModel]
+// represents the schema and operations needed to create the data source.
+type ListDataSourceConfig[T TFComputedModel, T2 APIModel] struct {
+	*BaseListDataSourceConfig[T, T2]
 
 	// ListAPIModels returns all of the API models on which the data source
 	// should expose.
-	ListAPIModels func(ctx context.Context, client *bastionzero.Client) ([]APIModel, error)
+	ListAPIModels func(ctx context.Context, client *bastionzero.Client) ([]T2, error)
 }
 
-// Returns a new list data source given the specified configuration. The
-// function panics if the config is invalid. A list data source abstracts
-// calling a GET BastionZero API endpoint that returns a list of objects.
-func NewListDataSource[TFModel any, APIModel any](config *ListDataSourceConfig[TFModel, APIModel]) datasource.DataSourceWithConfigure {
-	if config.RecordSchema == nil {
-		panic("RecordSchema cannot be nil")
-	}
-	if config.ResultAttributeName == "" {
-		panic("ResultAttributeName cannot be empty")
-	}
-	if config.PrettyAttributeName == "" {
-		panic("PrettyAttributeName cannot be empty")
-	}
-
-	if config.MetadataTypeName == "" {
-		config.MetadataTypeName = config.ResultAttributeName
+// NewListDataSource creates a ListDataSource. The function panics if the config
+// is invalid.
+func NewListDataSource[T TFComputedModel, T2 APIModel](config *ListDataSourceConfig[T, T2]) ListDataSource {
+	if err := config.Validate(); err != nil {
+		panic(err)
 	}
 
 	t := struct{ protoDataSource }{}
@@ -87,6 +113,8 @@ func NewListDataSource[TFModel any, APIModel any](config *ListDataSourceConfig[T
 			MarkdownDescription: config.MarkdownDescription,
 			DeprecationMessage:  config.DeprecationMessage,
 			Attributes: map[string]schema.Attribute{
+				// A list data source exposes a single attribute; a list of
+				// TFModel objects.
 				config.ResultAttributeName: schema.ListNestedAttribute{
 					Description: fmt.Sprintf("List of %s.", config.PrettyAttributeName),
 					Computed:    true,
@@ -115,7 +143,7 @@ func NewListDataSource[TFModel any, APIModel any](config *ListDataSourceConfig[T
 		t.client = client
 	}
 	t.readFunc = func(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-		stateScaffold := struct{ Records []TFModel }{}
+		stateScaffold := struct{ Records []T }{}
 
 		// Query BastionZero for list of API objects
 		tflog.Debug(ctx, fmt.Sprintf("Querying for %s", config.PrettyAttributeName))
@@ -130,71 +158,79 @@ func NewListDataSource[TFModel any, APIModel any](config *ListDataSourceConfig[T
 		tflog.Debug(ctx, fmt.Sprintf("Queried for %s", config.PrettyAttributeName), map[string]any{fmt.Sprintf("num_%s", config.ResultAttributeName): len(apiObjects)})
 
 		// Map response body to model
-		for _, apiObj := range apiObjects {
-			tfModel, diags := config.FlattenAPIModel(ctx, &apiObj)
-			resp.Diagnostics.Append(diags...)
-			if resp.Diagnostics.HasError() {
-				// Return early because something went wrong
-				return
-			}
-
-			stateScaffold.Records = append(stateScaffold.Records, *tfModel)
+		models, diags := mapAPIModelsToTFModels(ctx, config.BaseListDataSourceConfig, apiObjects)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
 		}
+		stateScaffold.Records = models
 
 		// Dynamically set the TF state struct's tfsdk tag
-		//
-		// Source: https://stackoverflow.com/a/62486560
-		value := reflect.ValueOf(stateScaffold)
-		stateScaffoldType := value.Type()
-		sf := make([]reflect.StructField, 0)
-		sf = append(sf, stateScaffoldType.Field(0))
-		sf[0].Tag = reflect.StructTag(fmt.Sprintf(`tfsdk:"%s"`, config.ResultAttributeName))
-		newType := reflect.StructOf(sf)
-		newValue := value.Convert(newType)
+		modelBuilder := dynamicstruct.ExtendStruct(stateScaffold)
+		recordsField := modelBuilder.GetField("Records")
+		recordsField.SetTag(fmt.Sprintf(`tfsdk:"%s"`, config.ResultAttributeName))
+		model := modelBuilder.Build().New()
+
+		err = copier.Copy(model, stateScaffold)
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Unexpected error during conversion to model",
+				fmt.Sprintf("Got: %v during conversion. Please report this issue to the provider developers.", err.Error()),
+			)
+			return
+		}
 
 		// Save data into Terraform state
-		resp.Diagnostics.Append(resp.State.Set(ctx, newValue.Interface())...)
+		resp.Diagnostics.Append(resp.State.Set(ctx, model)...)
 	}
 
 	return &t
 }
 
-// ListDataSourceConfig is the configuration for a list data source. It
-// represents the schema and operations needed to create the list data source.
-type ListDataSourceConfigWithUserParameters[TFComputedModel any, TFUserParamsModel any, APIModel any] struct {
-	*BaseListDataSourceConfig[TFComputedModel, APIModel]
+// ListDataSourceWithPractitionerParameters is a data source that calls a
+// BastionZero API endpoint which returns a list of objects. It abstracts
+// common, boilerplate code that typically accompanies a data source that
+// exposes a list of items. Additionally, it provides support for practitioner
+// provided attributes (either Required = true or Optional = true) that can be
+// accessed before calling the BastionZero API endpoint.
+//
+// If there are no extra practitioner parameters required to call the API
+// endpoint, then use bzdatasource.ListDataSource instead.
+type ListDataSourceWithPractitionerParameters datasource.DataSourceWithConfigure
+
+// TFPractitionerParamsModel is a struct that models a collection of TF schema
+// attributes that are not Computed (Computed should be set to false. Required
+// or Optional can be set to True).
+type TFPractitionerParamsModel = interface{}
+
+// ListDataSourceWithPractitionerParametersConfig is the configuration for a
+// list data source with practitioner parameters. It represents the schema and
+// operations needed to create the data source.
+type ListDataSourceWithPractitionerParametersConfig[T TFComputedModel, T2 TFPractitionerParamsModel, T3 APIModel] struct {
+	*BaseListDataSourceConfig[T, T3]
 
 	// UserParamsRecordSchema is the TF schema that models additional user
 	// parameters that are passed to ListAPIModels. Required.
 	UserParamsRecordSchema map[string]schema.Attribute
 
 	// ListAPIModels returns all of the API models on which the data source
-	// should expose.
-	ListAPIModels func(ctx context.Context, tfUserParamsModel TFUserParamsModel, client *bastionzero.Client) ([]APIModel, error)
+	// should expose. practitionerParams are the practitioner parameters
+	// retrieved from the TF schema.
+	ListAPIModels func(ctx context.Context, practitionerParams T2, client *bastionzero.Client) ([]T3, error)
 }
 
-// Returns a new list data source given the specified configuration. The
-// function panics if the config is invalid. A list data source abstracts
-// calling a GET BastionZero API endpoint that returns a list of objects.
-func NewListDataSourceWithUserParameters[TFModel any, TFUserParamsModel any, APIModel any](config *ListDataSourceConfigWithUserParameters[TFModel, TFUserParamsModel, APIModel]) datasource.DataSourceWithConfigure {
-	if config.RecordSchema == nil {
-		panic("RecordSchema cannot be nil")
+// NewListDataSourceWithPractitionerParameters creates a
+// ListDataSourceWithPractitionerParameters. The function panics if the config
+// is invalid.
+func NewListDataSourceWithPractitionerParameters[T TFComputedModel, T2 TFPractitionerParamsModel, T3 APIModel](config *ListDataSourceWithPractitionerParametersConfig[T, T2, T3]) ListDataSourceWithPractitionerParameters {
+	if err := config.Validate(); err != nil {
+		panic(err)
 	}
 	if config.UserParamsRecordSchema == nil {
 		panic("UserParamsRecordSchema cannot be nil")
 	}
-	if config.ResultAttributeName == "" {
-		panic("ResultAttributeName cannot be empty")
-	}
-	if config.PrettyAttributeName == "" {
-		panic("PrettyAttributeName cannot be empty")
-	}
 	if _, ok := config.UserParamsRecordSchema[config.ResultAttributeName]; ok {
 		panic(fmt.Sprintf("UserParamsRecordSchema cannot have attribute with name %v", config.ResultAttributeName))
-	}
-
-	if config.MetadataTypeName == "" {
-		config.MetadataTypeName = config.ResultAttributeName
 	}
 
 	t := struct{ protoDataSource }{}
@@ -211,6 +247,7 @@ func NewListDataSourceWithUserParameters[TFModel any, TFUserParamsModel any, API
 				},
 			},
 		}
+		// Add extra user parameters
 		maps.Copy(attributes, config.UserParamsRecordSchema)
 
 		resp.Schema = schema.Schema{
@@ -238,8 +275,8 @@ func NewListDataSourceWithUserParameters[TFModel any, TFUserParamsModel any, API
 		t.client = client
 	}
 	t.readFunc = func(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-		var userParamsModel TFUserParamsModel
-		stateScaffold := struct{ Records []TFModel }{}
+		var userParamsModel T2
+		stateScaffold := struct{ Records []T }{}
 
 		mergedModelBuilder := dynamicstruct.MergeStructs(stateScaffold, userParamsModel)
 
@@ -278,16 +315,12 @@ func NewListDataSourceWithUserParameters[TFModel any, TFUserParamsModel any, API
 		tflog.Debug(ctx, fmt.Sprintf("Queried for %s", config.PrettyAttributeName), map[string]any{fmt.Sprintf("num_%s", config.ResultAttributeName): len(apiObjects)})
 
 		// Map response body to model
-		for _, apiObj := range apiObjects {
-			tfModel, diags := config.FlattenAPIModel(ctx, &apiObj)
-			resp.Diagnostics.Append(diags...)
-			if resp.Diagnostics.HasError() {
-				// Return early because something went wrong
-				return
-			}
-
-			stateScaffold.Records = append(stateScaffold.Records, *tfModel)
+		models, diags := mapAPIModelsToTFModels(ctx, config.BaseListDataSourceConfig, apiObjects)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
 		}
+		stateScaffold.Records = models
 
 		// Using reflection, copy values from records back into the merged model
 		// that is expected to be stored in TF state
@@ -300,20 +333,28 @@ func NewListDataSourceWithUserParameters[TFModel any, TFUserParamsModel any, API
 			return
 		}
 
-		// // Dynamically set the TF state struct's tfsdk tag
-		// //
-		// // Source: https://stackoverflow.com/a/62486560
-		// value := reflect.ValueOf(stateScaffold)
-		// stateScaffoldType := value.Type()
-		// sf := make([]reflect.StructField, 0)
-		// sf = append(sf, stateScaffoldType.Field(0))
-		// sf[0].Tag = reflect.StructTag(fmt.Sprintf(`tfsdk:"%s"`, config.ResultAttributeName))
-		// newType := reflect.StructOf(sf)
-		// newValue := value.Convert(newType)
-
 		// Save data into Terraform state
 		resp.Diagnostics.Append(resp.State.Set(ctx, mergedModel)...)
 	}
 
 	return &t
+}
+
+// mapAPIModelsToTFModels converts a list of BastionZero API models to a list of
+// TF models.
+func mapAPIModelsToTFModels[T TFComputedModel, T2 APIModel](ctx context.Context, config *BaseListDataSourceConfig[T, T2], apiObjects []T2) ([]T, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	var models []T
+	for _, apiObj := range apiObjects {
+		tfModel, diagsFlatten := config.FlattenAPIModel(ctx, &apiObj)
+		diags.Append(diagsFlatten...)
+		if diagsFlatten.HasError() {
+			// Return early because something went wrong
+			return models, diags
+		}
+
+		models = append(models, *tfModel)
+	}
+
+	return models, diags
 }

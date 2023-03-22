@@ -14,7 +14,7 @@ import (
 )
 
 func NewTargetConnectPoliciesDataSource() datasource.DataSource {
-	return bzdatasource.NewListDataSourceWithUserParameters(&bzdatasource.ListDataSourceConfigWithUserParameters[targetConnectPolicyModel, policy.ListPolicyParametersModel, policies.TargetConnectPolicy]{
+	return bzdatasource.NewListDataSourceWithPractitionerParameters(&bzdatasource.ListDataSourceWithPractitionerParametersConfig[targetConnectPolicyModel, policy.ListPolicyParametersModel, policies.TargetConnectPolicy]{
 		BaseListDataSourceConfig: &bzdatasource.BaseListDataSourceConfig[targetConnectPolicyModel, policies.TargetConnectPolicy]{
 			RecordSchema:        internal.ResourceSchemaToDataSourceSchema(makeTargetConnectPolicyResourceSchema(context.TODO()), nil),
 			MetadataTypeName:    "targetconnect_policies",
