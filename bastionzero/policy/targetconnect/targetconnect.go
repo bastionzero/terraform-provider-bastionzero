@@ -51,8 +51,8 @@ func setTargetConnectPolicyAttributes(ctx context.Context, schema *targetConnect
 	// not consistent.
 	//
 	// Additionally, we always set the value in the schema if the model is a
-	// data source because it's easier to work with empty valued collection
-	// attributes in data sources then null.
+	// data source because it's easier to work with empty valued, computed
+	// collection attributes in data sources then null.
 	if !schema.Subjects.IsNull() || len(apiPolicy.GetSubjects()) != 0 || modelIsDataSource {
 		schema.Subjects = policy.FlattenPolicySubjects(ctx, apiPolicy.GetSubjects())
 	}

@@ -21,6 +21,18 @@ func StringFromFramework(_ context.Context, v types.String) *string {
 	return bastionzero.PtrTo(v.ValueString())
 }
 
+// ExpandFrameworkStringSet converts a framework Set value to a slice of string
+// values.
+//
+// If the framework value is null or unknown, or if an error occurs when first
+// converting the set into a slice of element type string, an empty slice is
+// returned.
+func ExpandFrameworkStringSet(ctx context.Context, tfSet types.Set) []string {
+	return ExpandFrameworkSet(ctx, tfSet, func(m string) string {
+		return m
+	})
+}
+
 // ExpandFrameworkSet converts a framework Set value to a slice of values
 // according to the specified map function f.
 //

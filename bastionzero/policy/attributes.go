@@ -13,6 +13,7 @@ import (
 	"github.com/bastionzero/terraform-provider-bastionzero/internal/bzplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	datasource_schema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -203,6 +204,29 @@ func PolicyTypeAttribute(policyType policytype.PolicyType) schema.Attribute {
 		PlanModifiers: []planmodifier.String{
 			stringplanmodifier.UseStateForUnknown(),
 			bzplanmodifier.StringDefaultValue(types.StringValue(string(policyType))),
+		},
+	}
+}
+
+// ListPolicyParametersModel maps optional, practitioner parameters that can be
+// specified when calling the list policies endpoint. This model is used for
+// data sources that query for a list of policies
+type ListPolicyParametersModel struct {
+	Subjects types.Set `tfsdk:"filter_subjects"`
+	Groups   types.Set `tfsdk:"filter_groups"`
+}
+
+func ListPolicyParametersSchema() map[string]datasource_schema.Attribute {
+	return map[string]datasource_schema.Attribute{
+		"filter_subjects": datasource_schema.SetAttribute{
+			Description: "Filters the list of policies to only those that contain the provided subject ID(s).",
+			ElementType: types.StringType,
+			Optional:    true,
+		},
+		"filter_groups": datasource_schema.SetAttribute{
+			Description: "Filters the list of policies to only those that contain the provided group ID(s).",
+			ElementType: types.StringType,
+			Optional:    true,
 		},
 	}
 }
