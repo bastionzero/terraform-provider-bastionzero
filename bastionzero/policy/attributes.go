@@ -33,7 +33,6 @@ func GetPolicySubjectModelType(ctx context.Context) types.ObjectType {
 
 func PolicySubjectsAttribute(ctx context.Context) schema.Attribute {
 	return schema.SetNestedAttribute{
-		Computed:    true,
 		Optional:    true,
 		Description: "Set of subjects that this policy applies to.",
 		NestedObject: schema.NestedAttributeObject{
@@ -50,9 +49,6 @@ func PolicySubjectsAttribute(ctx context.Context) schema.Attribute {
 					},
 				},
 			},
-		},
-		PlanModifiers: []planmodifier.Set{
-			bzplanmodifier.SetDefaultValue(types.SetValueMust(GetPolicySubjectModelType(ctx), []attr.Value{})),
 		},
 	}
 }
@@ -90,7 +86,6 @@ func GetPolicyGroupModelType(ctx context.Context) types.ObjectType {
 
 func PolicyGroupsAttribute(ctx context.Context) schema.Attribute {
 	return schema.SetNestedAttribute{
-		Computed:    true,
 		Optional:    true,
 		Description: "Set of IdP groups that this policy applies to.",
 		NestedObject: schema.NestedAttributeObject{
@@ -104,9 +99,6 @@ func PolicyGroupsAttribute(ctx context.Context) schema.Attribute {
 					Description: "The group's name.",
 				},
 			},
-		},
-		PlanModifiers: []planmodifier.Set{
-			bzplanmodifier.SetDefaultValue(types.SetValueMust(GetPolicyGroupModelType(ctx), []attr.Value{})),
 		},
 	}
 }
@@ -135,11 +127,7 @@ func PolicyEnvironmentsAttribute() schema.Attribute {
 	return schema.SetAttribute{
 		Description: "Set of environments that this policy applies to.",
 		ElementType: types.StringType,
-		Computed:    true,
 		Optional:    true,
-		PlanModifiers: []planmodifier.Set{
-			bzplanmodifier.SetDefaultValue(types.SetValueMust(types.StringType, []attr.Value{})),
-		},
 	}
 }
 
@@ -169,7 +157,6 @@ func GetPolicyTargetModelType(ctx context.Context) types.ObjectType {
 func PolicyTargetsAttribute(ctx context.Context) schema.Attribute {
 	return schema.SetNestedAttribute{
 		Description: "Set of targets that this policy applies to.",
-		Computed:    true,
 		Optional:    true,
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: map[string]schema.Attribute{
@@ -185,9 +172,6 @@ func PolicyTargetsAttribute(ctx context.Context) schema.Attribute {
 					},
 				},
 			},
-		},
-		PlanModifiers: []planmodifier.Set{
-			bzplanmodifier.SetDefaultValue(types.SetValueMust(GetPolicyTargetModelType(ctx), []attr.Value{})),
 		},
 	}
 }

@@ -57,9 +57,25 @@ func setTargetConnectPolicyAttributes(ctx context.Context, schema *targetConnect
 	schema.Type = types.StringValue(string(apiPolicy.GetPolicyType()))
 	schema.Description = types.StringValue(apiPolicy.GetDescription())
 	schema.Subjects = policy.FlattenPolicySubjects(ctx, apiPolicy.GetSubjects())
-	schema.Groups = policy.FlattenPolicyGroups(ctx, apiPolicy.GetGroups())
-	schema.Environments = policy.FlattenPolicyEnvironments(ctx, apiPolicy.GetEnvironments())
-	schema.Targets = policy.FlattenPolicyTargets(ctx, apiPolicy.GetTargets())
+
+	// Preserve null in schema if refreshed list is empty list.
+	//
+	// If we don't include this logic, then we will get "Provider produced
+	// inconsistent result after apply" error when user sets null value in
+	// config because Flatten() returns an empty set if slice is empty which is
+	// not consistent.
+	if !schema.Groups.IsNull() || len(apiPolicy.GetGroups()) != 0 {
+		schema.Groups = policy.FlattenPolicyGroups(ctx, apiPolicy.GetGroups())
+	}
+	if !schema.Environments.IsNull() || len(apiPolicy.GetEnvironments()) != 0 {
+		schema.Environments = policy.FlattenPolicyEnvironments(ctx, apiPolicy.GetEnvironments())
+	}
+	if !schema.Targets.IsNull() || len(apiPolicy.GetTargets()) != 0 {
+		schema.Targets = policy.FlattenPolicyTargets(ctx, apiPolicy.GetTargets())
+	}
+
+	// By def. of schema, these values cannot be null so just accept whatever
+	// the refreshed value is
 	schema.TargetUsers = FlattenPolicyTargetUsers(ctx, apiPolicy.GetTargetUsers())
 	schema.Verbs = FlattenPolicyVerbs(ctx, apiPolicy.GetVerbs())
 }
