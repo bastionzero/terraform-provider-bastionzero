@@ -13,22 +13,24 @@ import (
 
 func NewBzeroTargetsDataSource() datasource.DataSource {
 	return bzdatasource.NewListDataSource(&bzdatasource.ListDataSourceConfig[bzeroTargetModel, targets.BzeroTarget]{
-		RecordSchema: makeBzeroTargetDataSourceSchema(
-			&target.BaseTargetDataSourceAttributeOptions{
-				IsIDComputed:   true,
-				IsNameComputed: true,
-			}),
-		ResultAttributeName: "bzero_targets",
-		PrettyAttributeName: "Bzero targets",
-		FlattenAPIModel: func(ctx context.Context, apiObject *targets.BzeroTarget) (state *bzeroTargetModel, diags diag.Diagnostics) {
-			state = new(bzeroTargetModel)
-			setBzeroTargetAttributes(ctx, state, apiObject)
-			return
+		BaseListDataSourceConfig: &bzdatasource.BaseListDataSourceConfig[bzeroTargetModel, targets.BzeroTarget]{
+			RecordSchema: makeBzeroTargetDataSourceSchema(
+				&target.BaseTargetDataSourceAttributeOptions{
+					IsIDComputed:   true,
+					IsNameComputed: true,
+				}),
+			ResultAttributeName: "bzero_targets",
+			PrettyAttributeName: "Bzero targets",
+			FlattenAPIModel: func(ctx context.Context, apiObject *targets.BzeroTarget) (state *bzeroTargetModel, diags diag.Diagnostics) {
+				state = new(bzeroTargetModel)
+				setBzeroTargetAttributes(ctx, state, apiObject)
+				return
+			},
+			Description: "Get a list of all Bzero targets in your BastionZero organization.",
 		},
 		ListAPIModels: func(ctx context.Context, client *bastionzero.Client) ([]targets.BzeroTarget, error) {
 			targets, _, err := client.Targets.ListBzeroTargets(ctx)
 			return targets, err
 		},
-		Description: "Get a list of all Bzero targets in your BastionZero organization.",
 	})
 }

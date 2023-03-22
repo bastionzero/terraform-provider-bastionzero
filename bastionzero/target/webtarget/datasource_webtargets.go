@@ -13,22 +13,24 @@ import (
 
 func NewWebTargetsDataSource() datasource.DataSource {
 	return bzdatasource.NewListDataSource(&bzdatasource.ListDataSourceConfig[webTargetModel, targets.WebTarget]{
-		RecordSchema: makeWebTargetDataSourceSchema(
-			&target.BaseTargetDataSourceAttributeOptions{
-				IsIDComputed:   true,
-				IsNameComputed: true,
-			}),
-		ResultAttributeName: "web_targets",
-		PrettyAttributeName: "Web targets",
-		FlattenAPIModel: func(ctx context.Context, apiObject *targets.WebTarget) (state *webTargetModel, diags diag.Diagnostics) {
-			state = new(webTargetModel)
-			setWebTargetAttributes(ctx, state, apiObject)
-			return
+		BaseListDataSourceConfig: &bzdatasource.BaseListDataSourceConfig[webTargetModel, targets.WebTarget]{
+			RecordSchema: makeWebTargetDataSourceSchema(
+				&target.BaseTargetDataSourceAttributeOptions{
+					IsIDComputed:   true,
+					IsNameComputed: true,
+				}),
+			ResultAttributeName: "web_targets",
+			PrettyAttributeName: "Web targets",
+			FlattenAPIModel: func(ctx context.Context, apiObject *targets.WebTarget) (state *webTargetModel, diags diag.Diagnostics) {
+				state = new(webTargetModel)
+				setWebTargetAttributes(ctx, state, apiObject)
+				return
+			},
+			Description: "Get a list of all Web targets in your BastionZero organization.",
 		},
 		ListAPIModels: func(ctx context.Context, client *bastionzero.Client) ([]targets.WebTarget, error) {
 			targets, _, err := client.Targets.ListWebTargets(ctx)
 			return targets, err
 		},
-		Description: "Get a list of all Web targets in your BastionZero organization.",
 	})
 }

@@ -12,18 +12,20 @@ import (
 
 func NewServiceAccountsDataSource() datasource.DataSource {
 	return bzdatasource.NewListDataSource(&bzdatasource.ListDataSourceConfig[serviceAccountModel, serviceaccounts.ServiceAccount]{
-		RecordSchema:        makeServiceAccountDataSourceSchema(false),
-		ResultAttributeName: "service_accounts",
-		PrettyAttributeName: "service accounts",
-		FlattenAPIModel: func(ctx context.Context, apiObject *serviceaccounts.ServiceAccount) (state *serviceAccountModel, diags diag.Diagnostics) {
-			state = new(serviceAccountModel)
-			setServiceAccountAttributes(ctx, state, apiObject)
-			return
+		BaseListDataSourceConfig: &bzdatasource.BaseListDataSourceConfig[serviceAccountModel, serviceaccounts.ServiceAccount]{
+			RecordSchema:        makeServiceAccountDataSourceSchema(false),
+			ResultAttributeName: "service_accounts",
+			PrettyAttributeName: "service accounts",
+			FlattenAPIModel: func(ctx context.Context, apiObject *serviceaccounts.ServiceAccount) (state *serviceAccountModel, diags diag.Diagnostics) {
+				state = new(serviceAccountModel)
+				setServiceAccountAttributes(ctx, state, apiObject)
+				return
+			},
+			Description: "Get a list of all service accounts in your BastionZero organization.",
 		},
 		ListAPIModels: func(ctx context.Context, client *bastionzero.Client) ([]serviceaccounts.ServiceAccount, error) {
 			serviceAccounts, _, err := client.ServiceAccounts.ListServiceAccounts(ctx)
 			return serviceAccounts, err
 		},
-		Description: "Get a list of all service accounts in your BastionZero organization.",
 	})
 }
