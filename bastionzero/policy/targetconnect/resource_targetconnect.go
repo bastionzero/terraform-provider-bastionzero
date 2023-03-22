@@ -56,7 +56,6 @@ func setTargetConnectPolicyAttributes(ctx context.Context, schema *targetConnect
 	schema.Name = types.StringValue(apiPolicy.Name)
 	schema.Type = types.StringValue(string(apiPolicy.GetPolicyType()))
 	schema.Description = types.StringValue(apiPolicy.GetDescription())
-	schema.Subjects = policy.FlattenPolicySubjects(ctx, apiPolicy.GetSubjects())
 
 	// Preserve null in schema if refreshed list is empty list.
 	//
@@ -64,6 +63,9 @@ func setTargetConnectPolicyAttributes(ctx context.Context, schema *targetConnect
 	// inconsistent result after apply" error when user sets null value in
 	// config because Flatten() returns an empty set if slice is empty which is
 	// not consistent.
+	if !schema.Subjects.IsNull() || len(apiPolicy.GetSubjects()) != 0 {
+		schema.Subjects = policy.FlattenPolicySubjects(ctx, apiPolicy.GetSubjects())
+	}
 	if !schema.Groups.IsNull() || len(apiPolicy.GetGroups()) != 0 {
 		schema.Groups = policy.FlattenPolicyGroups(ctx, apiPolicy.GetGroups())
 	}
