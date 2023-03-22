@@ -97,7 +97,6 @@ func ResourceSchemaToDataSourceSchema(resourceSchema map[string]resource_schema.
 				MarkdownDescription: srcAttrTyped.MarkdownDescription,
 				CustomType:          srcAttrTyped.CustomType,
 				Sensitive:           srcAttrTyped.Sensitive,
-				// NestedObject:        srcAttrTyped.NestedObject,
 				NestedObject: datasource_schema.NestedAttributeObject{
 					Attributes: ResourceSchemaToDataSourceSchema(srcAttrTyped.NestedObject.Attributes, nil),
 					Validators: srcAttrTyped.NestedObject.Validators,
@@ -118,6 +117,22 @@ func ResourceSchemaToDataSourceSchema(resourceSchema map[string]resource_schema.
 				Optional:            optional,
 				Required:            required,
 				Computed:            computed,
+			}
+		case resource_schema.SetNestedAttribute:
+			datasourceSchema[name] = datasource_schema.SetNestedAttribute{
+				Validators:          srcAttrTyped.Validators,
+				Description:         srcAttrTyped.Description,
+				MarkdownDescription: srcAttrTyped.MarkdownDescription,
+				CustomType:          srcAttrTyped.CustomType,
+				Sensitive:           srcAttrTyped.Sensitive,
+				NestedObject: datasource_schema.NestedAttributeObject{
+					Attributes: ResourceSchemaToDataSourceSchema(srcAttrTyped.NestedObject.Attributes, nil),
+					Validators: srcAttrTyped.NestedObject.Validators,
+					CustomType: srcAttrTyped.NestedObject.CustomType,
+				},
+				Optional: optional,
+				Required: required,
+				Computed: computed,
 			}
 		default:
 			log.Panicf("unknown attribute type: %v", srcAttr.GetType().String())
