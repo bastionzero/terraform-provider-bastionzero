@@ -14,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -30,56 +29,9 @@ func NewTargetConnectPolicyResource() resource.Resource {
 	return &targetConnectPolicyResource{}
 }
 
-// targetConnectPolicyModel maps the target connect policy schema data.
-type targetConnectPolicyModel struct {
-	ID           types.String `tfsdk:"id"`
-	Name         types.String `tfsdk:"name"`
-	Type         types.String `tfsdk:"type"`
-	Description  types.String `tfsdk:"description"`
-	Subjects     types.Set    `tfsdk:"subjects"`
-	Groups       types.Set    `tfsdk:"groups"`
-	Environments types.Set    `tfsdk:"environments"`
-	Targets      types.Set    `tfsdk:"targets"`
-	TargetUsers  types.Set    `tfsdk:"target_users"`
-	Verbs        types.Set    `tfsdk:"verbs"`
-}
-
 // targetConnectPolicyResource is the resource implementation.
 type targetConnectPolicyResource struct {
 	client *bastionzero.Client
-}
-
-// setTargetConnectPolicyAttributes populates the TF schema data from a target
-// connect policy
-func setTargetConnectPolicyAttributes(ctx context.Context, schema *targetConnectPolicyModel, apiPolicy *policies.TargetConnectPolicy) {
-	schema.ID = types.StringValue(apiPolicy.ID)
-	schema.Name = types.StringValue(apiPolicy.Name)
-	schema.Type = types.StringValue(string(apiPolicy.GetPolicyType()))
-	schema.Description = types.StringValue(apiPolicy.GetDescription())
-
-	// Preserve null in schema if refreshed list is empty list.
-	//
-	// If we don't include this logic, then we will get "Provider produced
-	// inconsistent result after apply" error when user sets null value in
-	// config because Flatten() returns an empty set if slice is empty which is
-	// not consistent.
-	if !schema.Subjects.IsNull() || len(apiPolicy.GetSubjects()) != 0 {
-		schema.Subjects = policy.FlattenPolicySubjects(ctx, apiPolicy.GetSubjects())
-	}
-	if !schema.Groups.IsNull() || len(apiPolicy.GetGroups()) != 0 {
-		schema.Groups = policy.FlattenPolicyGroups(ctx, apiPolicy.GetGroups())
-	}
-	if !schema.Environments.IsNull() || len(apiPolicy.GetEnvironments()) != 0 {
-		schema.Environments = policy.FlattenPolicyEnvironments(ctx, apiPolicy.GetEnvironments())
-	}
-	if !schema.Targets.IsNull() || len(apiPolicy.GetTargets()) != 0 {
-		schema.Targets = policy.FlattenPolicyTargets(ctx, apiPolicy.GetTargets())
-	}
-
-	// By def. of schema, these values cannot be null so just accept whatever
-	// the refreshed value is
-	schema.TargetUsers = FlattenPolicyTargetUsers(ctx, apiPolicy.GetTargetUsers())
-	schema.Verbs = FlattenPolicyVerbs(ctx, apiPolicy.GetVerbs())
 }
 
 // Configure adds the provider configured BastionZero API client to the
@@ -151,7 +103,7 @@ func (r *targetConnectPolicyResource) Create(ctx context.Context, req resource.C
 	ctx = tflog.SetField(ctx, "policy_id", createResp.ID)
 	tflog.Debug(ctx, "Created target connect policy")
 
-	setTargetConnectPolicyAttributes(ctx, &plan, createResp)
+	setTargetConnectPolicyAttributes(ctx, &plan, createResp, false)
 
 	// Set state to fully populated data
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
@@ -182,7 +134,7 @@ func (r *targetConnectPolicyResource) Read(ctx context.Context, req resource.Rea
 	}
 	tflog.Debug(ctx, "Queried for target connect policy")
 
-	setTargetConnectPolicyAttributes(ctx, &state, p)
+	setTargetConnectPolicyAttributes(ctx, &state, p, false)
 
 	// Overwrite with refreshed state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -239,7 +191,7 @@ func (r *targetConnectPolicyResource) Update(ctx context.Context, req resource.U
 		return
 	}
 
-	setTargetConnectPolicyAttributes(ctx, &plan, updateResp)
+	setTargetConnectPolicyAttributes(ctx, &plan, updateResp, false)
 
 	// Overwrite with refreshed state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
