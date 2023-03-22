@@ -7,6 +7,7 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/targettype"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/target"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -41,7 +42,7 @@ func (t *clusterTargetModel) SetAgentPublicKey(value types.String)  { t.AgentPub
 func setClusterTargetAttributes(ctx context.Context, schema *clusterTargetModel, clusterTarget *targets.ClusterTarget) {
 	target.SetBaseTargetAttributes(ctx, schema, clusterTarget)
 	schema.ControlChannel = target.FlattenControlChannelSummary(ctx, clusterTarget.ControlChannel)
-	schema.ValidClusterUsers = internal.FlattenFrameworkStringValueSet(ctx, clusterTarget.ValidClusterUsers)
+	schema.ValidClusterUsers = internal.FlattenFrameworkSet(ctx, types.StringType, clusterTarget.ValidClusterUsers, func(user string) attr.Value { return types.StringValue(user) })
 }
 
 func makeClusterTargetDataSourceSchema(opts *target.BaseTargetDataSourceAttributeOptions) map[string]schema.Attribute {
@@ -49,8 +50,8 @@ func makeClusterTargetDataSourceSchema(opts *target.BaseTargetDataSourceAttribut
 	clusterTargetAttributes["control_channel"] = target.ControlChannelSummaryAttribute()
 	clusterTargetAttributes["valid_cluster_users"] = schema.SetAttribute{
 		Computed:            true,
-		Description:         "Set of Kubernetes user subjects that have been extracted from RoleBindings or ClusterRoleBindings defined in the cluster. Null if nothing could be extracted.",
-		MarkdownDescription: "Set of Kubernetes user [subjects](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-subjects) that have been extracted from RoleBindings or ClusterRoleBindings defined in the cluster. Null if nothing could be extracted.",
+		Description:         "Set of Kubernetes user subjects that have been extracted from RoleBindings or ClusterRoleBindings defined in the cluster.",
+		MarkdownDescription: "Set of Kubernetes user [subjects](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-subjects) that have been extracted from RoleBindings or ClusterRoleBindings defined in the cluster.",
 		ElementType:         types.StringType,
 	}
 

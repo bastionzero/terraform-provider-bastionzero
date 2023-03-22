@@ -34,7 +34,7 @@ Specify exactly one of `id` or `name`. When specifying a `name`, an error is tri
 - `region` (String) The BastionZero region that this target has connected to (follows same naming convention as AWS regions).
 - `status` (String) The target's status (one of "NotActivated", "Offline", "Online", "Terminated", "Error", or "Restarting").
 - `type` (String) The target's type (constant value "Bzero").
-- `valid_cluster_users` (Set of String) Set of Kubernetes user [subjects](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-subjects) that have been extracted from RoleBindings or ClusterRoleBindings defined in the cluster. Null if nothing could be extracted.
+- `valid_cluster_users` (Set of String) Set of Kubernetes user [subjects](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-subjects) that have been extracted from RoleBindings or ClusterRoleBindings defined in the cluster.
 
 <a id="nestedatt--timeouts"></a>
 ### Nested Schema for `timeouts`
