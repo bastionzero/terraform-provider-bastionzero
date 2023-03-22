@@ -198,15 +198,15 @@ func NewListDataSource[T TFComputedModel, T2 APIModel](config *ListDataSourceCon
 // endpoint, then use bzdatasource.ListDataSource instead.
 type ListDataSourceWithPractitionerParameters datasource.DataSourceWithConfigure
 
-// TFPractitionerParamsModel is a struct that models a collection of TF schema
+// TFNonComputedModel is a struct that models a collection of TF schema
 // attributes that are not Computed (Computed should be set to false. Required
 // or Optional can be set to True).
-type TFPractitionerParamsModel = interface{}
+type TFNonComputedModel = interface{}
 
 // ListDataSourceWithPractitionerParametersConfig is the configuration for a
 // list data source with practitioner parameters. It represents the schema and
 // operations needed to create the data source.
-type ListDataSourceWithPractitionerParametersConfig[T TFComputedModel, T2 TFPractitionerParamsModel, T3 APIModel] struct {
+type ListDataSourceWithPractitionerParametersConfig[T TFComputedModel, T2 TFNonComputedModel, T3 APIModel] struct {
 	*BaseListDataSourceConfig[T, T3]
 
 	// UserParamsRecordSchema is the TF schema that models additional user
@@ -222,7 +222,7 @@ type ListDataSourceWithPractitionerParametersConfig[T TFComputedModel, T2 TFPrac
 // NewListDataSourceWithPractitionerParameters creates a
 // ListDataSourceWithPractitionerParameters. The function panics if the config
 // is invalid.
-func NewListDataSourceWithPractitionerParameters[T TFComputedModel, T2 TFPractitionerParamsModel, T3 APIModel](config *ListDataSourceWithPractitionerParametersConfig[T, T2, T3]) ListDataSourceWithPractitionerParameters {
+func NewListDataSourceWithPractitionerParameters[T TFComputedModel, T2 TFNonComputedModel, T3 APIModel](config *ListDataSourceWithPractitionerParametersConfig[T, T2, T3]) ListDataSourceWithPractitionerParameters {
 	if err := config.Validate(); err != nil {
 		panic(err)
 	}
