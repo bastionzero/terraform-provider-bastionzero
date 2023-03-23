@@ -10,6 +10,7 @@ import (
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/autodiscoveryscript"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/environment"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/organization"
+	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/kubernetes"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/targetconnect"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/serviceaccount"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/target/bzerotarget"
@@ -187,6 +188,7 @@ func (p *BastionZeroProvider) Resources(ctx context.Context) []func() resource.R
 	return []func() resource.Resource{
 		environment.NewEnvironmentResource,
 		targetconnect.NewTargetConnectPolicyResource,
+		kubernetes.NewKubernetesPolicyResource,
 	}
 }
 
@@ -212,6 +214,8 @@ func (p *BastionZeroProvider) DataSources(ctx context.Context) []func() datasour
 		autodiscoveryscript.NewAdBashDataSource,
 		targetconnect.NewTargetConnectPolicyDataSource,
 		targetconnect.NewTargetConnectPoliciesDataSource,
+		kubernetes.NewKubernetesPolicyDataSource,
+		kubernetes.NewKubernetesPoliciesDataSource,
 	}
 }
 
