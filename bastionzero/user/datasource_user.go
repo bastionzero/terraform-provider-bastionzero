@@ -15,18 +15,17 @@ func NewUserDataSource() datasource.DataSource {
 		&bzdatasource.SingleDataSourceConfig[userModel, users.User]{
 			BaseSingleDataSourceConfig: &bzdatasource.BaseSingleDataSourceConfig[userModel, users.User]{
 				RecordSchema:        makeUserDataSourceSchema(true),
-				ResultAttributeName: "user",
+				MetadataTypeName:    "user",
 				PrettyAttributeName: "user",
-				FlattenAPIModel: func(ctx context.Context, apiObject *users.User, _ userModel) (state *userModel, diags diag.Diagnostics) {
-					state = new(userModel)
+				FlattenAPIModel: func(ctx context.Context, apiObject *users.User, state *userModel) (diags diag.Diagnostics) {
 					setUserAttributes(ctx, state, apiObject)
 					return
 				},
+				GetAPIModel: func(ctx context.Context, tfModel userModel, client *bastionzero.Client) (*users.User, error) {
+					user, _, err := client.Users.GetUser(ctx, tfModel.ID.ValueString())
+					return user, err
+				},
 				Description: "Get information on a user in your BastionZero organization. Provide the user's unique ID or email address in the \"id\" field.",
-			},
-			GetAPIModel: func(ctx context.Context, tfModel userModel, client *bastionzero.Client) (*users.User, error) {
-				user, _, err := client.Users.GetUser(ctx, tfModel.ID.ValueString())
-				return user, err
 			},
 		},
 	)

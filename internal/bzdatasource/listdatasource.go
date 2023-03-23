@@ -18,14 +18,11 @@ import (
 // that are Computed (Optional and Required should both be set to false).
 type TFComputedModel = interface{}
 
-// APIModel is a BastionZero API object struct.
-type APIModel = interface{}
-
 // BaseListDataSourceConfig contains common options used for creating any type
 // of ListDataSource data source.
 type BaseListDataSourceConfig[T TFComputedModel, T2 APIModel] struct {
 	// RecordSchema is the TF schema that models a single instance of the API
-	// object. There should be a key for each field in TFComputedModel.
+	// object. There should be a key for each field defined in TFComputedModel.
 	// Required.
 	RecordSchema map[string]schema.Attribute
 
@@ -114,7 +111,7 @@ func NewListDataSource[T TFComputedModel, T2 APIModel](config *ListDataSourceCon
 			DeprecationMessage:  config.DeprecationMessage,
 			Attributes: map[string]schema.Attribute{
 				// A list data source exposes a single attribute; a list of
-				// TFModel objects.
+				// TFComputedModel objects.
 				config.ResultAttributeName: schema.ListNestedAttribute{
 					Description: fmt.Sprintf("List of %s.", config.PrettyAttributeName),
 					Computed:    true,
@@ -209,9 +206,9 @@ type TFNonComputedModel = interface{}
 type ListDataSourceWithPractitionerParametersConfig[T TFComputedModel, T2 TFNonComputedModel, T3 APIModel] struct {
 	*BaseListDataSourceConfig[T, T3]
 
-	// UserParamsRecordSchema is the TF schema that models additional user
-	// parameters that are passed to ListAPIModels. Required.
-	UserParamsRecordSchema map[string]schema.Attribute
+	// PractitionerParamsRecordSchema is the TF schema that models additional
+	// user parameters that are passed to ListAPIModels. Required.
+	PractitionerParamsRecordSchema map[string]schema.Attribute
 
 	// ListAPIModels returns all of the API models on which the data source
 	// should expose. practitionerParams are the practitioner parameters
@@ -226,11 +223,11 @@ func NewListDataSourceWithPractitionerParameters[T TFComputedModel, T2 TFNonComp
 	if err := config.Validate(); err != nil {
 		panic(err)
 	}
-	if config.UserParamsRecordSchema == nil {
-		panic("UserParamsRecordSchema cannot be nil")
+	if config.PractitionerParamsRecordSchema == nil {
+		panic("PractitionerParamsRecordSchema cannot be nil")
 	}
-	if _, ok := config.UserParamsRecordSchema[config.ResultAttributeName]; ok {
-		panic(fmt.Sprintf("UserParamsRecordSchema cannot have attribute with name %v", config.ResultAttributeName))
+	if _, ok := config.PractitionerParamsRecordSchema[config.ResultAttributeName]; ok {
+		panic(fmt.Sprintf("PractitionerParamsRecordSchema cannot have attribute with name %v", config.ResultAttributeName))
 	}
 
 	t := struct{ protoDataSource }{}
@@ -247,8 +244,8 @@ func NewListDataSourceWithPractitionerParameters[T TFComputedModel, T2 TFNonComp
 				},
 			},
 		}
-		// Add extra user parameters
-		maps.Copy(attributes, config.UserParamsRecordSchema)
+		// Add extra practitioner parameters
+		maps.Copy(attributes, config.PractitionerParamsRecordSchema)
 
 		resp.Schema = schema.Schema{
 			Description:         config.Description,

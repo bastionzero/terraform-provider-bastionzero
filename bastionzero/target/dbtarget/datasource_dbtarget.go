@@ -20,18 +20,17 @@ func NewDbTargetDataSource() datasource.DataSource {
 						IsIDRequired:   true,
 						IsNameComputed: true,
 					}),
-				ResultAttributeName: "db_target",
+				MetadataTypeName:    "db_target",
 				PrettyAttributeName: "Db target",
-				FlattenAPIModel: func(ctx context.Context, apiObject *targets.DatabaseTarget, _ dbTargetModel) (state *dbTargetModel, diags diag.Diagnostics) {
-					state = new(dbTargetModel)
+				FlattenAPIModel: func(ctx context.Context, apiObject *targets.DatabaseTarget, state *dbTargetModel) (diags diag.Diagnostics) {
 					setDbTargetAttributes(ctx, state, apiObject)
 					return
 				},
+				GetAPIModel: func(ctx context.Context, tfModel dbTargetModel, client *bastionzero.Client) (*targets.DatabaseTarget, error) {
+					target, _, err := client.Targets.GetDatabaseTarget(ctx, tfModel.ID.ValueString())
+					return target, err
+				},
 				Description: "Get information about a specific Db target in your BastionZero organization.",
-			},
-			GetAPIModel: func(ctx context.Context, tfModel dbTargetModel, client *bastionzero.Client) (*targets.DatabaseTarget, error) {
-				target, _, err := client.Targets.GetDatabaseTarget(ctx, tfModel.ID.ValueString())
-				return target, err
 			},
 		},
 	)

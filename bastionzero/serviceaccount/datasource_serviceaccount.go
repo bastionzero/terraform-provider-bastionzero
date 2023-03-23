@@ -15,18 +15,17 @@ func NewServiceAccountDataSource() datasource.DataSource {
 		&bzdatasource.SingleDataSourceConfig[serviceAccountModel, serviceaccounts.ServiceAccount]{
 			BaseSingleDataSourceConfig: &bzdatasource.BaseSingleDataSourceConfig[serviceAccountModel, serviceaccounts.ServiceAccount]{
 				RecordSchema:        makeServiceAccountDataSourceSchema(true),
-				ResultAttributeName: "service_account",
+				MetadataTypeName:    "service_account",
 				PrettyAttributeName: "service account",
-				FlattenAPIModel: func(ctx context.Context, apiObject *serviceaccounts.ServiceAccount, _ serviceAccountModel) (state *serviceAccountModel, diags diag.Diagnostics) {
-					state = new(serviceAccountModel)
+				FlattenAPIModel: func(ctx context.Context, apiObject *serviceaccounts.ServiceAccount, state *serviceAccountModel) (diags diag.Diagnostics) {
 					setServiceAccountAttributes(ctx, state, apiObject)
 					return
 				},
+				GetAPIModel: func(ctx context.Context, tfModel serviceAccountModel, client *bastionzero.Client) (*serviceaccounts.ServiceAccount, error) {
+					serviceAccount, _, err := client.ServiceAccounts.GetServiceAccount(ctx, tfModel.ID.ValueString())
+					return serviceAccount, err
+				},
 				Description: "Get information on a service account in your BastionZero organization.",
-			},
-			GetAPIModel: func(ctx context.Context, tfModel serviceAccountModel, client *bastionzero.Client) (*serviceaccounts.ServiceAccount, error) {
-				serviceAccount, _, err := client.ServiceAccounts.GetServiceAccount(ctx, tfModel.ID.ValueString())
-				return serviceAccount, err
 			},
 		},
 	)

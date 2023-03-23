@@ -15,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -44,7 +43,7 @@ func NewBzeroTargetDataSource() datasource.DataSource {
 	baseDesc := "Get information about a specific Bzero target in your BastionZero organization."
 	return &bzeroTargetDataSource{
 		DataSourceWithConfigure: bzdatasource.NewSingleDataSourceWithTimeout(
-			&bzdatasource.SingleDataSourceConfigWithTimeout[bzeroTargetModel, targets.BzeroTarget]{
+			&bzdatasource.SingleDataSourceWithTimeoutConfig[bzeroTargetModel, targets.BzeroTarget]{
 				BaseSingleDataSourceConfig: &bzdatasource.BaseSingleDataSourceConfig[bzeroTargetModel, targets.BzeroTarget]{
 					RecordSchema: makeBzeroTargetDataSourceSchema(
 						&target.BaseTargetDataSourceAttributeOptions{
@@ -53,22 +52,16 @@ func NewBzeroTargetDataSource() datasource.DataSource {
 							IsIDOptional:   true,
 							IsNameOptional: true,
 						}),
-					ResultAttributeName: "bzero_target",
+					MetadataTypeName:    "bzero_target",
 					PrettyAttributeName: "Bzero target",
-					FlattenAPIModel: func(ctx context.Context, apiObject *targets.BzeroTarget, _ bzeroTargetModel) (state *bzeroTargetModel, diags diag.Diagnostics) {
-						state = new(bzeroTargetModel)
+					FlattenAPIModel: func(ctx context.Context, apiObject *targets.BzeroTarget, state *bzeroTargetModel) (diags diag.Diagnostics) {
 						setBzeroTargetAttributes(ctx, state, apiObject)
 						return
 					},
-					Description:         baseDesc,
-					MarkdownDescription: target.TargetDataSourceWithTimeoutMarkdownDescription(baseDesc, targettype.Bzero),
-				},
-				DefaultTimeout: 15 * time.Minute,
-				GetAPIModelWithTimeout: func(ctx context.Context, tfModel bzeroTargetModel, client *bastionzero.Client, timeout time.Duration) (*targets.BzeroTarget, error) {
-					// An operation that may fail.
-					operation := func() (*targets.BzeroTarget, error) {
+					GetAPIModel: func(ctx context.Context, tfModel bzeroTargetModel, client *bastionzero.Client) (*targets.BzeroTarget, error) {
 						if !tfModel.ID.IsNull() {
-							// ID provided. Use GET API for single target with ID.
+							// ID provided. Use GET API for single target with
+							// ID.
 							target, _, err := client.Targets.GetBzeroTarget(ctx, tfModel.ID.ValueString())
 							return target, err
 						} else if !tfModel.Name.IsNull() {
@@ -85,23 +78,11 @@ func NewBzeroTargetDataSource() datasource.DataSource {
 						// This should never happen due to
 						// ConfigValidator.ExactlyOneOf
 						panic("Expected one of \"id\" or \"name\" to be set. Please report this issue to the provider developers.")
-					}
-
-					// Attempt to find target with backoff
-					backOffConfig := backoff.NewExponentialBackOff()
-					backOffConfig.MaxElapsedTime = timeout
-					target, err := backoff.RetryNotifyWithData(operation, backoff.WithContext(backOffConfig, ctx), func(err error, dur time.Duration) {
-						tflog.Info(ctx, fmt.Sprintf("%v. Retrying in %s...", err, dur))
-					})
-
-					// We timed out, or a backoff.PermanentError was returned
-					if err != nil {
-						return nil, err
-					}
-
-					// Operation is successful.
-					return target, nil
+					},
+					Description:         baseDesc,
+					MarkdownDescription: target.TargetDataSourceWithTimeoutMarkdownDescription(baseDesc, targettype.Bzero),
 				},
+				DefaultTimeout: 15 * time.Minute,
 			},
 		),
 	}

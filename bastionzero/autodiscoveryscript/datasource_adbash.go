@@ -54,29 +54,24 @@ func NewAdBashDataSource() datasource.DataSource {
 		&bzdatasource.SingleDataSourceConfig[adBashModel, autodiscoveryscripts.BzeroBashAutodiscoveryScript]{
 			BaseSingleDataSourceConfig: &bzdatasource.BaseSingleDataSourceConfig[adBashModel, autodiscoveryscripts.BzeroBashAutodiscoveryScript]{
 				RecordSchema:        makeAdBashModelDataSourceSchema(),
-				ResultAttributeName: "ad_bash",
+				MetadataTypeName:    "ad_bash",
 				PrettyAttributeName: "autodiscovery script (bash)",
-				FlattenAPIModel: func(ctx context.Context, apiObject *autodiscoveryscripts.BzeroBashAutodiscoveryScript, tfModel adBashModel) (state *adBashModel, diags diag.Diagnostics) {
-					state = new(adBashModel)
+				FlattenAPIModel: func(ctx context.Context, apiObject *autodiscoveryscripts.BzeroBashAutodiscoveryScript, state *adBashModel) (diags diag.Diagnostics) {
 					state.Script = types.StringValue(apiObject.Script)
-
-					// Use what was previously read from TF configuration
-					state.EnvironmentID = tfModel.EnvironmentID
-					state.TargetNameOption = tfModel.TargetNameOption
 					return
+				},
+				GetAPIModel: func(ctx context.Context, tfModel adBashModel, client *bastionzero.Client) (*autodiscoveryscripts.BzeroBashAutodiscoveryScript, error) {
+					script, _, err := client.AutodiscoveryScripts.GetBzeroBashAutodiscoveryScript(ctx, &autodiscoveryscripts.BzeroBashAutodiscoveryOptions{
+						TargetNameOption: targetnameoption.TargetNameOption(tfModel.TargetNameOption.ValueString()),
+						EnvironmentID:    tfModel.EnvironmentID.ValueString(),
+					})
+					return script, err
 				},
 				Description: baseDesc,
 				MarkdownDescription: baseDesc +
 					"\n\nThe data source's `script` does not contain the registration secret that is required to register your targets with BastionZero. " +
 					"You must replace `<REGISTRATION-SECRET-GOES-HERE>` with " +
 					"a valid registration secret before attempting to execute the script.",
-			},
-			GetAPIModel: func(ctx context.Context, tfModel adBashModel, client *bastionzero.Client) (*autodiscoveryscripts.BzeroBashAutodiscoveryScript, error) {
-				script, _, err := client.AutodiscoveryScripts.GetBzeroBashAutodiscoveryScript(ctx, &autodiscoveryscripts.BzeroBashAutodiscoveryOptions{
-					TargetNameOption: targetnameoption.TargetNameOption(tfModel.TargetNameOption.ValueString()),
-					EnvironmentID:    tfModel.EnvironmentID.ValueString(),
-				})
-				return script, err
 			},
 		},
 	)

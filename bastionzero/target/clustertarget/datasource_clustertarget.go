@@ -15,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -44,7 +43,7 @@ func NewClusterTargetDataSource() datasource.DataSource {
 	baseDesc := "Get information about a specific Cluster target in your BastionZero organization."
 	return &clusterTargetDataSource{
 		DataSourceWithConfigure: bzdatasource.NewSingleDataSourceWithTimeout(
-			&bzdatasource.SingleDataSourceConfigWithTimeout[clusterTargetModel, targets.ClusterTarget]{
+			&bzdatasource.SingleDataSourceWithTimeoutConfig[clusterTargetModel, targets.ClusterTarget]{
 				BaseSingleDataSourceConfig: &bzdatasource.BaseSingleDataSourceConfig[clusterTargetModel, targets.ClusterTarget]{
 					RecordSchema: makeClusterTargetDataSourceSchema(
 						&target.BaseTargetDataSourceAttributeOptions{
@@ -53,20 +52,13 @@ func NewClusterTargetDataSource() datasource.DataSource {
 							IsIDOptional:   true,
 							IsNameOptional: true,
 						}),
-					ResultAttributeName: "cluster_target",
+					MetadataTypeName:    "cluster_target",
 					PrettyAttributeName: "Cluster target",
-					FlattenAPIModel: func(ctx context.Context, apiObject *targets.ClusterTarget, _ clusterTargetModel) (state *clusterTargetModel, diags diag.Diagnostics) {
-						state = new(clusterTargetModel)
+					FlattenAPIModel: func(ctx context.Context, apiObject *targets.ClusterTarget, state *clusterTargetModel) (diags diag.Diagnostics) {
 						setClusterTargetAttributes(ctx, state, apiObject)
 						return
 					},
-					Description:         baseDesc,
-					MarkdownDescription: target.TargetDataSourceWithTimeoutMarkdownDescription(baseDesc, targettype.Cluster),
-				},
-				DefaultTimeout: 15 * time.Minute,
-				GetAPIModelWithTimeout: func(ctx context.Context, tfModel clusterTargetModel, client *bastionzero.Client, timeout time.Duration) (*targets.ClusterTarget, error) {
-					// An operation that may fail.
-					operation := func() (*targets.ClusterTarget, error) {
+					GetAPIModel: func(ctx context.Context, tfModel clusterTargetModel, client *bastionzero.Client) (*targets.ClusterTarget, error) {
 						if !tfModel.ID.IsNull() {
 							// ID provided. Use GET API for single target with ID.
 							target, _, err := client.Targets.GetClusterTarget(ctx, tfModel.ID.ValueString())
@@ -85,23 +77,11 @@ func NewClusterTargetDataSource() datasource.DataSource {
 						// This should never happen due to
 						// ConfigValidator.ExactlyOneOf
 						panic("Expected one of \"id\" or \"name\" to be set. Please report this issue to the provider developers.")
-					}
-
-					// Attempt to find target with backoff
-					backOffConfig := backoff.NewExponentialBackOff()
-					backOffConfig.MaxElapsedTime = timeout
-					target, err := backoff.RetryNotifyWithData(operation, backoff.WithContext(backOffConfig, ctx), func(err error, dur time.Duration) {
-						tflog.Info(ctx, fmt.Sprintf("%v. Retrying in %s...", err, dur))
-					})
-
-					// We timed out, or a backoff.PermanentError was returned
-					if err != nil {
-						return nil, err
-					}
-
-					// Operation is successful.
-					return target, nil
+					},
+					Description:         baseDesc,
+					MarkdownDescription: target.TargetDataSourceWithTimeoutMarkdownDescription(baseDesc, targettype.Cluster),
 				},
+				DefaultTimeout: 15 * time.Minute,
 			},
 		),
 	}

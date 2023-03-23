@@ -27,7 +27,7 @@ func NewTargetConnectPoliciesDataSource() datasource.DataSource {
 			},
 			Description: "Get a list of all target connect policies in your BastionZero organization.",
 		},
-		UserParamsRecordSchema: policy.ListPolicyParametersSchema(),
+		PractitionerParamsRecordSchema: policy.ListPolicyParametersSchema(),
 		ListAPIModels: func(ctx context.Context, listParameters policy.ListPolicyParametersModel, client *bastionzero.Client) ([]policies.TargetConnectPolicy, error) {
 			subjectsFilter := strings.Join(internal.ExpandFrameworkStringSet(ctx, listParameters.Subjects), ",")
 			groupsFilter := strings.Join(internal.ExpandFrameworkStringSet(ctx, listParameters.Groups), ",")

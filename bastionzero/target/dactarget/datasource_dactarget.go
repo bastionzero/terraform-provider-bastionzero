@@ -18,18 +18,17 @@ func NewDacTargetDataSource() datasource.DataSource {
 					&dacTargetDataSourceAttributeOptions{
 						IsIDRequired: true,
 					}),
-				ResultAttributeName: "dac_target",
+				MetadataTypeName:    "dac_target",
 				PrettyAttributeName: "Dynamic access configuration target",
-				FlattenAPIModel: func(ctx context.Context, apiObject *targets.DynamicAccessConfiguration, _ dacTargetModel) (state *dacTargetModel, diags diag.Diagnostics) {
-					state = new(dacTargetModel)
+				FlattenAPIModel: func(ctx context.Context, apiObject *targets.DynamicAccessConfiguration, state *dacTargetModel) (diags diag.Diagnostics) {
 					setDacTargetAttributes(ctx, state, apiObject)
 					return
 				},
+				GetAPIModel: func(ctx context.Context, tfModel dacTargetModel, client *bastionzero.Client) (*targets.DynamicAccessConfiguration, error) {
+					target, _, err := client.Targets.GetDynamicAccessConfiguration(ctx, tfModel.ID.ValueString())
+					return target, err
+				},
 				Description: "Get information about a specific dynamic access configuration (DAC) target in your BastionZero organization.",
-			},
-			GetAPIModel: func(ctx context.Context, tfModel dacTargetModel, client *bastionzero.Client) (*targets.DynamicAccessConfiguration, error) {
-				target, _, err := client.Targets.GetDynamicAccessConfiguration(ctx, tfModel.ID.ValueString())
-				return target, err
 			},
 		},
 	)

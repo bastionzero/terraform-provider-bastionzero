@@ -16,18 +16,17 @@ func NewEnvironmentDataSource() datasource.DataSource {
 		&bzdatasource.SingleDataSourceConfig[environmentModel, environments.Environment]{
 			BaseSingleDataSourceConfig: &bzdatasource.BaseSingleDataSourceConfig[environmentModel, environments.Environment]{
 				RecordSchema:        internal.ResourceSchemaToDataSourceSchema(makeEnvironmentResourceSchema(), bastionzero.PtrTo("id")),
-				ResultAttributeName: "environment",
+				MetadataTypeName:    "environment",
 				PrettyAttributeName: "environment",
-				FlattenAPIModel: func(ctx context.Context, apiObject *environments.Environment, _ environmentModel) (state *environmentModel, diags diag.Diagnostics) {
-					state = new(environmentModel)
+				FlattenAPIModel: func(ctx context.Context, apiObject *environments.Environment, state *environmentModel) (diags diag.Diagnostics) {
 					setEnvironmentAttributes(ctx, state, apiObject)
 					return
 				},
+				GetAPIModel: func(ctx context.Context, tfModel environmentModel, client *bastionzero.Client) (*environments.Environment, error) {
+					env, _, err := client.Environments.GetEnvironment(ctx, tfModel.ID.ValueString())
+					return env, err
+				},
 				Description: "Get information on a BastionZero environment.",
-			},
-			GetAPIModel: func(ctx context.Context, tfModel environmentModel, client *bastionzero.Client) (*environments.Environment, error) {
-				env, _, err := client.Environments.GetEnvironment(ctx, tfModel.ID.ValueString())
-				return env, err
 			},
 		},
 	)

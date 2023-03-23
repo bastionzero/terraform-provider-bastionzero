@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -19,31 +20,31 @@ import (
 	dynamicstruct "github.com/ompluscator/dynamic-struct"
 )
 
-// TODO: Refactor FlattenAPIModel and GetAPIModel functions to take in req +
-// resp similar to the Terraform plugin framework, so that we can add new fields
-// without having to refactor every instance of these structs
+// TFSingleDataSourceModel is a struct that models a collection of TF schema
+// attributes that can be a mix of Computed, Required, and Optional attributes.
+type TFSingleDataSourceModel = interface{}
 
-// TODO: FlattenAPIModel: Potentially consider taking pointer to state that was
-// read previously instead of asking for new value to be returned and passing
-// copy of current value read
-
-type BaseSingleDataSourceConfig[TFModel any, APIModel any] struct {
+type BaseSingleDataSourceConfig[T TFSingleDataSourceModel, T2 APIModel] struct {
 	// RecordSchema is the TF schema that models a single instance of the API
-	// object. Required. Schema must contain a required attribute with name
-	// "id".
+	// object. There should be a key for each field defined in
+	// TFSingleDataSourceModel. Required.
 	RecordSchema map[string]schema.Attribute
 
-	// The name of the attribute in the data source definition name. Cannot be
-	// the empty string.
-	ResultAttributeName string
+	// MetadataTypeName is the suffix to use for the name of the data source.
+	// Cannot be the empty string.
+	MetadataTypeName string
 
 	// PrettyAttributeName is the name of the attribute used for logging and
 	// documentation purposes. Cannot be the empty string.
 	PrettyAttributeName string
 
-	// Given a model returned from the GetAPIModel function, flatten the API
-	// model to a TF model.
-	FlattenAPIModel func(ctx context.Context, apiObject *APIModel, tfModel TFModel) (*TFModel, diag.Diagnostics)
+	// FlattenAPIModel takes a model returned from the GetAPIModel function and
+	// uses it to update the TF model.
+	FlattenAPIModel func(ctx context.Context, apiObject *T2, tfModel *T) diag.Diagnostics
+
+	// GetAPIModel returns a single API object on which the data source should
+	// expose.
+	GetAPIModel func(ctx context.Context, tfModel T, client *bastionzero.Client) (*T2, error)
 
 	// Description is passed as the data source schema's Description field
 	// during construction.
@@ -58,33 +59,44 @@ type BaseSingleDataSourceConfig[TFModel any, APIModel any] struct {
 	DeprecationMessage string
 }
 
-// SingleDataSourceConfig is the configuration for a single item data source. It
-// represents the schema and operations needed to create the single data source.
-type SingleDataSourceConfig[TFModel any, APIModel any] struct {
-	*BaseSingleDataSourceConfig[TFModel, APIModel]
+// Validate checks for errors in the base single data source config
+func (c *BaseSingleDataSourceConfig[T, T2]) Validate() error {
+	if c.RecordSchema == nil {
+		return fmt.Errorf("RecordSchema cannot be nil")
+	}
+	if c.MetadataTypeName == "" {
+		return fmt.Errorf("MetadataTypeName cannot be empty")
+	}
+	if c.PrettyAttributeName == "" {
+		return fmt.Errorf("PrettyAttributeName cannot be empty")
+	}
 
-	// GetAPIModel returns a single API object on which the data source should
-	// expose.
-	GetAPIModel func(ctx context.Context, tfModel TFModel, client *bastionzero.Client) (*APIModel, error)
+	return nil
 }
 
-// Returns a new single data source given the specified configuration. The
-// function panics if the config is invalid. A single data source abstracts
-// calling a BastionZero API endpoint that returns a single object.
-func NewSingleDataSource[TFModel any, APIModel any](config *SingleDataSourceConfig[TFModel, APIModel]) datasource.DataSourceWithConfigure {
-	if config.RecordSchema == nil {
-		panic("RecordSchema cannot be nil")
-	}
-	if config.ResultAttributeName == "" {
-		panic("ResultAttributeName cannot be empty")
-	}
-	if config.PrettyAttributeName == "" {
-		panic("PrettyAttributeName cannot be empty")
+// SingleDataSource is a data source that calls a BastionZero API endpoint which
+// returns a single object. It abstracts common, boilerplate code that typically
+// accompanies a data source that exposes a single item. It is assumed the TF
+// model contains some identification attribute(s) and/or parameters that can be
+// used when querying the BastionZero API.
+type SingleDataSource datasource.DataSourceWithConfigure
+
+// SingleDataSourceConfig is the configuration for a single data source. It
+// represents the schema and operations needed to create the data source.
+type SingleDataSourceConfig[T TFSingleDataSourceModel, T2 APIModel] struct {
+	*BaseSingleDataSourceConfig[T, T2]
+}
+
+// NewSingleDataSource creates a SingleDataSource. The function panics if the
+// config is invalid.
+func NewSingleDataSource[T TFSingleDataSourceModel, T2 APIModel](config *SingleDataSourceConfig[T, T2]) SingleDataSource {
+	if err := config.Validate(); err != nil {
+		panic(err)
 	}
 
 	t := struct{ protoDataSource }{}
 	t.metadataFunc = func(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-		resp.TypeName = req.ProviderTypeName + fmt.Sprintf("_%s", config.ResultAttributeName)
+		resp.TypeName = req.ProviderTypeName + fmt.Sprintf("_%s", config.MetadataTypeName)
 	}
 	t.schemaFunc = func(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 		resp.Schema = schema.Schema{
@@ -112,7 +124,7 @@ func NewSingleDataSource[TFModel any, APIModel any](config *SingleDataSourceConf
 		t.client = client
 	}
 	t.readFunc = func(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-		var T TFModel
+		var T T
 		// Read Terraform configuration data into the model
 		resp.Diagnostics.Append(req.Config.Get(ctx, &T)...)
 		if resp.Diagnostics.HasError() {
@@ -132,64 +144,51 @@ func NewSingleDataSource[TFModel any, APIModel any](config *SingleDataSourceConf
 		tflog.Debug(ctx, fmt.Sprintf("Queried for %s", config.PrettyAttributeName))
 
 		// Convert to TFModel
-		tfModel, diags := config.FlattenAPIModel(ctx, apiObject, T)
+		diags := config.FlattenAPIModel(ctx, apiObject, &T)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
 			return
 		}
 
 		// Save data into Terraform state
-		resp.Diagnostics.Append(resp.State.Set(ctx, tfModel)...)
+		resp.Diagnostics.Append(resp.State.Set(ctx, &T)...)
 	}
 
 	return &t
 }
 
-// SingleDataSourceConfigWithTimeout is the configuration for a single item data
-// source that waits for a timeout duration before failing. It represents the
-// schema and operations needed to create the single data source.
-type SingleDataSourceConfigWithTimeout[TFModel any, APIModel any] struct {
-	*BaseSingleDataSourceConfig[TFModel, APIModel]
+// SingleDataSourceWithTimeout is a data source with operational semantics
+// similar to bzdatasource.SingleDataSource. It additionally abstracts calling a
+// BastionZero API endpoint many times until it returns a valid response to
+// expose through the data source.
+//
+// GetAPIModel() is called with exponential backoff until a result is returned,
+// or a timeout occurs. The timeout can be configured by the practitioner. If
+// the error is fatal and should short circuit, have GetAPIModel() return an
+// error of type backoff.PermanentError.
+type SingleDataSourceWithTimeout datasource.DataSourceWithConfigure
 
-	// GetAPIModelWithTimeout returns a single API object on which the data
-	// source should expose. The function should retry its application logic up
-	// until timeout.
-	GetAPIModelWithTimeout func(ctx context.Context, tfModel TFModel, client *bastionzero.Client, timeout time.Duration) (*APIModel, error)
+// SingleDataSourceWithTimeoutConfig is the configuration for a single data
+// source with timeout. It represents the schema and operations needed to create
+// the data source.
+type SingleDataSourceWithTimeoutConfig[T TFSingleDataSourceModel, T2 APIModel] struct {
+	*BaseSingleDataSourceConfig[T, T2]
 
 	// DefaultTimeout to use if the practitioner does not specify a timeout in
 	// the "timeouts" field.
 	DefaultTimeout time.Duration
 }
 
-type getAPIResult[APIModel any] struct {
-	apiObject *APIModel
-	err       error
-}
-
-// Returns a new single data source given the specified configuration. The
-// function panics if the config is invalid. A single data source abstracts
-// calling a BastionZero API endpoint that returns a single object.
-//
-// Reflection is used to add a "timeouts" field to the TF schema which allows
-// the practitioner to configure how long to retry calling the BastionZero API
-// for a resource.
-//
-// config.GetAPIModelWithTimeout() should retry its application logic.
-// Cancellation occurs if a timeout or interrupt is received.
-func NewSingleDataSourceWithTimeout[TFModel any, APIModel any](config *SingleDataSourceConfigWithTimeout[TFModel, APIModel]) datasource.DataSourceWithConfigure {
-	if config.RecordSchema == nil {
-		panic("RecordSchema cannot be nil")
-	}
-	if config.ResultAttributeName == "" {
-		panic("ResultAttributeName cannot be empty")
-	}
-	if config.PrettyAttributeName == "" {
-		panic("PrettyAttributeName cannot be empty")
+// NewSingleDataSourceWithTimeout creates a SingleDataSourceWithTimeout. The
+// function panics if the config is invalid.
+func NewSingleDataSourceWithTimeout[T TFSingleDataSourceModel, T2 APIModel](config *SingleDataSourceWithTimeoutConfig[T, T2]) SingleDataSourceWithTimeout {
+	if err := config.Validate(); err != nil {
+		panic(err)
 	}
 
 	t := struct{ protoDataSource }{}
 	t.metadataFunc = func(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-		resp.TypeName = req.ProviderTypeName + fmt.Sprintf("_%s", config.ResultAttributeName)
+		resp.TypeName = req.ProviderTypeName + fmt.Sprintf("_%s", config.MetadataTypeName)
 	}
 	t.schemaFunc = func(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 		attributes := config.RecordSchema
@@ -221,11 +220,11 @@ func NewSingleDataSourceWithTimeout[TFModel any, APIModel any](config *SingleDat
 		t.client = client
 	}
 	t.readFunc = func(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-		var T TFModel
+		var model T
 		var err error
 
 		// Using reflection, add "Timeouts" field
-		modelWithTimeouts := dynamicstruct.ExtendStruct(T).
+		modelWithTimeouts := dynamicstruct.ExtendStruct(model).
 			AddField("Timeouts", timeouts.Value{}, `tfsdk:"timeouts"`).
 			Build().
 			New()
@@ -237,8 +236,9 @@ func NewSingleDataSourceWithTimeout[TFModel any, APIModel any](config *SingleDat
 		}
 
 		// Using reflection, copy all fields from modelWithTimeouts, excluding
-		// additional "Timeouts" field which does not exist on T, into T
-		err = copier.Copy(&T, modelWithTimeouts)
+		// additional "Timeouts" field which does not exist on the model, into
+		// the model
+		err = copier.Copy(&model, modelWithTimeouts)
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Unexpected error during conversion to model without timeout",
@@ -255,42 +255,46 @@ func NewSingleDataSourceWithTimeout[TFModel any, APIModel any](config *SingleDat
 			return
 		}
 
-		// Create child context that cancels after readTimeout elapses
-		ctx, cancel := context.WithTimeout(ctx, readTimeout)
+		// Create linked child context that we can cancel under our own
+		// conditions in addition to the Terraform framework's context.
+		childCtx, cancel := context.WithCancel(ctx)
 		defer cancel()
 
-		// Query BastionZero for API object on separate goroutine
-		resultCh := make(chan getAPIResult[APIModel], 1)
+		// Spawn goroutine that listens for interrupts from user
 		go func() {
-			defer close(resultCh)
-			tflog.Debug(ctx, fmt.Sprintf("Querying for %s", config.PrettyAttributeName))
-			apiObject, err := config.GetAPIModelWithTimeout(ctx, T, t.client, readTimeout)
-			resultCh <- getAPIResult[APIModel]{apiObject: apiObject, err: err}
+			sigChan := make(chan os.Signal)
+			signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+			select {
+			case <-sigChan:
+				cancel()
+				return
+			case <-childCtx.Done():
+				// Must return to not leak this goroutine (in case no interrupt
+				// received)
+				return
+			}
 		}()
 
-		// Wait for result, timeout, or interrupt
-		sigChan := make(chan os.Signal)
-		signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
-		var apiObject *APIModel
-		select {
-		case <-ctx.Done():
-			resp.Diagnostics.AddError(
-				fmt.Sprintf("Error reading %s", config.PrettyAttributeName),
-				fmt.Sprintf("Took longer than %s to read", readTimeout),
-			)
-			return
-		case sig := <-sigChan:
-			resp.Diagnostics.AddError(
-				fmt.Sprintf("Error reading %s", config.PrettyAttributeName),
-				fmt.Sprintf("Interrupted while reading %s. Caught signal %v", config.PrettyAttributeName, sig),
-			)
-			return
-		case result := <-resultCh:
-			apiObject = result.apiObject
-			err = result.err
-			break
-		}
+		// Perform API call with backoff
+		backOffConfig := backoff.NewExponentialBackOff()
+		// Stop trying after timeout is hit
+		backOffConfig.MaxElapsedTime = readTimeout
 
+		apiObject, err := backoff.RetryNotifyWithData(
+			func() (*T2, error) {
+				apiObject, err := config.GetAPIModel(childCtx, model, t.client)
+				return apiObject, err
+			},
+			// Init backoff config with child context, so that we can cancel it
+			// due to interrupt
+			backoff.WithContext(backOffConfig, childCtx),
+			// Log message
+			func(err error, dur time.Duration) {
+				tflog.Info(ctx, fmt.Sprintf("%v. Retrying in %s...", err, dur))
+			},
+		)
+
+		// Error from API server, timeout, or context cancelled
 		if err != nil {
 			resp.Diagnostics.AddError(
 				fmt.Sprintf("Error reading %s", config.PrettyAttributeName),
@@ -301,7 +305,7 @@ func NewSingleDataSourceWithTimeout[TFModel any, APIModel any](config *SingleDat
 		tflog.Debug(ctx, fmt.Sprintf("Queried for %s", config.PrettyAttributeName))
 
 		// Convert to TFModel
-		tfModel, diags := config.FlattenAPIModel(ctx, apiObject, T)
+		diags = config.FlattenAPIModel(ctx, apiObject, &model)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
 			return
@@ -309,7 +313,7 @@ func NewSingleDataSourceWithTimeout[TFModel any, APIModel any](config *SingleDat
 
 		// Using reflection, copy all fields from TFModel back into the expected
 		// struct stored in the TF state
-		err = copier.Copy(modelWithTimeouts, tfModel)
+		err = copier.Copy(modelWithTimeouts, &model)
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Unexpected error during conversion to model with timeout",
