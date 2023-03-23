@@ -32,7 +32,7 @@ func (m *stringDefaultValueProvider) MarkdownDescription(ctx context.Context) st
 	return fmt.Sprintf("If value is not configured, defaults to `%s`", m.DefaultValue)
 }
 
-// PlanModifyInt64 runs the logic of the plan modifier. Access to the
+// PlanModifyString runs the logic of the plan modifier. Access to the
 // configuration, plan, and state is available in `req`, while `resp` contains
 // fields for updating the planned value, triggering resource replacement, and
 // returning diagnostics.
