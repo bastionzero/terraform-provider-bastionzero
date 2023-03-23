@@ -21,6 +21,126 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
+// PolicyModelInterface lets you work with common attributes from any kind of
+// policy model
+type PolicyModelInterface interface {
+	// SetID sets the policy model's ID attribute.
+	SetID(value types.String)
+	// SetName sets the policy model's name attribute.
+	SetName(value types.String)
+	// SetType sets the policy model's type attribute.
+	SetType(value types.String)
+	// SetDescription sets the policy model's description attribute.
+	SetDescription(value types.String)
+	// SetSubjects sets the policy model's subjects attribute.
+	SetSubjects(value types.Set)
+	// SetGroups sets the policy model's groups attribute.
+	SetGroups(value types.Set)
+
+	// GetSubjects gets the policy model's subjects attribute.
+	GetSubjects() types.Set
+	// GetGroups gets the policy model's groups attribute.
+	GetGroups() types.Set
+}
+
+// SetBasePolicyAttributes populates base policy attributes in the TF schema
+// from a base policy
+func SetBasePolicyAttributes(ctx context.Context, schema PolicyModelInterface, basePolicy policies.PolicyInterface, modelIsDataSource bool) {
+	schema.SetID(types.StringValue(basePolicy.GetID()))
+	schema.SetName(types.StringValue(basePolicy.GetName()))
+	schema.SetType(types.StringValue(string(basePolicy.GetPolicyType())))
+	schema.SetDescription(types.StringValue(basePolicy.GetDescription()))
+
+	// Preserve null in schema if refreshed list is empty list.
+	//
+	// If we don't include this logic, then we will get "Provider produced
+	// inconsistent result after apply" error when user sets null value in
+	// config because Flatten() returns an empty set if slice is empty which is
+	// not consistent.
+	//
+	// Additionally, we always set the value in the schema if the model is a
+	// data source because it's easier to work with empty valued, computed
+	// collection attributes in data sources than null ones.
+	if !schema.GetSubjects().IsNull() || len(basePolicy.GetSubjects()) != 0 || modelIsDataSource {
+		schema.SetSubjects(FlattenPolicySubjects(ctx, basePolicy.GetSubjects()))
+	}
+	if !schema.GetGroups().IsNull() || len(basePolicy.GetGroups()) != 0 || modelIsDataSource {
+		schema.SetGroups(FlattenPolicyGroups(ctx, basePolicy.GetGroups()))
+	}
+}
+
+func BasePolicyResourceAttributes(policyType policytype.PolicyType) map[string]schema.Attribute {
+	return map[string]schema.Attribute{
+		"id": schema.StringAttribute{
+			Computed: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+			Description: "The policy's unique ID.",
+		},
+		"name": schema.StringAttribute{
+			Required:    true,
+			Description: "The policy's name.",
+			Validators: []validator.String{
+				stringvalidator.LengthAtLeast(1),
+			},
+		},
+		"type": schema.StringAttribute{
+			Description: fmt.Sprintf("The policy's type (constant value \"%s\").", policyType),
+			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+				bzplanmodifier.StringDefaultValue(types.StringValue(string(policyType))),
+			},
+		},
+		"description": schema.StringAttribute{
+			Optional:    true,
+			Computed:    true,
+			Description: "The policy's description.",
+			PlanModifiers: []planmodifier.String{
+				// Don't allow null description to make it easier when parsing
+				// results back into TF
+				bzplanmodifier.StringDefaultValue(types.StringValue("")),
+			},
+		},
+		"subjects": schema.SetNestedAttribute{
+			Optional:    true,
+			Description: "Set of subjects that this policy applies to.",
+			NestedObject: schema.NestedAttributeObject{
+				Attributes: map[string]schema.Attribute{
+					"id": schema.StringAttribute{
+						Required:    true,
+						Description: "The subject's unique ID.",
+					},
+					"type": schema.StringAttribute{
+						Required:    true,
+						Description: fmt.Sprintf("The subject's type %s.", internal.PrettyOneOf(subjecttype.SubjectTypeValues())),
+						Validators: []validator.String{
+							stringvalidator.OneOf(bastionzero.ToStringSlice(subjecttype.SubjectTypeValues())...),
+						},
+					},
+				},
+			},
+		},
+		"groups": schema.SetNestedAttribute{
+			Optional:    true,
+			Description: "Set of IdP groups that this policy applies to.",
+			NestedObject: schema.NestedAttributeObject{
+				Attributes: map[string]schema.Attribute{
+					"id": schema.StringAttribute{
+						Required:    true,
+						Description: "The group's unique ID.",
+					},
+					"name": schema.StringAttribute{
+						Required:    true,
+						Description: "The group's name.",
+					},
+				},
+			},
+		},
+	}
+}
+
 // PolicySubjectModel maps policy subject data.
 type PolicySubjectModel struct {
 	ID   types.String `tfsdk:"id"`
@@ -30,28 +150,6 @@ type PolicySubjectModel struct {
 func GetPolicySubjectModelType(ctx context.Context) types.ObjectType {
 	attributeTypes, _ := internal.AttributeTypes[PolicySubjectModel](ctx)
 	return types.ObjectType{AttrTypes: attributeTypes}
-}
-
-func PolicySubjectsAttribute(ctx context.Context) schema.Attribute {
-	return schema.SetNestedAttribute{
-		Optional:    true,
-		Description: "Set of subjects that this policy applies to.",
-		NestedObject: schema.NestedAttributeObject{
-			Attributes: map[string]schema.Attribute{
-				"id": schema.StringAttribute{
-					Required:    true,
-					Description: "The subject's unique ID.",
-				},
-				"type": schema.StringAttribute{
-					Required:    true,
-					Description: fmt.Sprintf("The subject's type %s.", internal.PrettyOneOf(subjecttype.SubjectTypeValues())),
-					Validators: []validator.String{
-						stringvalidator.OneOf(bastionzero.ToStringSlice(subjecttype.SubjectTypeValues())...),
-					},
-				},
-			},
-		},
-	}
 }
 
 func ExpandPolicySubjects(ctx context.Context, tfSet types.Set) []policies.Subject {
@@ -83,25 +181,6 @@ type PolicyGroupModel struct {
 func GetPolicyGroupModelType(ctx context.Context) types.ObjectType {
 	attributeTypes, _ := internal.AttributeTypes[PolicyGroupModel](ctx)
 	return types.ObjectType{AttrTypes: attributeTypes}
-}
-
-func PolicyGroupsAttribute(ctx context.Context) schema.Attribute {
-	return schema.SetNestedAttribute{
-		Optional:    true,
-		Description: "Set of IdP groups that this policy applies to.",
-		NestedObject: schema.NestedAttributeObject{
-			Attributes: map[string]schema.Attribute{
-				"id": schema.StringAttribute{
-					Required:    true,
-					Description: "The group's unique ID.",
-				},
-				"name": schema.StringAttribute{
-					Required:    true,
-					Description: "The group's name.",
-				},
-			},
-		},
-	}
 }
 
 func ExpandPolicyGroups(ctx context.Context, tfSet types.Set) []policies.Group {
@@ -155,7 +234,7 @@ func GetPolicyTargetModelType(ctx context.Context) types.ObjectType {
 	return types.ObjectType{AttrTypes: attributeTypes}
 }
 
-func PolicyTargetsAttribute(ctx context.Context) schema.Attribute {
+func PolicyTargetsAttribute() schema.Attribute {
 	return schema.SetNestedAttribute{
 		Description: "Set of targets that this policy applies to.",
 		Optional:    true,
@@ -195,17 +274,6 @@ func FlattenPolicyTargets(ctx context.Context, apiObject []policies.Target) type
 			"type": types.StringValue(string(m.Type)),
 		})
 	})
-}
-
-func PolicyTypeAttribute(policyType policytype.PolicyType) schema.Attribute {
-	return schema.StringAttribute{
-		Description: fmt.Sprintf("The policy's type (constant value \"%s\").", policyType),
-		Computed:    true,
-		PlanModifiers: []planmodifier.String{
-			stringplanmodifier.UseStateForUnknown(),
-			bzplanmodifier.StringDefaultValue(types.StringValue(string(policyType))),
-		},
-	}
 }
 
 // ListPolicyParametersModel maps optional, practitioner parameters that can be

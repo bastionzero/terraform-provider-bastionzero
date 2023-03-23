@@ -14,26 +14,27 @@ import (
 )
 
 func NewTargetConnectPoliciesDataSource() datasource.DataSource {
-	return bzdatasource.NewListDataSourceWithPractitionerParameters(&bzdatasource.ListDataSourceWithPractitionerParametersConfig[targetConnectPolicyModel, policy.ListPolicyParametersModel, policies.TargetConnectPolicy]{
-		BaseListDataSourceConfig: &bzdatasource.BaseListDataSourceConfig[targetConnectPolicyModel, policies.TargetConnectPolicy]{
-			RecordSchema:        internal.ResourceSchemaToDataSourceSchema(makeTargetConnectPolicyResourceSchema(context.TODO()), nil),
-			MetadataTypeName:    "targetconnect_policies",
-			ResultAttributeName: "policies",
-			PrettyAttributeName: "target connect policies",
-			FlattenAPIModel: func(ctx context.Context, apiObject *policies.TargetConnectPolicy) (state *targetConnectPolicyModel, diags diag.Diagnostics) {
-				state = new(targetConnectPolicyModel)
-				setTargetConnectPolicyAttributes(ctx, state, apiObject, true)
-				return
+	return bzdatasource.NewListDataSourceWithPractitionerParameters(
+		&bzdatasource.ListDataSourceWithPractitionerParametersConfig[targetConnectPolicyModel, policy.ListPolicyParametersModel, policies.TargetConnectPolicy]{
+			BaseListDataSourceConfig: &bzdatasource.BaseListDataSourceConfig[targetConnectPolicyModel, policies.TargetConnectPolicy]{
+				RecordSchema:        internal.ResourceSchemaToDataSourceSchema(makeTargetConnectPolicyResourceSchema(), nil),
+				MetadataTypeName:    "targetconnect_policies",
+				ResultAttributeName: "policies",
+				PrettyAttributeName: "target connect policies",
+				FlattenAPIModel: func(ctx context.Context, apiObject *policies.TargetConnectPolicy) (state *targetConnectPolicyModel, diags diag.Diagnostics) {
+					state = new(targetConnectPolicyModel)
+					setTargetConnectPolicyAttributes(ctx, state, apiObject, true)
+					return
+				},
+				Description: "Get a list of all target connect policies in your BastionZero organization.",
 			},
-			Description: "Get a list of all target connect policies in your BastionZero organization.",
-		},
-		PractitionerParamsRecordSchema: policy.ListPolicyParametersSchema(),
-		ListAPIModels: func(ctx context.Context, listParameters policy.ListPolicyParametersModel, client *bastionzero.Client) ([]policies.TargetConnectPolicy, error) {
-			subjectsFilter := strings.Join(internal.ExpandFrameworkStringSet(ctx, listParameters.Subjects), ",")
-			groupsFilter := strings.Join(internal.ExpandFrameworkStringSet(ctx, listParameters.Groups), ",")
+			PractitionerParamsRecordSchema: policy.ListPolicyParametersSchema(),
+			ListAPIModels: func(ctx context.Context, listParameters policy.ListPolicyParametersModel, client *bastionzero.Client) ([]policies.TargetConnectPolicy, error) {
+				subjectsFilter := strings.Join(internal.ExpandFrameworkStringSet(ctx, listParameters.Subjects), ",")
+				groupsFilter := strings.Join(internal.ExpandFrameworkStringSet(ctx, listParameters.Groups), ",")
 
-			policies, _, err := client.Policies.ListTargetConnectPolicies(ctx, &policies.ListPolicyOptions{Subjects: subjectsFilter, Groups: groupsFilter})
-			return policies, err
-		},
-	})
+				policies, _, err := client.Policies.ListTargetConnectPolicies(ctx, &policies.ListPolicyOptions{Subjects: subjectsFilter, Groups: groupsFilter})
+				return policies, err
+			},
+		})
 }

@@ -210,6 +210,7 @@ func (p *BastionZeroProvider) DataSources(ctx context.Context) []func() datasour
 		dactarget.NewDacTargetDataSource,
 		dactarget.NewDacTargetsDataSource,
 		autodiscoveryscript.NewAdBashDataSource,
+		targetconnect.NewTargetConnectDataSource,
 		targetconnect.NewTargetConnectPoliciesDataSource,
 	}
 }

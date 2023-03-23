@@ -10,13 +10,10 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/verbtype"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
-	"github.com/bastionzero/terraform-provider-bastionzero/internal/bzplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -35,30 +32,23 @@ type targetConnectPolicyModel struct {
 	Verbs        types.Set    `tfsdk:"verbs"`
 }
 
+func (m *targetConnectPolicyModel) SetID(value types.String)          { m.ID = value }
+func (m *targetConnectPolicyModel) SetName(value types.String)        { m.Name = value }
+func (m *targetConnectPolicyModel) SetType(value types.String)        { m.Type = value }
+func (m *targetConnectPolicyModel) SetDescription(value types.String) { m.Description = value }
+func (m *targetConnectPolicyModel) SetSubjects(value types.Set)       { m.Subjects = value }
+func (m *targetConnectPolicyModel) SetGroups(value types.Set)         { m.Groups = value }
+
+func (m *targetConnectPolicyModel) GetSubjects() types.Set { return m.Subjects }
+func (m *targetConnectPolicyModel) GetGroups() types.Set   { return m.Groups }
+
 // setTargetConnectPolicyAttributes populates the TF schema data from a target
 // connect policy
 func setTargetConnectPolicyAttributes(ctx context.Context, schema *targetConnectPolicyModel, apiPolicy *policies.TargetConnectPolicy, modelIsDataSource bool) {
-	schema.ID = types.StringValue(apiPolicy.ID)
-	schema.Name = types.StringValue(apiPolicy.Name)
-	schema.Type = types.StringValue(string(apiPolicy.GetPolicyType()))
-	schema.Description = types.StringValue(apiPolicy.GetDescription())
+	policy.SetBasePolicyAttributes(ctx, schema, apiPolicy, modelIsDataSource)
 
-	// Preserve null in schema if refreshed list is empty list.
-	//
-	// If we don't include this logic, then we will get "Provider produced
-	// inconsistent result after apply" error when user sets null value in
-	// config because Flatten() returns an empty set if slice is empty which is
-	// not consistent.
-	//
-	// Additionally, we always set the value in the schema if the model is a
-	// data source because it's easier to work with empty valued, computed
-	// collection attributes in data sources then null.
-	if !schema.Subjects.IsNull() || len(apiPolicy.GetSubjects()) != 0 || modelIsDataSource {
-		schema.Subjects = policy.FlattenPolicySubjects(ctx, apiPolicy.GetSubjects())
-	}
-	if !schema.Groups.IsNull() || len(apiPolicy.GetGroups()) != 0 || modelIsDataSource {
-		schema.Groups = policy.FlattenPolicyGroups(ctx, apiPolicy.GetGroups())
-	}
+	// See comment in SetBasePolicyAttributes that explains this conditional
+	// logic
 	if !schema.Environments.IsNull() || len(apiPolicy.GetEnvironments()) != 0 || modelIsDataSource {
 		schema.Environments = policy.FlattenPolicyEnvironments(ctx, apiPolicy.GetEnvironments())
 	}
@@ -96,53 +86,27 @@ func FlattenPolicyVerbs(ctx context.Context, apiObject []policies.Verb) types.Se
 	})
 }
 
-func makeTargetConnectPolicyResourceSchema(ctx context.Context) map[string]schema.Attribute {
-	return map[string]schema.Attribute{
-		"id": schema.StringAttribute{
-			Computed: true,
-			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
-			},
-			Description: "The policy's unique ID.",
-		},
-		"name": schema.StringAttribute{
-			Required:    true,
-			Description: "The policy's name.",
-			Validators: []validator.String{
-				stringvalidator.LengthAtLeast(1),
-			},
-		},
-		"type": policy.PolicyTypeAttribute(policytype.TargetConnect),
-		"description": schema.StringAttribute{
-			Optional:    true,
-			Computed:    true,
-			Description: "The policy's description.",
-			PlanModifiers: []planmodifier.String{
-				// Don't allow null description to make it easier when parsing
-				// results back into TF
-				bzplanmodifier.StringDefaultValue(types.StringValue("")),
-			},
-		},
-		"subjects":     policy.PolicySubjectsAttribute(ctx),
-		"groups":       policy.PolicyGroupsAttribute(ctx),
-		"environments": policy.PolicyEnvironmentsAttribute(),
-		"targets":      policy.PolicyTargetsAttribute(ctx),
-		"target_users": schema.SetAttribute{
-			Description: "Set of Unix usernames that this policy applies to.",
-			ElementType: types.StringType,
-			Required:    true,
-			Validators: []validator.Set{
-				setvalidator.SizeAtLeast(1),
-			},
-		},
-		"verbs": schema.SetAttribute{
-			Required:    true,
-			Description: fmt.Sprintf("Set of actions allowed by this policy %s.", internal.PrettyOneOf(verbtype.VerbTypeValues())),
-			ElementType: types.StringType,
-			Validators: []validator.Set{
-				setvalidator.ValueStringsAre(stringvalidator.OneOf(bastionzero.ToStringSlice(verbtype.VerbTypeValues())...)),
-				setvalidator.SizeAtLeast(1),
-			},
+func makeTargetConnectPolicyResourceSchema() map[string]schema.Attribute {
+	attributes := policy.BasePolicyResourceAttributes(policytype.TargetConnect)
+	attributes["environments"] = policy.PolicyEnvironmentsAttribute()
+	attributes["targets"] = policy.PolicyTargetsAttribute()
+	attributes["target_users"] = schema.SetAttribute{
+		Description: "Set of Unix usernames that this policy applies to.",
+		ElementType: types.StringType,
+		Required:    true,
+		Validators: []validator.Set{
+			setvalidator.SizeAtLeast(1),
 		},
 	}
+	attributes["verbs"] = schema.SetAttribute{
+		Required:    true,
+		Description: fmt.Sprintf("Set of actions allowed by this policy %s.", internal.PrettyOneOf(verbtype.VerbTypeValues())),
+		ElementType: types.StringType,
+		Validators: []validator.Set{
+			setvalidator.ValueStringsAre(stringvalidator.OneOf(bastionzero.ToStringSlice(verbtype.VerbTypeValues())...)),
+			setvalidator.SizeAtLeast(1),
+		},
+	}
+
+	return attributes
 }
