@@ -26,8 +26,8 @@ type dbTargetModel struct {
 
 	ProxyTargetID types.String `tfsdk:"proxy_target_id"`
 	RemoteHost    types.String `tfsdk:"remote_host"`
-	RemotePort    types.Number `tfsdk:"remote_port"`
-	LocalPort     types.Number `tfsdk:"local_port"`
+	RemotePort    types.Int64  `tfsdk:"remote_port"`
+	LocalPort     types.Int64  `tfsdk:"local_port"`
 	IsSplitCert   types.Bool   `tfsdk:"is_split_cert"`
 	DatabaseType  types.String `tfsdk:"database_type"`
 }
@@ -44,8 +44,8 @@ func (t *dbTargetModel) SetAgentPublicKey(value types.String)  { t.AgentPublicKe
 
 func (t *dbTargetModel) SetProxyTargetID(value types.String) { t.ProxyTargetID = value }
 func (t *dbTargetModel) SetRemoteHost(value types.String)    { t.RemoteHost = value }
-func (t *dbTargetModel) SetRemotePort(value types.Number)    { t.RemotePort = value }
-func (t *dbTargetModel) SetLocalPort(value types.Number)     { t.LocalPort = value }
+func (t *dbTargetModel) SetRemotePort(value types.Int64)     { t.RemotePort = value }
+func (t *dbTargetModel) SetLocalPort(value types.Int64)      { t.LocalPort = value }
 
 // setDbTargetAttributes populates the TF schema data from a db target API
 // object.

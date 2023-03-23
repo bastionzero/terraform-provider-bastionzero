@@ -142,11 +142,11 @@ func BaseVirtualTargetDataSourceAttributes(targetType targettype.TargetType) map
 			Computed:    true,
 			Description: "The target's hostname or IP address.",
 		},
-		"remote_port": schema.NumberAttribute{
+		"remote_port": schema.Int64Attribute{
 			Computed:    true,
 			Description: fmt.Sprintf("The port of the %v server accessible via the target.", targetType),
 		},
-		"local_port": schema.NumberAttribute{
+		"local_port": schema.Int64Attribute{
 			Computed:    true,
 			Description: fmt.Sprintf("The port of the %v daemon's localhost server that is spawned on the user's machine on connect. Null if not configured.", targetType),
 		},
@@ -161,9 +161,9 @@ type VirtualTargetModelInterface interface {
 	// SetRemoteHost sets the target model's remote_host attribute.
 	SetRemoteHost(value types.String)
 	// SetRemotePort sets the target model's remote_port attribute.
-	SetRemotePort(value types.Number)
+	SetRemotePort(value types.Int64)
 	// SetLocalPort sets the target model's local_port attribute.
-	SetLocalPort(value types.Number)
+	SetLocalPort(value types.Int64)
 }
 
 // SetBaseVirtualTargetAttributes populates base virtual target attributes in
@@ -171,8 +171,8 @@ type VirtualTargetModelInterface interface {
 func SetBaseVirtualTargetAttributes(ctx context.Context, schema VirtualTargetModelInterface, virtualTarget targets.VirtualTargetInterface) {
 	schema.SetProxyTargetID(types.StringValue(virtualTarget.GetProxyTargetID()))
 	schema.SetRemoteHost(types.StringValue(virtualTarget.GetRemoteHost()))
-	schema.SetRemotePort(typesext.NumberPointerValue(virtualTarget.GetRemotePort().Value))
-	schema.SetLocalPort(typesext.NumberPointerValue(virtualTarget.GetLocalPort().Value))
+	schema.SetRemotePort(typesext.Int64PointerValue(virtualTarget.GetRemotePort().Value))
+	schema.SetLocalPort(typesext.Int64PointerValue(virtualTarget.GetLocalPort().Value))
 }
 
 // ControlChannelSummaryModel maps control channel summary data.
