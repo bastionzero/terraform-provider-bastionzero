@@ -234,7 +234,7 @@ func GetPolicyTargetModelType(ctx context.Context) types.ObjectType {
 	return types.ObjectType{AttrTypes: attributeTypes}
 }
 
-func PolicyTargetsAttribute() schema.Attribute {
+func PolicyTargetsAttribute(allowedTypes []targettype.TargetType) schema.Attribute {
 	return schema.SetNestedAttribute{
 		Description: "Set of targets that this policy applies to.",
 		Optional:    true,
@@ -246,9 +246,9 @@ func PolicyTargetsAttribute() schema.Attribute {
 				},
 				"type": schema.StringAttribute{
 					Required:    true,
-					Description: fmt.Sprintf("The target's type %s.", internal.PrettyOneOf(targettype.TargetTypeValues())),
+					Description: fmt.Sprintf("The target's type %s.", internal.PrettyOneOf(allowedTypes)),
 					Validators: []validator.String{
-						stringvalidator.OneOf(bastionzero.ToStringSlice(targettype.TargetTypeValues())...),
+						stringvalidator.OneOf(bastionzero.ToStringSlice(allowedTypes)...),
 					},
 				},
 			},
@@ -297,4 +297,16 @@ func ListPolicyParametersSchema() map[string]datasource_schema.Attribute {
 			Optional:    true,
 		},
 	}
+}
+
+func ExpandPolicyTargetUsers(ctx context.Context, tfSet types.Set) []policies.TargetUser {
+	return internal.ExpandFrameworkSet(ctx, tfSet, func(m string) policies.TargetUser {
+		return policies.TargetUser{Username: m}
+	})
+}
+
+func FlattenPolicyTargetUsers(ctx context.Context, apiObject []policies.TargetUser) types.Set {
+	return internal.FlattenFrameworkSet(ctx, types.StringType, apiObject, func(m policies.TargetUser) attr.Value {
+		return types.StringValue(m.Username)
+	})
 }

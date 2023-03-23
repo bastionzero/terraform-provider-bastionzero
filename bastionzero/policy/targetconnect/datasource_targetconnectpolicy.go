@@ -23,8 +23,8 @@ func NewTargetConnectPolicyDataSource() datasource.DataSource {
 					return
 				},
 				GetAPIModel: func(ctx context.Context, tfModel targetConnectPolicyModel, client *bastionzero.Client) (*policies.TargetConnectPolicy, error) {
-					env, _, err := client.Policies.GetTargetConnectPolicy(ctx, tfModel.ID.ValueString())
-					return env, err
+					policy, _, err := client.Policies.GetTargetConnectPolicy(ctx, tfModel.ID.ValueString())
+					return policy, err
 				},
 				Description: "Get information on a BastionZero target connect policy.",
 			},

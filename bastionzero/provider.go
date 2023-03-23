@@ -11,6 +11,7 @@ import (
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/environment"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/organization"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/kubernetes"
+	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/proxy"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/targetconnect"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/serviceaccount"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/target/bzerotarget"
@@ -189,6 +190,7 @@ func (p *BastionZeroProvider) Resources(ctx context.Context) []func() resource.R
 		environment.NewEnvironmentResource,
 		targetconnect.NewTargetConnectPolicyResource,
 		kubernetes.NewKubernetesPolicyResource,
+		proxy.NewProxyPolicyResource,
 	}
 }
 
@@ -216,6 +218,8 @@ func (p *BastionZeroProvider) DataSources(ctx context.Context) []func() datasour
 		targetconnect.NewTargetConnectPoliciesDataSource,
 		kubernetes.NewKubernetesPolicyDataSource,
 		kubernetes.NewKubernetesPoliciesDataSource,
+		proxy.NewProxyPolicyDataSource,
+		proxy.NewProxyPoliciesDataSource,
 	}
 }
 

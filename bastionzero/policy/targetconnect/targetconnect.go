@@ -8,6 +8,7 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/policytype"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/verbtype"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/targettype"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
@@ -58,20 +59,8 @@ func setTargetConnectPolicyAttributes(ctx context.Context, schema *targetConnect
 
 	// By def. of schema, these values cannot be null so just accept whatever
 	// the refreshed value is
-	schema.TargetUsers = FlattenPolicyTargetUsers(ctx, apiPolicy.GetTargetUsers())
+	schema.TargetUsers = policy.FlattenPolicyTargetUsers(ctx, apiPolicy.GetTargetUsers())
 	schema.Verbs = FlattenPolicyVerbs(ctx, apiPolicy.GetVerbs())
-}
-
-func ExpandPolicyTargetUsers(ctx context.Context, tfSet types.Set) []policies.TargetUser {
-	return internal.ExpandFrameworkSet(ctx, tfSet, func(m string) policies.TargetUser {
-		return policies.TargetUser{Username: m}
-	})
-}
-
-func FlattenPolicyTargetUsers(ctx context.Context, apiObject []policies.TargetUser) types.Set {
-	return internal.FlattenFrameworkSet(ctx, types.StringType, apiObject, func(m policies.TargetUser) attr.Value {
-		return types.StringValue(m.Username)
-	})
 }
 
 func ExpandPolicyVerbs(ctx context.Context, tfSet types.Set) []policies.Verb {
@@ -89,7 +78,10 @@ func FlattenPolicyVerbs(ctx context.Context, apiObject []policies.Verb) types.Se
 func makeTargetConnectPolicyResourceSchema() map[string]schema.Attribute {
 	attributes := policy.BasePolicyResourceAttributes(policytype.TargetConnect)
 	attributes["environments"] = policy.PolicyEnvironmentsAttribute()
-	attributes["targets"] = policy.PolicyTargetsAttribute()
+	attributes["targets"] = policy.PolicyTargetsAttribute([]targettype.TargetType{
+		targettype.Bzero,
+		targettype.DynamicAccessConfig,
+	})
 	attributes["target_users"] = schema.SetAttribute{
 		Description: "Set of Unix usernames that this policy applies to.",
 		ElementType: types.StringType,
