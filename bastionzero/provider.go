@@ -10,6 +10,7 @@ import (
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/autodiscoveryscript"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/environment"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/organization"
+	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/jit"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/kubernetes"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/proxy"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/sessionrecording"
@@ -193,6 +194,7 @@ func (p *BastionZeroProvider) Resources(ctx context.Context) []func() resource.R
 		kubernetes.NewKubernetesPolicyResource,
 		proxy.NewProxyPolicyResource,
 		sessionrecording.NewSessionRecordingPolicyResource,
+		jit.NewJITPolicyResource,
 	}
 }
 
@@ -224,6 +226,8 @@ func (p *BastionZeroProvider) DataSources(ctx context.Context) []func() datasour
 		proxy.NewProxyPoliciesDataSource,
 		sessionrecording.NewSessionRecordingPolicyDataSource,
 		sessionrecording.NewSessionRecordingPoliciesDataSource,
+		jit.NewJITPolicyDataSource,
+		jit.NewJITPoliciesDataSource,
 	}
 }
 
