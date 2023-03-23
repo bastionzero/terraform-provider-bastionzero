@@ -55,7 +55,7 @@ func (r *kubernetesPolicyResource) Configure(_ context.Context, req resource.Con
 	r.client = client
 }
 
-// Metadata returns the target connect policy resource type name.
+// Metadata returns the Kubernetes policy resource type name.
 func (r *kubernetesPolicyResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_kubernetes_policy"
 }
@@ -119,7 +119,7 @@ func (r *kubernetesPolicyResource) Read(ctx context.Context, req resource.ReadRe
 	}
 	ctx = tflog.SetField(ctx, "policy_id", state.ID.ValueString())
 
-	// Get refreshed environment value from BastionZero
+	// Get refreshed policy value from BastionZero
 	tflog.Debug(ctx, "Querying for Kubernetes policy")
 	p, _, err := r.client.Policies.GetKubernetesPolicy(ctx, state.ID.ValueString())
 	if apierror.IsAPIErrorStatusCode(err, http.StatusNotFound) {
@@ -208,7 +208,7 @@ func (r *kubernetesPolicyResource) Delete(ctx context.Context, req resource.Dele
 	}
 	ctx = tflog.SetField(ctx, "policy_id", state.ID.ValueString())
 
-	// Delete existing environment
+	// Delete existing policy
 	tflog.Debug(ctx, "Deleting Kubernetes policy")
 	_, err := r.client.Policies.DeleteKubernetesPolicy(ctx, state.ID.ValueString())
 	if apierror.IsAPIErrorStatusCode(err, http.StatusNotFound) {

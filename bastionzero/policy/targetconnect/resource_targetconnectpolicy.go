@@ -119,7 +119,7 @@ func (r *targetConnectPolicyResource) Read(ctx context.Context, req resource.Rea
 	}
 	ctx = tflog.SetField(ctx, "policy_id", state.ID.ValueString())
 
-	// Get refreshed environment value from BastionZero
+	// Get refreshed policy value from BastionZero
 	tflog.Debug(ctx, "Querying for target connect policy")
 	p, _, err := r.client.Policies.GetTargetConnectPolicy(ctx, state.ID.ValueString())
 	if apierror.IsAPIErrorStatusCode(err, http.StatusNotFound) {
@@ -208,7 +208,7 @@ func (r *targetConnectPolicyResource) Delete(ctx context.Context, req resource.D
 	}
 	ctx = tflog.SetField(ctx, "policy_id", state.ID.ValueString())
 
-	// Delete existing environment
+	// Delete existing policy
 	tflog.Debug(ctx, "Deleting target connect policy")
 	_, err := r.client.Policies.DeleteTargetConnectPolicy(ctx, state.ID.ValueString())
 	if apierror.IsAPIErrorStatusCode(err, http.StatusNotFound) {
