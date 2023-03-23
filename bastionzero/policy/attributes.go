@@ -124,7 +124,7 @@ func BasePolicyResourceAttributes(policyType policytype.PolicyType) map[string]s
 		},
 		"groups": schema.SetNestedAttribute{
 			Optional:    true,
-			Description: "Set of IdP groups that this policy applies to.",
+			Description: "Set of Identity Provider (IdP) groups that this policy applies to.",
 			NestedObject: schema.NestedAttributeObject{
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{

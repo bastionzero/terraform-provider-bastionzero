@@ -25,7 +25,7 @@ Provides a BastionZero target connect policy. Target connect policies provide ac
 
 - `description` (String) The policy's description.
 - `environments` (Set of String) Set of environments that this policy applies to.
-- `groups` (Attributes Set) Set of IdP groups that this policy applies to. (see [below for nested schema](#nestedatt--groups))
+- `groups` (Attributes Set) Set of Identity Provider (IdP) groups that this policy applies to. (see [below for nested schema](#nestedatt--groups))
 - `subjects` (Attributes Set) Set of subjects that this policy applies to. (see [below for nested schema](#nestedatt--subjects))
 - `targets` (Attributes Set) Set of targets that this policy applies to. (see [below for nested schema](#nestedatt--targets))
 

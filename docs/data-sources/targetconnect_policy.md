@@ -23,7 +23,7 @@ Get information on a BastionZero target connect policy.
 
 - `description` (String) The policy's description.
 - `environments` (Set of String) Set of environments that this policy applies to.
-- `groups` (Attributes Set) Set of IdP groups that this policy applies to. (see [below for nested schema](#nestedatt--groups))
+- `groups` (Attributes Set) Set of Identity Provider (IdP) groups that this policy applies to. (see [below for nested schema](#nestedatt--groups))
 - `name` (String) The policy's name.
 - `subjects` (Attributes Set) Set of subjects that this policy applies to. (see [below for nested schema](#nestedatt--subjects))
 - `target_users` (Set of String) Set of Unix usernames that this policy applies to.

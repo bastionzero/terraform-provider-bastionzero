@@ -23,7 +23,7 @@ Provides a BastionZero proxy policy. Proxy policies provide access to Db and Web
 
 - `description` (String) The policy's description.
 - `environments` (Set of String) Set of environments that this policy applies to.
-- `groups` (Attributes Set) Set of IdP groups that this policy applies to. (see [below for nested schema](#nestedatt--groups))
+- `groups` (Attributes Set) Set of Identity Provider (IdP) groups that this policy applies to. (see [below for nested schema](#nestedatt--groups))
 - `subjects` (Attributes Set) Set of subjects that this policy applies to. (see [below for nested schema](#nestedatt--subjects))
 - `target_users` (Set of String) Set of Database usernames that this policy applies to. These usernames only affect policy decisions involving Db targets that have the SplitCert feature enabled.
 - `targets` (Attributes Set) Set of targets that this policy applies to. (see [below for nested schema](#nestedatt--targets))

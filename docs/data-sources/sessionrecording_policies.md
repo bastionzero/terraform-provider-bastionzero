@@ -30,7 +30,7 @@ Get a list of all session recording policies in your BastionZero organization.
 Read-Only:
 
 - `description` (String) The policy's description.
-- `groups` (Attributes Set) Set of IdP groups that this policy applies to. (see [below for nested schema](#nestedatt--policies--groups))
+- `groups` (Attributes Set) Set of Identity Provider (IdP) groups that this policy applies to. (see [below for nested schema](#nestedatt--policies--groups))
 - `id` (String) The policy's unique ID.
 - `name` (String) The policy's name.
 - `record_input` (Boolean) If true, then in addition to session output, session input should be recorded. If false, then only session output should be recorded (Defaults to false).

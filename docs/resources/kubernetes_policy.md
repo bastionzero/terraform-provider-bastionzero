@@ -26,7 +26,7 @@ Provides a BastionZero Kubernetes policy. Kubernetes policies provide access to 
 - `clusters` (Set of String) Set of Cluster target ID(s) that this policy applies to.
 - `description` (String) The policy's description.
 - `environments` (Set of String) Set of environments that this policy applies to.
-- `groups` (Attributes Set) Set of IdP groups that this policy applies to. (see [below for nested schema](#nestedatt--groups))
+- `groups` (Attributes Set) Set of Identity Provider (IdP) groups that this policy applies to. (see [below for nested schema](#nestedatt--groups))
 - `subjects` (Attributes Set) Set of subjects that this policy applies to. (see [below for nested schema](#nestedatt--subjects))
 
 ### Read-Only
