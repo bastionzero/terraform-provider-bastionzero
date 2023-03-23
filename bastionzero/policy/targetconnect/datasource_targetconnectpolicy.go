@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 )
 
-func NewTargetConnectDataSource() datasource.DataSource {
+func NewTargetConnectPolicyDataSource() datasource.DataSource {
 	return bzdatasource.NewSingleDataSource(
 		&bzdatasource.SingleDataSourceConfig[targetConnectPolicyModel, policies.TargetConnectPolicy]{
 			BaseSingleDataSourceConfig: &bzdatasource.BaseSingleDataSourceConfig[targetConnectPolicyModel, policies.TargetConnectPolicy]{
