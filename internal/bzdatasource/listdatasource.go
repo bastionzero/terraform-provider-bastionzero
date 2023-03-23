@@ -341,7 +341,7 @@ func NewListDataSourceWithPractitionerParameters[T TFComputedModel, T2 TFNonComp
 // TF models.
 func mapAPIModelsToTFModels[T TFComputedModel, T2 APIModel](ctx context.Context, config *BaseListDataSourceConfig[T, T2], apiObjects []T2) ([]T, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var models []T
+	models := make([]T, 0)
 	for _, apiObj := range apiObjects {
 		tfModel, diagsFlatten := config.FlattenAPIModel(ctx, &apiObj)
 		diags.Append(diagsFlatten...)
