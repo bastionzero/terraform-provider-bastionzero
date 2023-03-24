@@ -6,7 +6,6 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/targettype"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/target"
-	"github.com/bastionzero/terraform-provider-bastionzero/internal/typesext"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"golang.org/x/exp/maps"
@@ -54,7 +53,7 @@ func setDbTargetAttributes(ctx context.Context, schema *dbTargetModel, dbTarget 
 	target.SetBaseVirtualTargetAttributes(ctx, schema, dbTarget)
 
 	schema.IsSplitCert = types.BoolValue(dbTarget.IsSplitCert)
-	schema.DatabaseType = typesext.StringPointerValue(dbTarget.DatabaseType)
+	schema.DatabaseType = types.StringPointerValue(dbTarget.DatabaseType)
 }
 
 func makeDbTargetDataSourceSchema(opts *target.BaseTargetDataSourceAttributeOptions) map[string]schema.Attribute {
