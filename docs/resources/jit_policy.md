@@ -4,14 +4,14 @@ page_title: "bastionzero_jit_policy Resource - terraform-provider-bastionzero"
 subcategory: ""
 description: |-
   Provides a BastionZero JIT policy. JIT policies provide just in time access to targets.
-  !> A JIT policy's child_policies can only refer to policies of the following types: TargetConnect, Kubernetes, Proxy. If any of the referenced policies are not of the valid type, then an error is returned when creating/updating the JIT policy.
+  !> Note on child policies A JIT policy's child_policies can only refer to policies of the following types: TargetConnect, Kubernetes, Proxy. If any of the referenced policies are not of the valid type, then an error is returned when creating/updating the JIT policy.
 ---
 
 # bastionzero_jit_policy (Resource)
 
 Provides a BastionZero JIT policy. JIT policies provide just in time access to targets.
 
-!> A JIT policy's `child_policies` can only refer to policies of the following types: TargetConnect, Kubernetes, Proxy. If any of the referenced policies are not of the valid type, then an error is returned when creating/updating the JIT policy.
+!> **Note on child policies** A JIT policy's `child_policies` can only refer to policies of the following types: TargetConnect, Kubernetes, Proxy. If any of the referenced policies are not of the valid type, then an error is returned when creating/updating the JIT policy.
 
 
 
