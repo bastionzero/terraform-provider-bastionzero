@@ -41,6 +41,8 @@ type BastionZeroProvider struct {
 	// provider is built and ran locally, and "test" when running acceptance
 	// testing.
 	version string
+
+	Client *bastionzero.Client
 }
 
 // bastionzeroProviderModel describes the provider data model.
@@ -179,6 +181,8 @@ func (p *BastionZeroProvider) Configure(ctx context.Context, req provider.Config
 		return
 	}
 
+	// Used by the acceptance tests
+	p.Client = client
 	// Make the BastionZero client available during DataSource and Resource type
 	// Configure methods.
 	resp.DataSourceData = client
@@ -231,6 +235,7 @@ func (p *BastionZeroProvider) DataSources(ctx context.Context) []func() datasour
 	}
 }
 
+// New creates a BastionZero Terraform provider
 func New(version string) func() provider.Provider {
 	return func() provider.Provider {
 		return &BastionZeroProvider{

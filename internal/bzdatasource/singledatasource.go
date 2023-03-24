@@ -262,7 +262,7 @@ func NewSingleDataSourceWithTimeout[T TFSingleDataSourceModel, T2 APIModel](conf
 
 		// Spawn goroutine that listens for interrupts from user
 		go func() {
-			sigChan := make(chan os.Signal)
+			sigChan := make(chan os.Signal, 1)
 			signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 			select {
 			case <-sigChan:
