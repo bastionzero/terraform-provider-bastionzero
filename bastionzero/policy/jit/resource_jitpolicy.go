@@ -167,9 +167,10 @@ func (r *jitPolicyResource) Update(ctx context.Context, req resource.UpdateReque
 	if !plan.Groups.Equal(state.Groups) {
 		modPolicy.Groups = bastionzero.PtrTo(policy.ExpandPolicyGroups(ctx, plan.Groups))
 	}
-	if !plan.ChildPolicies.Equal(state.ChildPolicies) {
-		modPolicy.ChildPolicies = bastionzero.PtrTo(ExpandChildPolicies(ctx, plan.ChildPolicies))
-	}
+
+	// Must always provide child policies
+	modPolicy.ChildPolicies = bastionzero.PtrTo(ExpandChildPolicies(ctx, plan.ChildPolicies))
+
 	if !plan.AutomaticallyApproved.Equal(state.AutomaticallyApproved) {
 		modPolicy.AutomaticallyApproved = bastionzero.PtrTo(plan.AutomaticallyApproved.ValueBool())
 	}
