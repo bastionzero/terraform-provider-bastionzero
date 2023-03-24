@@ -9,7 +9,7 @@ replace github.com/bastionzero/bastionzero-sdk-go v0.0.0 => ../bastionzero-sdk-g
 require (
 	github.com/cenkalti/backoff/v4 v4.2.0
 	github.com/hashicorp/terraform-plugin-docs v0.14.1
-	github.com/hashicorp/terraform-plugin-framework v1.1.1
+	github.com/hashicorp/terraform-plugin-framework v1.2.0
 	github.com/hashicorp/terraform-plugin-framework-timeouts v0.3.1
 	github.com/hashicorp/terraform-plugin-framework-validators v0.10.0
 	github.com/hashicorp/terraform-plugin-log v0.8.0
