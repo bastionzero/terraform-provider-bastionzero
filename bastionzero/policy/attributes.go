@@ -10,12 +10,12 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/subjecttype"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/targettype"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
-	"github.com/bastionzero/terraform-provider-bastionzero/internal/bzplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasource_schema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -88,20 +88,15 @@ func BasePolicyResourceAttributes(policyType policytype.PolicyType) map[string]s
 		"type": schema.StringAttribute{
 			Description: fmt.Sprintf("The policy's type (constant value \"%s\").", policyType),
 			Computed:    true,
-			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
-				bzplanmodifier.StringDefaultValue(types.StringValue(string(policyType))),
-			},
+			Default:     stringdefault.StaticString(string(policyType)),
 		},
 		"description": schema.StringAttribute{
 			Optional:    true,
 			Computed:    true,
 			Description: "The policy's description.",
-			PlanModifiers: []planmodifier.String{
-				// Don't allow null description to make it easier when parsing
-				// results back into TF
-				bzplanmodifier.StringDefaultValue(types.StringValue("")),
-			},
+			// Don't allow null description to make it easier when parsing
+			// results back into TF
+			Default: stringdefault.StaticString(""),
 		},
 		"subjects": schema.SetNestedAttribute{
 			Optional:    true,

@@ -6,9 +6,8 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/policytype"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy"
-	"github.com/bastionzero/terraform-provider-bastionzero/internal/bzplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -46,11 +45,9 @@ func makeSessionRecordingPolicyResourceSchema() map[string]schema.Attribute {
 		Optional:    true,
 		Computed:    true,
 		Description: "If true, then in addition to session output, session input should be recorded. If false, then only session output should be recorded (Defaults to false).",
-		PlanModifiers: []planmodifier.Bool{
-			// Don't allow null value to make it easier when parsing results
-			// back into TF
-			bzplanmodifier.BoolDefaultValue(types.BoolValue(false)),
-		},
+		// Don't allow null value to make it easier when parsing results back
+		// into TF
+		Default: booldefault.StaticBool(false),
 	}
 
 	return attributes

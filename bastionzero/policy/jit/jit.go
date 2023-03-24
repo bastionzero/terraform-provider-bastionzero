@@ -9,13 +9,13 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/policytype"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
-	"github.com/bastionzero/terraform-provider-bastionzero/internal/bzplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -124,18 +124,14 @@ func makeJITPolicyResourceSchema() map[string]schema.Attribute {
 		Computed: true,
 		Description: "If true, then the policies created by this JIT policy will be automatically approved. " +
 			"If false, then policies will only be created based on request and approval from reviewers (Defaults to false).",
-		PlanModifiers: []planmodifier.Bool{
-			bzplanmodifier.BoolDefaultValue(types.BoolValue(false)),
-		},
+		Default: booldefault.StaticBool(false),
 	}
 	attributes["duration"] = schema.Int64Attribute{
 		Optional:    true,
 		Computed:    true,
 		Description: "The amount of time (in minutes) after which the access granted by this JIT policy will expire (Defaults to 1 hour).",
-		PlanModifiers: []planmodifier.Int64{
-			// Same default as the webapp
-			bzplanmodifier.Int64DefaultValue(types.Int64Value(60)),
-		},
+		// Same default as the webapp
+		Default: int64default.StaticInt64(60),
 		Validators: []validator.Int64{
 			int64validator.AtLeast(1),
 		},

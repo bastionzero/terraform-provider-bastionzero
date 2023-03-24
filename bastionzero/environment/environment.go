@@ -11,14 +11,15 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/environments"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/targettype"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
-	"github.com/bastionzero/terraform-provider-bastionzero/internal/bzplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -103,19 +104,17 @@ func makeEnvironmentResourceSchema() map[string]schema.Attribute {
 		"description": schema.StringAttribute{
 			Optional: true,
 			Computed: true,
-			PlanModifiers: []planmodifier.String{
-				// Prevent null in TF config to make it easier when parsing
-				// results from BastionZero and converting back to TF. For
-				// example, if we allowed a null description in TF but
-				// BastionZero returned an empty string, then Terraform would
-				// complain with error "Provider produced inconsistent result
-				// after apply". By forcing it to the empty string, we won't run
-				// into this issue and it simplifies the conversion code back to
-				// a TF model.
-				//
-				// Related: https://github.com/hashicorp/terraform-plugin-framework/issues/305#issuecomment-1256319576
-				bzplanmodifier.StringDefaultValue(types.StringValue("")),
-			},
+			// Prevent null in TF config to make it easier when parsing results
+			// from BastionZero and converting back to TF. For example, if we
+			// allowed a null description in TF but BastionZero returned an
+			// empty string, then Terraform would complain with error "Provider
+			// produced inconsistent result after apply". By forcing it to the
+			// empty string, we won't run into this issue and it simplifies the
+			// conversion code back to a TF model.
+			//
+			// Related:
+			// https://github.com/hashicorp/terraform-plugin-framework/issues/305#issuecomment-1256319576
+			Default:     stringdefault.StaticString(""),
 			Description: "The environment's description.",
 		},
 		"time_created": schema.StringAttribute{
@@ -129,10 +128,8 @@ func makeEnvironmentResourceSchema() map[string]schema.Attribute {
 			Optional:    true,
 			Computed:    true,
 			Description: "The amount of time (in hours) to wait until offline targets are automatically removed by BastionZero (Defaults to 90 days).",
-			PlanModifiers: []planmodifier.Int64{
-				// Default to 90 days like in webapp
-				bzplanmodifier.Int64DefaultValue(types.Int64Value(24 * 90)),
-			},
+			// Default to 90 days like in webapp
+			Default: int64default.StaticInt64(24 * 90),
 			Validators: []validator.Int64{
 				int64validator.AtLeast(1),
 			},
