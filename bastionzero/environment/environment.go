@@ -26,6 +26,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
+const (
+	// DefaultOfflineCleanupTimeoutHours is the default cleanup value to use if
+	// practitioner does not provide one
+	DefaultOfflineCleanupTimeoutHours = 24 * 90
+)
+
 // environmentModel maps the environment schema data.
 type environmentModel struct {
 	ID                         types.String `tfsdk:"id"`
@@ -129,7 +135,7 @@ func makeEnvironmentResourceSchema() map[string]schema.Attribute {
 			Computed:    true,
 			Description: "The amount of time (in hours) to wait until offline targets are automatically removed by BastionZero (Defaults to 90 days).",
 			// Default to 90 days like in webapp
-			Default: int64default.StaticInt64(24 * 90),
+			Default: int64default.StaticInt64(DefaultOfflineCleanupTimeoutHours),
 			Validators: []validator.Int64{
 				int64validator.AtLeast(1),
 			},
