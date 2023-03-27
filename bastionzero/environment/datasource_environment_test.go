@@ -1,7 +1,6 @@
 package environment_test
 
 import (
-	"fmt"
 	"strconv"
 	"testing"
 
@@ -12,61 +11,40 @@ import (
 )
 
 func TestAccDataSourceEnvironment_BasicById(t *testing.T) {
-	var environment environments.Environment
+	var env environments.Environment
 	// Create random env name
 	name := bztftest.RandomTestName()
 
+	resourceConfig := environmentResourceTFConfig(&environmentResourceTFConfigOptions{TFResourceName: "env", Name: &name})
+	dataSourceConfig := `
+	data "bastionzero_environment" "env" {
+		id = bastionzero_environment.env.id
+	}`
+
+	dataSourceRefName := "data.bastionzero_environment.env"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { bztftest.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: bztftest.TestProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
+			// First ensure we can create the resource
+			{
+				Config: resourceConfig,
+			},
 			// Read testing
 			{
-				Config: environmentByIdConfig(name),
+				Config: resourceConfig + dataSourceConfig,
 				Check: resource.ComposeTestCheckFunc(
-					bztftest.TestAccCheckEnvironmentExists("data.bastionzero_environment.env", &environment),
-					resource.ComposeTestCheckFunc(
-						checkEnvironmentSchemaAttrs("data.bastionzero_environment.env", expectedEnvironmentSchema{ExpectedName: name})...,
-					),
+					bztftest.TestAccCheckEnvironmentExists(dataSourceRefName, &env),
+					resource.TestCheckResourceAttr(dataSourceRefName, "name", name),
+					resource.TestCheckResourceAttr(dataSourceRefName, "description", ""),
+					resource.TestCheckResourceAttr(dataSourceRefName, "offline_cleanup_timeout_hours", strconv.Itoa(environment.DefaultOfflineCleanupTimeoutHours)),
+					resource.TestCheckResourceAttr(dataSourceRefName, "is_default", "false"),
+					resource.TestCheckResourceAttr(dataSourceRefName, "targets.%", "0"),
+					resource.TestMatchResourceAttr(dataSourceRefName, "id", bztftest.ExpectedIDRegEx()),
+					resource.TestMatchResourceAttr(dataSourceRefName, "organization_id", bztftest.ExpectedIDRegEx()),
+					resource.TestMatchResourceAttr(dataSourceRefName, "time_created", bztftest.ExpectedTimestampRegEx()),
 				),
 			},
 		},
 	})
-}
-
-type expectedEnvironmentSchema struct {
-	ExpectedName                       string
-	ExpectedDescription                string
-	ExpectedOfflineCleanupTimeoutHours string
-	ExpectedTargetsLength              string
-}
-
-func checkEnvironmentSchemaAttrs(stateName string, expected expectedEnvironmentSchema) []resource.TestCheckFunc {
-	// Default assertions
-	if expected.ExpectedOfflineCleanupTimeoutHours == "" {
-		expected.ExpectedOfflineCleanupTimeoutHours = strconv.Itoa(environment.DefaultOfflineCleanupTimeoutHours)
-	}
-	if expected.ExpectedTargetsLength == "" {
-		expected.ExpectedTargetsLength = "0"
-	}
-
-	return []resource.TestCheckFunc{
-		resource.TestCheckResourceAttr(stateName, "name", expected.ExpectedName),
-		resource.TestCheckResourceAttr(stateName, "description", expected.ExpectedDescription),
-		resource.TestCheckResourceAttr(stateName, "offline_cleanup_timeout_hours", expected.ExpectedOfflineCleanupTimeoutHours),
-		resource.TestCheckResourceAttr(stateName, "is_default", "false"),
-		resource.TestCheckResourceAttr(stateName, "targets.%", expected.ExpectedTargetsLength),
-		resource.TestMatchResourceAttr(stateName, "id", bztftest.ExpectedIDRegEx()),
-		resource.TestMatchResourceAttr(stateName, "organization_id", bztftest.ExpectedIDRegEx()),
-		resource.TestMatchResourceAttr(stateName, "time_created", bztftest.ExpectedTimestampRegEx()),
-	}
-}
-
-func environmentByIdConfig(envName string) string {
-	return fmt.Sprintf(`
-%s
-data "bastionzero_environment" "env" {
-  id = bastionzero_environment.env.id
-}
-`, environmentResourceTFConfig(&environmentResourceTFConfigOptions{TFResourceName: "env", Name: &envName}))
 }

@@ -30,7 +30,7 @@ func environmentResourceTFConfig(opts *environmentResourceTFConfigOptions) strin
 		description = "null"
 	}
 	if opts.OfflineCleanupTimeoutHours != nil {
-		cleanupTimeout = surroundDoubleQuote(strconv.Itoa(*opts.OfflineCleanupTimeoutHours))
+		cleanupTimeout = strconv.Itoa(*opts.OfflineCleanupTimeoutHours)
 	} else {
 		cleanupTimeout = "null"
 	}

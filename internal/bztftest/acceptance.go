@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -71,6 +72,35 @@ func TestAccCheckExistsAtBastionZero[T any](namedTFResource string, apiObject *T
 		}
 
 		*apiObject = *foundApiObject
+
+		return nil
+	}
+}
+
+// TestAccCheckListHasElements attempts to load a resource/datasource with name
+// namedTFResource from the TF state, and then check that the list at
+// listAttributeName has at least 1 element.
+func TestAccCheckListHasElements(namedTFResource, listAttributeName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[namedTFResource]
+
+		if !ok {
+			return fmt.Errorf("Not found: %s", namedTFResource)
+		}
+
+		rawTotal, ok := rs.Primary.Attributes[fmt.Sprintf("%s.#", listAttributeName)]
+		if !ok {
+			return fmt.Errorf("Not found %s", listAttributeName)
+		}
+
+		total, err := strconv.Atoi(rawTotal)
+		if err != nil {
+			return err
+		}
+
+		if total < 1 {
+			return fmt.Errorf("No %s retrieved", listAttributeName)
+		}
 
 		return nil
 	}
