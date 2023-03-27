@@ -15,7 +15,7 @@ func TestAccDataSourceEnvironment_BasicById(t *testing.T) {
 	// Create random env name
 	name := bztftest.RandomTestName()
 
-	resourceConfig := environmentResourceTFConfig(&environmentResourceTFConfigOptions{TFResourceName: "env", Name: &name})
+	resourceConfig := environmentResourceTFConfig("env", &environmentResourceOptions{Name: &name})
 	dataSourceConfig := `
 	data "bastionzero_environment" "env" {
 		id = bastionzero_environment.env.id

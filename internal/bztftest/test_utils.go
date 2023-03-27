@@ -31,3 +31,7 @@ func SetEnvironmentVariables(envs map[string]string) func() {
 		}
 	}
 }
+
+func SurroundDoubleQuote(str string) string {
+	return "\"" + str + "\""
+}
