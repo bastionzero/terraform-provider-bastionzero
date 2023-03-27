@@ -18,6 +18,7 @@ Get a list of all environments in your BastionZero organization.
 ### Read-Only
 
 - `environments` (Attributes List) List of environments. (see [below for nested schema](#nestedatt--environments))
+- `id` (String, Deprecated) Deprecated. Do not depend on this attribute. This attribute will be removed in the future.
 
 <a id="nestedatt--environments"></a>
 ### Nested Schema for `environments`

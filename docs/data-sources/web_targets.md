@@ -17,6 +17,7 @@ Get a list of all Web targets in your BastionZero organization.
 
 ### Read-Only
 
+- `id` (String, Deprecated) Deprecated. Do not depend on this attribute. This attribute will be removed in the future.
 - `web_targets` (Attributes List) List of Web targets. (see [below for nested schema](#nestedatt--web_targets))
 
 <a id="nestedatt--web_targets"></a>

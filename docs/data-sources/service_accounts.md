@@ -17,6 +17,7 @@ Get a list of all service accounts in your BastionZero organization.
 
 ### Read-Only
 
+- `id` (String, Deprecated) Deprecated. Do not depend on this attribute. This attribute will be removed in the future.
 - `service_accounts` (Attributes List) List of service accounts. (see [below for nested schema](#nestedatt--service_accounts))
 
 <a id="nestedatt--service_accounts"></a>

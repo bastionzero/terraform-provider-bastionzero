@@ -22,6 +22,7 @@ data "bastionzero_users" "example" {
 
 ### Read-Only
 
+- `id` (String, Deprecated) Deprecated. Do not depend on this attribute. This attribute will be removed in the future.
 - `users` (Attributes List) List of users. (see [below for nested schema](#nestedatt--users))
 
 <a id="nestedatt--users"></a>

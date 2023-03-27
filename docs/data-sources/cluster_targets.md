@@ -18,6 +18,7 @@ Get a list of all Cluster targets in your BastionZero organization.
 ### Read-Only
 
 - `cluster_targets` (Attributes List) List of Cluster targets. (see [below for nested schema](#nestedatt--cluster_targets))
+- `id` (String, Deprecated) Deprecated. Do not depend on this attribute. This attribute will be removed in the future.
 
 <a id="nestedatt--cluster_targets"></a>
 ### Nested Schema for `cluster_targets`

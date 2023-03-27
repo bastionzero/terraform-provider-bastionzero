@@ -18,6 +18,7 @@ Get a list of all Bzero targets in your BastionZero organization.
 ### Read-Only
 
 - `bzero_targets` (Attributes List) List of Bzero targets. (see [below for nested schema](#nestedatt--bzero_targets))
+- `id` (String, Deprecated) Deprecated. Do not depend on this attribute. This attribute will be removed in the future.
 
 <a id="nestedatt--bzero_targets"></a>
 ### Nested Schema for `bzero_targets`

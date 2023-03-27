@@ -18,6 +18,7 @@ Get a list of all Db targets in your BastionZero organization.
 ### Read-Only
 
 - `db_targets` (Attributes List) List of Db targets. (see [below for nested schema](#nestedatt--db_targets))
+- `id` (String, Deprecated) Deprecated. Do not depend on this attribute. This attribute will be removed in the future.
 
 <a id="nestedatt--db_targets"></a>
 ### Nested Schema for `db_targets`

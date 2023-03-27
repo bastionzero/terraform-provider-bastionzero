@@ -18,6 +18,7 @@ Get a list of all groups in your BastionZero organization.
 ### Read-Only
 
 - `groups` (Attributes List) List of groups. (see [below for nested schema](#nestedatt--groups))
+- `id` (String, Deprecated) Deprecated. Do not depend on this attribute. This attribute will be removed in the future.
 
 <a id="nestedatt--groups"></a>
 ### Nested Schema for `groups`

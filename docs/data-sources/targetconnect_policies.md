@@ -22,6 +22,7 @@ Get a list of all target connect policies in your BastionZero organization.
 
 ### Read-Only
 
+- `id` (String, Deprecated) Deprecated. Do not depend on this attribute. This attribute will be removed in the future.
 - `policies` (Attributes List) List of target connect policies. (see [below for nested schema](#nestedatt--policies))
 
 <a id="nestedatt--policies"></a>

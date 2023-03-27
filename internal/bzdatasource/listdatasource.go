@@ -12,6 +12,8 @@ import (
 	"github.com/jinzhu/copier"
 	dynamicstruct "github.com/ompluscator/dynamic-struct"
 	"golang.org/x/exp/maps"
+
+	"github.com/google/uuid"
 )
 
 // TFComputedModel is a struct that models a collection of TF schema attributes
@@ -119,6 +121,16 @@ func NewListDataSource[T TFComputedModel, T2 APIModel](config *ListDataSourceCon
 						Attributes: config.RecordSchema,
 					},
 				},
+				// Dummy "id" attribute. Required in order to test this data source.
+				//
+				// Source: https://github.com/hashicorp/terraform-plugin-testing/issues/84
+				// Source: https://github.com/hashicorp/terraform-plugin-testing/issues/84#issuecomment-1480006432
+				// Source: https://developer.hashicorp.com/terraform/plugin/framework/acctests#implement-id-attribute
+				"id": schema.StringAttribute{
+					Computed:           true,
+					Description:        "Deprecated. Do not depend on this attribute. This attribute will be removed in the future.",
+					DeprecationMessage: "Do not depend on this attribute. This attribute will be removed in the future.",
+				},
 			},
 		}
 	}
@@ -140,7 +152,10 @@ func NewListDataSource[T TFComputedModel, T2 APIModel](config *ListDataSourceCon
 		t.client = client
 	}
 	t.readFunc = func(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-		stateScaffold := struct{ Records []T }{}
+		stateScaffold := struct {
+			Records []T
+			Id      *string `tfsdk:"id"`
+		}{}
 
 		// Query BastionZero for list of API objects
 		tflog.Debug(ctx, fmt.Sprintf("Querying for %s", config.PrettyAttributeName))
@@ -161,6 +176,7 @@ func NewListDataSource[T TFComputedModel, T2 APIModel](config *ListDataSourceCon
 			return
 		}
 		stateScaffold.Records = models
+		stateScaffold.Id = bastionzero.PtrTo(uuid.New().String())
 
 		// Dynamically set the TF state struct's tfsdk tag
 		modelBuilder := dynamicstruct.ExtendStruct(stateScaffold)
@@ -243,6 +259,16 @@ func NewListDataSourceWithPractitionerParameters[T TFComputedModel, T2 TFNonComp
 					Attributes: config.RecordSchema,
 				},
 			},
+			// Dummy "id" attribute. Required in order to test this data source.
+			//
+			// Source: https://github.com/hashicorp/terraform-plugin-testing/issues/84
+			// Source: https://github.com/hashicorp/terraform-plugin-testing/issues/84#issuecomment-1480006432
+			// Source: https://developer.hashicorp.com/terraform/plugin/framework/acctests#implement-id-attribute
+			"id": schema.StringAttribute{
+				Computed:           true,
+				Description:        "Deprecated. Do not depend on this attribute. This attribute will be removed in the future.",
+				DeprecationMessage: "Do not depend on this attribute. This attribute will be removed in the future.",
+			},
 		}
 		// Add extra practitioner parameters
 		maps.Copy(attributes, config.PractitionerParamsRecordSchema)
@@ -273,7 +299,10 @@ func NewListDataSourceWithPractitionerParameters[T TFComputedModel, T2 TFNonComp
 	}
 	t.readFunc = func(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 		var userParamsModel T2
-		stateScaffold := struct{ Records []T }{}
+		stateScaffold := struct {
+			Records []T
+			Id      *string `tfsdk:"id"`
+		}{}
 
 		mergedModelBuilder := dynamicstruct.MergeStructs(stateScaffold, userParamsModel)
 
@@ -318,6 +347,7 @@ func NewListDataSourceWithPractitionerParameters[T TFComputedModel, T2 TFNonComp
 			return
 		}
 		stateScaffold.Records = models
+		stateScaffold.Id = bastionzero.PtrTo(uuid.New().String())
 
 		// Using reflection, copy values from records back into the merged model
 		// that is expected to be stored in TF state

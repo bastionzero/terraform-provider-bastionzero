@@ -18,6 +18,7 @@ Get a list of all dynamic access configuration (DAC) targets in your BastionZero
 ### Read-Only
 
 - `dac_targets` (Attributes List) List of dynamic access configuration targets. (see [below for nested schema](#nestedatt--dac_targets))
+- `id` (String, Deprecated) Deprecated. Do not depend on this attribute. This attribute will be removed in the future.
 
 <a id="nestedatt--dac_targets"></a>
 ### Nested Schema for `dac_targets`
