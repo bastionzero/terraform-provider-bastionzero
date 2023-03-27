@@ -50,6 +50,11 @@ type environmentTargetModel struct {
 	Type types.String `tfsdk:"type"`
 }
 
+func getEnvironmentTargetModelType(ctx context.Context) types.ObjectType {
+	attributeTypes, _ := internal.AttributeTypes[environmentTargetModel](ctx)
+	return types.ObjectType{AttrTypes: attributeTypes}
+}
+
 // setEnvironmentAttributes populates the TF schema data from an environment
 func setEnvironmentAttributes(ctx context.Context, schema *environmentModel, env *environments.Environment) {
 	schema.Name = types.StringValue(env.Name)
@@ -62,8 +67,8 @@ func setEnvironmentAttributes(ctx context.Context, schema *environmentModel, env
 	schema.TimeCreated = types.StringValue(env.TimeCreated.UTC().Format(time.RFC3339))
 
 	targetsMap := make(map[string]attr.Value)
-	attributeTypes, _ := internal.AttributeTypes[environmentTargetModel](ctx)
-	elementType := types.ObjectType{AttrTypes: attributeTypes}
+	elementType := getEnvironmentTargetModelType(ctx)
+	attributeTypes := elementType.AttrTypes
 	for _, target := range env.Targets {
 		targetsMap[target.ID] = types.ObjectValueMust(attributeTypes, map[string]attr.Value{
 			"id":   types.StringValue(target.ID),
