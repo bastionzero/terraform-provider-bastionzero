@@ -42,4 +42,8 @@ fmtcheck:
 website:
 	@echo "Use this site to preview markdown rendering: https://registry.terraform.io/tools/doc-preview"
 
-.PHONY: build generate test testacc vet goimports fmt fmtcheck website
+sweep:
+	@echo "WARNING: This will destroy infrastructure. Use only in development accounts."
+	go test ./bastionzero/sweep/... -v -sweep=1
+
+.PHONY: build generate test testacc vet goimports fmt fmtcheck website sweep
