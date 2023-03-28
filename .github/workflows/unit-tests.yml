@@ -1,0 +1,31 @@
+name: Unit Tests
+
+# Runs unit tests for pull requests and pushes to master.
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  unit:
+    # Runs `go vet` and unit tests.
+    strategy:
+      matrix:
+        go-version: [1.18.x, 1.19.x]
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: make vet
+        run: make vet
+
+      - name: make test
+        run: make test
