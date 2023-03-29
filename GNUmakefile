@@ -17,7 +17,8 @@ test: fmtcheck
 	echo $(TEST) | \
 		xargs -t -n4 go test -count=1 -timeout=30s -parallel=4
 
-testacc: TF_ACC=1 go test -v ./$(PKG_NAME)/... -count=1 -timeout $(ACCTEST_TIMEOUT) -parallel=$(ACCTEST_PARALLELISM)
+testacc: 
+	TF_ACC=1 go test -v ./$(PKG_NAME)/... -count=1 -timeout $(ACCTEST_TIMEOUT) -parallel=$(ACCTEST_PARALLELISM)
 
 vet:
 	@echo "go vet ."
