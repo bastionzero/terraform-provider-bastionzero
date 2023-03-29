@@ -40,10 +40,6 @@ jobs:
           - windows-latest
           - ubuntu-latest
         terraform:
-          - '0.12.*'
-          - '0.13.*'
-          - '0.14.*'
-          - '0.15.*'
           - '1.0.*'
           - '1.1.*'
           - '1.2.*'
@@ -63,3 +59,5 @@ jobs:
       run: make testacc
       env:
         ACCTEST_PARALLELISM: 10
+        BASTIONZERO_API_SECRET: ${{ secrets.ACCEPTANCE_TESTS_API_SECRET }}
+        BASTIONZERO_HOST: ${{ secrets.ACCEPTANCE_TESTS_BASTIONZERO_HOST }}
