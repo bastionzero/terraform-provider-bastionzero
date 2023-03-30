@@ -85,8 +85,8 @@ func PreCheck(ctx context.Context, t *testing.T) {
 					"api_secret":   tftypes.String,
 				},
 			}, map[string]tftypes.Value{
-				"api_endpoint": tftypes.NewValue(tftypes.String, ""),
-				"api_secret":   tftypes.NewValue(tftypes.String, ""),
+				"api_endpoint": tftypes.NewValue(tftypes.String, nil),
+				"api_secret":   tftypes.NewValue(tftypes.String, nil),
 			}),
 			Schema: schemaResponse.Schema,
 		}
