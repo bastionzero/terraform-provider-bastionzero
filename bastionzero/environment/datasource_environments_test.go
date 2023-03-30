@@ -41,6 +41,7 @@ func TestAccDataSourceEnvironments_Basic(t *testing.T) {
 					// resolved:
 					// https://github.com/hashicorp/terraform-plugin-testing/issues/68
 					acctest.CheckListHasElements(dataSourceName, "environments"),
+					resource.TestCheckTypeSetElemAttr(dataSourceName, "environments.*", "value1"),
 					resource.TestCheckTypeSetElemAttrPair(resourceName, "name", dataSourceName, "environments.*"),
 				),
 			},
