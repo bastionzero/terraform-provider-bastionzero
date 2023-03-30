@@ -40,7 +40,7 @@ func TestAccDataSourceEnvironments_Basic(t *testing.T) {
 					// don't want to add TF specific tests until this issue is
 					// resolved:
 					// https://github.com/hashicorp/terraform-plugin-testing/issues/68
-					acctest.CheckListHasElements("data.bastionzero_environments.envs", "environments"),
+					acctest.CheckListHasElements(dataSourceName, "environments"),
 					resource.TestCheckTypeSetElemAttrPair(resourceName, "name", dataSourceName, "environments.*"),
 				),
 			},
