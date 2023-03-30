@@ -1,168 +1,323 @@
 package environment_test
 
-// func TestAccEnvironment_CreateAndUpdate(t *testing.T) {
-// 	var env environments.Environment
-// 	name := acctest.RandomName()
-// 	resourceName := "bastionzero_environment.env"
+import (
+	"context"
+	"fmt"
+	"net/http"
+	"regexp"
+	"strconv"
+	"testing"
 
-// 	resource.Test(t, resource.TestCase{
-// 		PreCheck:                 func() { acctest.PreCheck(context.Background(), t) },
-// 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
-// 		CheckDestroy:             testAccCheckEnvironmentDestroy,
-// 		Steps: []resource.TestStep{
-// 			// Create environment
-// 			{
-// 				Config: environmentResourceTFConfig("env", &environmentResourceOptions{
-// 					Name:        &name,
-// 					Description: bastionzero.PtrTo("test")}),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					acctest.CheckEnvironmentExists(resourceName, &env),
-// 					testAccCheckEnvironmentAttributes(&env, &environmentResourceOptions{
-// 						Name:                       &name,
-// 						Description:                bastionzero.PtrTo("test"),
-// 						OfflineCleanupTimeoutHours: bastionzero.PtrTo(environment.DefaultOfflineCleanupTimeoutHours)}),
-// 					resource.TestCheckResourceAttr(resourceName, "name", name),
-// 					resource.TestCheckResourceAttr(resourceName, "description", "test"),
-// 					resource.TestCheckResourceAttr(resourceName, "offline_cleanup_timeout_hours", strconv.Itoa(environment.DefaultOfflineCleanupTimeoutHours)),
-// 					resource.TestCheckResourceAttr(resourceName, "is_default", "false"),
-// 					resource.TestCheckResourceAttr(resourceName, "targets.%", "0"),
-// 					resource.TestMatchResourceAttr(resourceName, "id", acctest.ExpectedIDRegEx()),
-// 					resource.TestMatchResourceAttr(resourceName, "organization_id", acctest.ExpectedIDRegEx()),
-// 					resource.TestMatchResourceAttr(resourceName, "time_created", acctest.ExpectedTimestampRegEx()),
-// 				),
-// 			},
-// 			// Modify description and cleanup timeout
-// 			{
-// 				Config: environmentResourceTFConfig("env", &environmentResourceOptions{
-// 					Name:                       &name,
-// 					Description:                bastionzero.PtrTo("new-desc"),
-// 					OfflineCleanupTimeoutHours: bastionzero.PtrTo(3000)}),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					acctest.CheckEnvironmentExists(resourceName, &env),
-// 					testAccCheckEnvironmentAttributes(&env, &environmentResourceOptions{
-// 						Name:                       &name,
-// 						Description:                bastionzero.PtrTo("new-desc"),
-// 						OfflineCleanupTimeoutHours: bastionzero.PtrTo(3000)}),
-// 					resource.TestCheckResourceAttr(resourceName, "name", name),
-// 					resource.TestCheckResourceAttr(resourceName, "description", "new-desc"),
-// 					resource.TestCheckResourceAttr(resourceName, "offline_cleanup_timeout_hours", strconv.Itoa(3000)),
-// 					resource.TestCheckResourceAttr(resourceName, "is_default", "false"),
-// 					resource.TestCheckResourceAttr(resourceName, "targets.%", "0"),
-// 					resource.TestMatchResourceAttr(resourceName, "id", acctest.ExpectedIDRegEx()),
-// 					resource.TestMatchResourceAttr(resourceName, "organization_id", acctest.ExpectedIDRegEx()),
-// 					resource.TestMatchResourceAttr(resourceName, "time_created", acctest.ExpectedTimestampRegEx()),
-// 				),
-// 			},
-// 		},
-// 	})
-// }
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/apierror"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/environments"
+	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/environment"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+)
 
-// func TestAccEnvironment_UpdateName(t *testing.T) {
-// 	var afterCreate, afterUpdate environments.Environment
-// 	name := acctest.RandomName()
-// 	name2 := acctest.RandomName()
-// 	resourceName := "bastionzero_environment.env"
+func TestAccEnvironment_Basic(t *testing.T) {
+	ctx := context.Background()
+	rName := acctest.RandomName()
+	resourceName := "bastionzero_environment.test"
+	var env environments.Environment
 
-// 	resource.Test(t, resource.TestCase{
-// 		PreCheck:                 func() { acctest.PreCheck(context.Background(), t) },
-// 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
-// 		CheckDestroy:             testAccCheckEnvironmentDestroy,
-// 		Steps: []resource.TestStep{
-// 			{
-// 				Config: environmentResourceTFConfig("env", &environmentResourceOptions{Name: &name}),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					acctest.CheckEnvironmentExists(resourceName, &afterCreate),
-// 					testAccCheckEnvironmentAttributes(&afterCreate, &environmentResourceOptions{Name: &name}),
-// 					resource.TestCheckResourceAttr(resourceName, "name", name),
-// 				),
-// 			},
-// 			// Change name should force re-create the resource
-// 			{
-// 				Config: environmentResourceTFConfig("env", &environmentResourceOptions{Name: &name2}),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					acctest.CheckEnvironmentExists(resourceName, &afterUpdate),
-// 					testAccCheckEnvironmentAttributes(&afterUpdate, &environmentResourceOptions{Name: &name2}),
-// 					resource.TestCheckResourceAttr(resourceName, "name", name2),
-// 					testAccCheckEnvironmentRecreated(t, &afterCreate, &afterUpdate),
-// 				),
-// 			},
-// 		},
-// 	})
-// }
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckEnvironmentDestroy,
+		Steps: []resource.TestStep{
+			// Verify create works for a config set with all required attributes
+			{
+				Config: testAccEnvironmentConfigName(rName),
+				Check: resource.ComposeTestCheckFunc(
+					// Check environment exists at BastionZero
+					testAccCheckEnvironmentExists(resourceName, &env),
+					// Check environment stored at BastionZero looks correct
+					testAccCheckEnvironmentAttributes(&env, &expectedEnvironmentResource{
+						Name:                       &rName,
+						Description:                bastionzero.PtrTo(""),
+						OfflineCleanupTimeoutHours: bastionzero.PtrTo(environment.DefaultOfflineCleanupTimeoutHours)},
+					),
+					// Check computed values in TF state are correct
+					testAccCheckResourceEnvironmentComputedAttr(resourceName),
+					// Check the state value we explicitly configured in this
+					// test is correct
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					// Check default values are set in state
+					resource.TestCheckResourceAttr(resourceName, "description", ""),
+					resource.TestCheckResourceAttr(resourceName, "offline_cleanup_timeout_hours", strconv.Itoa(environment.DefaultOfflineCleanupTimeoutHours)),
+				),
+			},
+			// Verify import works
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
 
-// type environmentResourceOptions struct {
-// 	Name                       *string
-// 	Description                *string
-// 	OfflineCleanupTimeoutHours *int
-// }
+func TestAccEnvironment_Disappears(t *testing.T) {
+	ctx := context.Background()
+	rName := acctest.RandomName()
+	resourceName := "bastionzero_environment.test"
+	var env environments.Environment
 
-// func environmentResourceTFConfig(resourceName string, opts *environmentResourceOptions) string {
-// 	var name, description, cleanupTimeout string
-// 	if opts.Name != nil {
-// 		name = acctest.SurroundDoubleQuote(*opts.Name)
-// 	} else {
-// 		name = "null"
-// 	}
-// 	if opts.Description != nil {
-// 		description = acctest.SurroundDoubleQuote(*opts.Description)
-// 	} else {
-// 		description = "null"
-// 	}
-// 	if opts.OfflineCleanupTimeoutHours != nil {
-// 		cleanupTimeout = strconv.Itoa(*opts.OfflineCleanupTimeoutHours)
-// 	} else {
-// 		cleanupTimeout = "null"
-// 	}
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckEnvironmentDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEnvironmentConfigName(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckEnvironmentExists(resourceName, &env),
+					acctest.CheckResourceDisappears(resourceName, func(c *bastionzero.Client, ctx context.Context, s string) (*http.Response, error) {
+						return c.Environments.DeleteEnvironment(ctx, resourceName)
+					}),
+				),
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
 
-// 	return fmt.Sprintf(`
-// resource "bastionzero_environment" "%s" {
-//   name   = %s
-//   description = %s
-//   offline_cleanup_timeout_hours = %s
-// }
-// `, resourceName, name, description, cleanupTimeout)
-// }
+func TestAccEnvironment_Description(t *testing.T) {
+	ctx := context.Background()
+	rName := acctest.RandomName()
+	desc1 := "description1"
+	desc2 := "description2"
+	resourceName := "bastionzero_environment.test"
+	var env1, env2 environments.Environment
 
-// func testAccCheckEnvironmentDestroy(s *terraform.State) error {
-// 	client := acctest.GetBastionZeroClient()
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckEnvironmentDestroy,
+		Steps: []resource.TestStep{
+			// Verify create works for a config that sets description
+			{
+				Config: testAccEnvironmentConfigDescription(rName, desc1),
+				Check: resource.ComposeTestCheckFunc(
+					// Check environment exists at BastionZero
+					testAccCheckEnvironmentExists(resourceName, &env1),
+					// Check environment stored at BastionZero looks correct
+					testAccCheckEnvironmentAttributes(&env1, &expectedEnvironmentResource{
+						Name:                       &rName,
+						Description:                bastionzero.PtrTo(desc1),
+						OfflineCleanupTimeoutHours: bastionzero.PtrTo(environment.DefaultOfflineCleanupTimeoutHours)},
+					),
+					// Check computed values in TF state are correct
+					testAccCheckResourceEnvironmentComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "description", desc1),
+					resource.TestCheckResourceAttr(resourceName, "offline_cleanup_timeout_hours", strconv.Itoa(environment.DefaultOfflineCleanupTimeoutHours)),
+				),
+			},
+			// Verify import
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Verify update description
+			{
+				Config: testAccEnvironmentConfigDescription(rName, desc2),
+				Check: resource.ComposeTestCheckFunc(
+					// Check environment exists at BastionZero
+					testAccCheckEnvironmentExists(resourceName, &env2),
+					// Check environment stored at BastionZero looks correct
+					testAccCheckEnvironmentAttributes(&env2, &expectedEnvironmentResource{
+						Name:                       &rName,
+						Description:                bastionzero.PtrTo(desc2),
+						OfflineCleanupTimeoutHours: bastionzero.PtrTo(environment.DefaultOfflineCleanupTimeoutHours)},
+					),
+					testAccCheckResourceEnvironmentComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "description", desc2),
+					resource.TestCheckResourceAttr(resourceName, "offline_cleanup_timeout_hours", strconv.Itoa(environment.DefaultOfflineCleanupTimeoutHours)),
+				),
+			},
+		},
+	})
+}
 
-// 	for _, rs := range s.RootModule().Resources {
-// 		if rs.Type != "bastionzero_environment" {
-// 			continue
-// 		}
+func TestAccEnvironment_OfflineCleanupTimeoutHours(t *testing.T) {
+	ctx := context.Background()
+	rName := acctest.RandomName()
+	timeout1 := 24
+	timeout2 := 48
+	resourceName := "bastionzero_environment.test"
+	var env1, env2 environments.Environment
 
-// 		// Try to find the environment
-// 		_, _, err := client.Environments.GetEnvironment(context.Background(), rs.Primary.ID)
-// 		if err != nil && !apierror.IsAPIErrorStatusCode(err, http.StatusNotFound) {
-// 			return fmt.Errorf("Error waiting for environment (%s) to be destroyed: %s", rs.Primary.ID, err)
-// 		}
-// 	}
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckEnvironmentDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEnvironmentConfigOfflineCleanupTimeoutHours(rName, strconv.Itoa(timeout1)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckEnvironmentExists(resourceName, &env1),
+					testAccCheckEnvironmentAttributes(&env1, &expectedEnvironmentResource{
+						Name:                       &rName,
+						Description:                bastionzero.PtrTo(""),
+						OfflineCleanupTimeoutHours: bastionzero.PtrTo(timeout1)},
+					),
+					testAccCheckResourceEnvironmentComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "offline_cleanup_timeout_hours", strconv.Itoa(timeout1)),
+					resource.TestCheckResourceAttr(resourceName, "description", ""),
+				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccEnvironmentConfigOfflineCleanupTimeoutHours(rName, strconv.Itoa(timeout2)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckEnvironmentExists(resourceName, &env2),
+					testAccCheckEnvironmentAttributes(&env2, &expectedEnvironmentResource{
+						Name:                       &rName,
+						Description:                bastionzero.PtrTo(""),
+						OfflineCleanupTimeoutHours: bastionzero.PtrTo(timeout2)},
+					),
+					testAccCheckResourceEnvironmentComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "offline_cleanup_timeout_hours", strconv.Itoa(timeout2)),
+					resource.TestCheckResourceAttr(resourceName, "description", ""),
+				),
+			},
+		},
+	})
+}
 
-// 	return nil
-// }
+func TestAccEnvironment_RecreateOnNameChange(t *testing.T) {
+	var afterCreate, afterUpdate environments.Environment
+	name := acctest.RandomName()
+	name2 := acctest.RandomName()
+	resourceName := "bastionzero_environment.env"
 
-// func testAccCheckEnvironmentRecreated(t *testing.T, before, after *environments.Environment) resource.TestCheckFunc {
-// 	return func(s *terraform.State) error {
-// 		if before.ID == after.ID {
-// 			t.Fatalf("Expected change of environment IDs, but both were %v", before.ID)
-// 		}
-// 		return nil
-// 	}
-// }
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(context.Background(), t) },
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckEnvironmentDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEnvironmentConfigName(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckEnvironmentExists(resourceName, &afterCreate),
+					testAccCheckEnvironmentAttributes(&afterCreate, &expectedEnvironmentResource{Name: &name}),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+				),
+			},
+			// Change name should force re-create the resource
+			{
+				Config: testAccEnvironmentConfigName(name2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckEnvironmentExists(resourceName, &afterUpdate),
+					testAccCheckEnvironmentAttributes(&afterUpdate, &expectedEnvironmentResource{Name: &name2}),
+					resource.TestCheckResourceAttr(resourceName, "name", name2),
+					testAccCheckEnvironmentRecreated(t, &afterCreate, &afterUpdate),
+				),
+			},
+		},
+	})
+}
 
-// func testAccCheckEnvironmentAttributes(env *environments.Environment, opts *environmentResourceOptions) resource.TestCheckFunc {
-// 	return func(s *terraform.State) error {
+func testAccEnvironmentConfigName(rName string) string {
+	return fmt.Sprintf(`
+resource "bastionzero_environment" "test" {
+  name = %[1]q
+}
+`, rName)
+}
 
-// 		if opts.Name != nil && *opts.Name != env.Name {
-// 			return fmt.Errorf("Bad name, expected \"%s\", got: %#v", *opts.Name, env.Name)
-// 		}
-// 		if opts.Description != nil && *opts.Description != env.Description {
-// 			return fmt.Errorf("Bad description, expected \"%s\", got: %#v", *opts.Description, env.Description)
-// 		}
-// 		if opts.OfflineCleanupTimeoutHours != nil && *opts.OfflineCleanupTimeoutHours != int(env.OfflineCleanupTimeoutHours) {
-// 			return fmt.Errorf("Bad offline_cleanup_timeout_hours, expected \"%v\", got: %#v", *opts.OfflineCleanupTimeoutHours, env.OfflineCleanupTimeoutHours)
-// 		}
+func testAccEnvironmentConfigDescription(rName string, description string) string {
+	return fmt.Sprintf(`
+resource "bastionzero_environment" "test" {
+  description = %[2]q
+  name = %[1]q
+}
+`, rName, description)
+}
 
-// 		return nil
-// 	}
-// }
+func testAccEnvironmentConfigOfflineCleanupTimeoutHours(rName string, timeoutHours string) string {
+	return fmt.Sprintf(`
+resource "bastionzero_environment" "test" {
+  offline_cleanup_timeout_hours = %[2]q
+  name = %[1]q
+}
+`, rName, timeoutHours)
+}
+
+type expectedEnvironmentResource struct {
+	Name                       *string
+	Description                *string
+	OfflineCleanupTimeoutHours *int
+}
+
+func testAccCheckEnvironmentAttributes(env *environments.Environment, expected *expectedEnvironmentResource) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+
+		if expected.Name != nil && *expected.Name != env.Name {
+			return fmt.Errorf("Bad name, expected \"%s\", got: %#v", *expected.Name, env.Name)
+		}
+		if expected.Description != nil && *expected.Description != env.Description {
+			return fmt.Errorf("Bad description, expected \"%s\", got: %#v", *expected.Description, env.Description)
+		}
+		if expected.OfflineCleanupTimeoutHours != nil && *expected.OfflineCleanupTimeoutHours != int(env.OfflineCleanupTimeoutHours) {
+			return fmt.Errorf("Bad offline_cleanup_timeout_hours, expected \"%v\", got: %#v", *expected.OfflineCleanupTimeoutHours, env.OfflineCleanupTimeoutHours)
+		}
+
+		return nil
+	}
+}
+
+// testAccCheckEnvironmentExists checks that namedTFResource exists in the
+// Terraform state and its ID represents an environment that exists at
+// BastionZero. If the environment is found, its value is stored at the provided
+// pointer.
+func testAccCheckEnvironmentExists(namedTFResource string, environment *environments.Environment) resource.TestCheckFunc {
+	return acctest.CheckExistsAtBastionZero(namedTFResource, environment, func(c *bastionzero.Client, ctx context.Context, s string) (*environments.Environment, *http.Response, error) {
+		return c.Environments.GetEnvironment(ctx, s)
+	})
+}
+
+// testAccCheckResourceEnvironmentComputedAttr checks all computed (read-only)
+// attributes of an environment resource match expected values
+func testAccCheckResourceEnvironmentComputedAttr(resourceName string) resource.TestCheckFunc {
+	return resource.ComposeTestCheckFunc(
+		resource.TestCheckResourceAttr(resourceName, "is_default", "false"),
+		resource.TestCheckResourceAttr(resourceName, "targets.%", "0"),
+		resource.TestMatchResourceAttr(resourceName, "id", regexp.MustCompile(acctest.UUIDV4RegexPattern)),
+		resource.TestMatchResourceAttr(resourceName, "organization_id", regexp.MustCompile(acctest.UUIDV4RegexPattern)),
+		resource.TestMatchResourceAttr(resourceName, "time_created", regexp.MustCompile(acctest.RFC3339RegexPattern)),
+	)
+}
+
+func testAccCheckEnvironmentDestroy(s *terraform.State) error {
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "bastionzero_environment" {
+			continue
+		}
+
+		// Try to find the environment
+		_, _, err := acctest.APIClient.Environments.GetEnvironment(context.Background(), rs.Primary.ID)
+		if err != nil && !apierror.IsAPIErrorStatusCode(err, http.StatusNotFound) {
+			return fmt.Errorf("Error waiting for environment (%s) to be destroyed: %s", rs.Primary.ID, err)
+		}
+	}
+
+	return nil
+}
+
+func testAccCheckEnvironmentRecreated(t *testing.T, before, after *environments.Environment) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if before.ID == after.ID {
+			t.Fatalf("Expected change of environment IDs, but both were %v", before.ID)
+		}
+		return nil
+	}
+}

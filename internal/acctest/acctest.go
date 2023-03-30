@@ -3,6 +3,7 @@ package acctest
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -10,7 +11,6 @@ import (
 	"testing"
 
 	bzapi "github.com/bastionzero/bastionzero-sdk-go/bastionzero"
-	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/environments"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
@@ -126,20 +126,19 @@ func RandomName(additionalNames ...string) string {
 // The provided pointer is set if there is no error when calling BastionZero. It
 // can be examined to check that what exists at BastionZero matches what is
 // actually set in the TF config/state.
-func CheckExistsAtBastionZero[T any](namedTFResource string, apiObject *T, f func(*bzapi.Client, context.Context, string) (*T, error)) resource.TestCheckFunc {
+func CheckExistsAtBastionZero[T any](namedTFResource string, apiObject *T, f func(*bzapi.Client, context.Context, string) (*T, *http.Response, error)) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		// Load from state
 		rs, ok := s.RootModule().Resources[namedTFResource]
 		if !ok {
-			return fmt.Errorf("Not found: %s", namedTFResource)
+			return fmt.Errorf("resource not found: %s", namedTFResource)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID set in the loaded resource")
+			return fmt.Errorf("resource ID missing: %s", namedTFResource)
 		}
 
 		// Try to find the API object
-		foundApiObject, err := f(APIClient, context.Background(), rs.Primary.ID)
+		foundApiObject, _, err := f(APIClient, context.Background(), rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -148,16 +147,6 @@ func CheckExistsAtBastionZero[T any](namedTFResource string, apiObject *T, f fun
 
 		return nil
 	}
-}
-
-// CheckEnvironmentExists checks that namedTFResource exists in the Terraform
-// state and its ID represents an environment that exists at BastionZero. If the
-// environment is found, its value is stored at the provided pointer.
-func CheckEnvironmentExists(namedTFResource string, environment *environments.Environment) resource.TestCheckFunc {
-	return CheckExistsAtBastionZero(namedTFResource, environment, func(c *bzapi.Client, ctx context.Context, s string) (*environments.Environment, error) {
-		foundEnv, _, err := c.Environments.GetEnvironment(ctx, s)
-		return foundEnv, err
-	})
 }
 
 // CheckListHasElements attempts to load a resource/datasource with name
@@ -183,6 +172,27 @@ func CheckListHasElements(namedTFResource, listAttributeName string) resource.Te
 
 		if total < 1 {
 			return fmt.Errorf("No %s retrieved", listAttributeName)
+		}
+
+		return nil
+	}
+}
+
+func CheckResourceDisappears(namedTFResource string, f func(*bzapi.Client, context.Context, string) (*http.Response, error)) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[namedTFResource]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", namedTFResource)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("resource ID missing: %s", namedTFResource)
+		}
+
+		// Try to delete the API object
+		_, err := f(APIClient, context.Background(), rs.Primary.ID)
+		if err != nil {
+			return err
 		}
 
 		return nil
