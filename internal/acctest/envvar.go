@@ -1,15 +1,12 @@
-package bztftest
+package acctest
 
-import (
-	"os"
-)
+import "os"
 
 // SetEnvironmentVariables sets environment variables and provides a cleanup
 // function to reset the modified environment variables back to their original
 // value.
 //
-// Source:
-// https://dev.to/arxeiss/auto-reset-environment-variables-when-testing-in-go-5ec
+// Source: https://dev.to/arxeiss/auto-reset-environment-variables-when-testing-in-go-5ec
 func SetEnvironmentVariables(envs map[string]string) func() {
 	originalEnvs := map[string]string{}
 
@@ -30,8 +27,4 @@ func SetEnvironmentVariables(envs map[string]string) func() {
 			}
 		}
 	}
-}
-
-func SurroundDoubleQuote(str string) string {
-	return "\"" + str + "\""
 }

@@ -4,19 +4,19 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/bastionzero/terraform-provider-bastionzero/internal/bztftest"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestProviderConfig_InvalidAPISecret(t *testing.T) {
 	// Clear env-var if set
-	closer := bztftest.SetEnvironmentVariables(map[string]string{
+	closer := acctest.SetEnvironmentVariables(map[string]string{
 		"BASTIONZERO_API_SECRET": "",
 	})
 	t.Cleanup(closer)
 
 	resource.UnitTest(t, resource.TestCase{
-		ProtoV6ProviderFactories: bztftest.TestProtoV6ProviderFactories,
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				// Missing secret
