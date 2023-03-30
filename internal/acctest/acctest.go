@@ -14,7 +14,9 @@ import (
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -68,16 +70,37 @@ func PreCheck(ctx context.Context, t *testing.T) {
 		}
 
 		// Create dummy provider so that we can access a properly configured
-		// BastionZero client
+		// BastionZero client and test provider configuration e2e
 		testProvider := bastionzero.New("test")()
 
+		// Get schema from the provider
+		schemaResponse := new(provider.SchemaResponse)
+		testProvider.Schema(ctx, provider.SchemaRequest{}, schemaResponse)
+
+		// Create empty config
+		testConfig := tfsdk.Config{
+			Raw: tftypes.NewValue(tftypes.Object{
+				AttributeTypes: map[string]tftypes.Type{
+					"api_endpoint": tftypes.String,
+					"api_secret":   tftypes.String,
+				},
+			}, map[string]tftypes.Value{
+				"api_endpoint": tftypes.NewValue(tftypes.String, ""),
+				"api_secret":   tftypes.NewValue(tftypes.String, ""),
+			}),
+			Schema: schemaResponse.Schema,
+		}
+
+		// Call Configure on the provider
 		configureResponse := new(provider.ConfigureResponse)
-		testProvider.Configure(ctx, provider.ConfigureRequest{}, configureResponse)
+		terraform.NewResourceConfigRaw(nil)
+		testProvider.Configure(ctx, provider.ConfigureRequest{Config: testConfig}, configureResponse)
+
+		// Parse the API client and save
 		apiClient, ok := configureResponse.ResourceData.(*bzapi.Client)
 		if !ok {
 			t.Fatalf("expected provider to contain a *bastionzero.Client in its ResourceData")
 		}
-
 		APIClient = apiClient
 	})
 }
