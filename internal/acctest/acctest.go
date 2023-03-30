@@ -126,7 +126,7 @@ func RandomName(additionalNames ...string) string {
 // The provided pointer is set if there is no error when calling BastionZero. It
 // can be examined to check that what exists at BastionZero matches what is
 // actually set in the TF config/state.
-func CheckExistsAtBastionZero[T any](namedTFResource string, apiObject *T, f func(*bzapi.Client, context.Context, string) (*T, *http.Response, error)) resource.TestCheckFunc {
+func CheckExistsAtBastionZero[T any](namedTFResource string, apiObject *T, f func(client *bzapi.Client, ctx context.Context, id string) (*T, *http.Response, error)) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[namedTFResource]
 		if !ok {
@@ -178,7 +178,7 @@ func CheckListHasElements(namedTFResource, listAttributeName string) resource.Te
 	}
 }
 
-func CheckResourceDisappears(namedTFResource string, f func(*bzapi.Client, context.Context, string) (*http.Response, error)) resource.TestCheckFunc {
+func CheckResourceDisappears(namedTFResource string, f func(client *bzapi.Client, ctx context.Context, id string) (*http.Response, error)) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[namedTFResource]
 		if !ok {

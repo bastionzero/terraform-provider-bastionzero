@@ -75,8 +75,8 @@ func TestAccEnvironment_Disappears(t *testing.T) {
 				Config: testAccEnvironmentConfigName(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEnvironmentExists(resourceName, &env),
-					acctest.CheckResourceDisappears(resourceName, func(c *bastionzero.Client, ctx context.Context, s string) (*http.Response, error) {
-						return c.Environments.DeleteEnvironment(ctx, resourceName)
+					acctest.CheckResourceDisappears(resourceName, func(c *bastionzero.Client, ctx context.Context, id string) (*http.Response, error) {
+						return c.Environments.DeleteEnvironment(ctx, id)
 					}),
 				),
 				ExpectNonEmptyPlan: true,
@@ -197,7 +197,7 @@ func TestAccEnvironment_RecreateOnNameChange(t *testing.T) {
 	var afterCreate, afterUpdate environments.Environment
 	name := acctest.RandomName()
 	name2 := acctest.RandomName()
-	resourceName := "bastionzero_environment.env"
+	resourceName := "bastionzero_environment.test"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(context.Background(), t) },
@@ -280,8 +280,8 @@ func testAccCheckEnvironmentAttributes(env *environments.Environment, expected *
 // BastionZero. If the environment is found, its value is stored at the provided
 // pointer.
 func testAccCheckEnvironmentExists(namedTFResource string, environment *environments.Environment) resource.TestCheckFunc {
-	return acctest.CheckExistsAtBastionZero(namedTFResource, environment, func(c *bastionzero.Client, ctx context.Context, s string) (*environments.Environment, *http.Response, error) {
-		return c.Environments.GetEnvironment(ctx, s)
+	return acctest.CheckExistsAtBastionZero(namedTFResource, environment, func(c *bastionzero.Client, ctx context.Context, id string) (*environments.Environment, *http.Response, error) {
+		return c.Environments.GetEnvironment(ctx, id)
 	})
 }
 
