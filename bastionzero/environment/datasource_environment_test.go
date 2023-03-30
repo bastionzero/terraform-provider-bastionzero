@@ -1,43 +1,51 @@
 package environment_test
 
-// func TestAccDataSourceEnvironment_BasicById(t *testing.T) {
-// 	var env environments.Environment
-// 	// Create random env name
-// 	name := acctest.RandomName()
+import (
+	"context"
+	"testing"
 
-// 	resourceConfig := fmt.Sprintf(`
-// 	resource "bastionzero_environment" "env" {
-// 		name = %v
-// 	}`, name)
-// 	dataSourceConfig := `
-// 	data "bastionzero_environment" "env" {
-// 		id = bastionzero_environment.env.id
-// 	}`
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/environments"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+)
 
-// 	dataSourceRefName := "data.bastionzero_environment.env"
-// 	resource.Test(t, resource.TestCase{
-// 		PreCheck:                 func() { acctest.PreCheck(context.Background(), t) },
-// 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
-// 		Steps: []resource.TestStep{
-// 			// First ensure we can create the resource
-// 			{
-// 				Config: resourceConfig,
-// 			},
-// 			// Read testing
-// 			{
-// 				Config: resourceConfig + dataSourceConfig,
-// 				Check: resource.ComposeTestCheckFunc(
-// 					acctest.CheckEnvironmentExists(dataSourceRefName, &env),
-// 					resource.TestCheckResourceAttr(dataSourceRefName, "name", name),
-// 					resource.TestCheckResourceAttr(dataSourceRefName, "description", ""),
-// 					resource.TestCheckResourceAttr(dataSourceRefName, "offline_cleanup_timeout_hours", strconv.Itoa(environment.DefaultOfflineCleanupTimeoutHours)),
-// 					resource.TestCheckResourceAttr(dataSourceRefName, "is_default", "false"),
-// 					resource.TestCheckResourceAttr(dataSourceRefName, "targets.%", "0"),
-// 					resource.TestMatchResourceAttr(dataSourceRefName, "id", regexp.MustCompile(acctest.UUIDV4RegexPattern)),
-// 					resource.TestMatchResourceAttr(dataSourceRefName, "organization_id", regexp.MustCompile(acctest.UUIDV4RegexPattern)),
-// 					resource.TestMatchResourceAttr(dataSourceRefName, "time_created", regexp.MustCompile(acctest.RFC3339RegexPattern)),
-// 				),
-// 			},
-// 		},
-// 	})
-// }
+func TestAccEnvironmentDataSource_ID(t *testing.T) {
+	ctx := context.Background()
+	rName := acctest.RandomName()
+	resourceName := "bastionzero_environment.test"
+	dataSourceName := "data.bastionzero_environment.test"
+	var env environments.Environment
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckEnvironmentDestroy,
+		Steps: []resource.TestStep{
+			// Check data source matches environment we create
+			{
+				Config: testAccEnvironmentDataSourceConfigID(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckEnvironmentExists(resourceName, &env),
+					resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "name"),
+					resource.TestCheckResourceAttrPair(resourceName, "description", dataSourceName, "description"),
+					resource.TestCheckResourceAttrPair(resourceName, "offline_cleanup_timeout_hours", dataSourceName, "offline_cleanup_timeout_hours"),
+					resource.TestCheckResourceAttrPair(resourceName, "id", dataSourceName, "id"),
+					resource.TestCheckResourceAttrPair(resourceName, "organization_id", dataSourceName, "organization_id"),
+					resource.TestCheckResourceAttrPair(resourceName, "time_created", dataSourceName, "time_created"),
+					resource.TestCheckResourceAttrPair(resourceName, "is_default", dataSourceName, "is_default"),
+					resource.TestCheckResourceAttrPair(resourceName, "targets", dataSourceName, "targets"),
+				),
+			},
+		},
+	})
+}
+
+func testAccEnvironmentDataSourceConfigID(rName string) string {
+	return acctest.ConfigCompose(
+		testAccEnvironmentConfigName(rName),
+		`
+data "bastionzero_environment" "test" {
+  id = bastionzero_environment.test.id
+}
+`)
+}
