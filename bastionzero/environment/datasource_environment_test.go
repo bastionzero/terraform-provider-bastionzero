@@ -21,9 +21,13 @@ func TestAccEnvironmentDataSource_ID(t *testing.T) {
 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckEnvironmentDestroy,
 		Steps: []resource.TestStep{
-			// Check data source matches environment we create
+			// First create a resource
 			{
-				Config: testAccEnvironmentDataSourceConfigID(rName),
+				Config: testAccEnvironmentConfigName(rName),
+			},
+			// Then, check data source matches environment we create
+			{
+				Config: acctest.ConfigCompose(testAccEnvironmentConfigName(rName), testAccEnvironmentDataSourceConfigID()),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEnvironmentExists(resourceName, &env),
 					resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "name"),
@@ -40,12 +44,10 @@ func TestAccEnvironmentDataSource_ID(t *testing.T) {
 	})
 }
 
-func testAccEnvironmentDataSourceConfigID(rName string) string {
-	return acctest.ConfigCompose(
-		testAccEnvironmentConfigName(rName),
-		`
+func testAccEnvironmentDataSourceConfigID() string {
+	return `
 data "bastionzero_environment" "test" {
   id = bastionzero_environment.test.id
 }
-`)
+`
 }
