@@ -52,7 +52,7 @@ func TestAccDataSourceEnvironments_Basic(t *testing.T) {
 					acctest.CheckListHasElements(dataSourceName, "environments"),
 					resource.TestCheckTypeSetElemAttr(dataSourceName, "environments.*", "value1"),
 					resource.TestCheckTypeSetElemAttrPair(resourceName, "name", dataSourceName, "environments.*.name"),
-					foo(resourceName, keys, dataSourceName, "environments"),
+					foo(resourceName, keys, dataSourceName, "environments.*"),
 				),
 			},
 		},
