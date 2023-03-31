@@ -200,9 +200,9 @@ func CheckListHasElements(namedTFResource, listAttributeName string) resource.Te
 // of keys. Otherwise, if keys list is empty, it is assumed all key and value
 // pairs should be asserted to exist in one of the nested objects under a list
 // or set block (specified by attr).
-func CheckTypeSetElemNestedAttrsFromResource(nameFirst string, keys []string, nameSecond string, attr string) resource.TestCheckFunc {
+func CheckTypeSetElemNestedAttrsFromResource(t *testing.T, nameFirst string, keys []string, nameSecond string, attr string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		rs1, ok := s.RootModule().Resources[nameFirst]
+		rs, ok := s.RootModule().Resources[nameFirst]
 		if !ok {
 			return fmt.Errorf("resource not found: %s", nameFirst)
 		}
@@ -215,15 +215,19 @@ func CheckTypeSetElemNestedAttrsFromResource(nameFirst string, keys []string, na
 				keysMap[v] = struct{}{}
 			}
 
-			// Create expected, nested object using only select keys
+			// Create expected, nested object using only select keys from
+			// provided resource
 			values = make(map[string]string, 0)
-			for k, v := range rs1.Primary.Attributes {
+			for k, v := range rs.Primary.Attributes {
 				if _, ok := keysMap[k]; ok {
 					values[k] = v
 				}
 			}
 		} else {
-			values = rs1.Primary.Attributes
+			// Otherwise, assume all key and value pairs to exist in a nested
+			// object
+			values = rs.Primary.Attributes
+			t.Logf("values: %#v", values)
 		}
 
 		return resource.TestCheckTypeSetElemNestedAttrs(nameSecond, attr, values)(s)

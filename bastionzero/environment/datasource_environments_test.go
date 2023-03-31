@@ -36,7 +36,7 @@ func TestAccDataSourceEnvironments_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEnvironmentExists(resourceName, &env),
 					acctest.CheckListHasElements(dataSourceName, "environments"),
-					acctest.CheckTypeSetElemNestedAttrsFromResource(resourceName, []string{}, dataSourceName, "environments.*"),
+					acctest.CheckTypeSetElemNestedAttrsFromResource(t, resourceName, []string{}, dataSourceName, "environments.*"),
 				),
 			},
 		},
