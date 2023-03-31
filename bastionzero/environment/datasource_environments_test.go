@@ -82,7 +82,7 @@ func foo(nameFirst string, keys []string, nameSecond string, attr string) resour
 		values := make(map[string]string, 0)
 		for k, v := range rs1Attr {
 			if _, ok := keysMap[k]; ok {
-				rs1Attr[k] = v
+				values[k] = v
 			}
 		}
 
