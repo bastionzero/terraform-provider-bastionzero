@@ -200,7 +200,7 @@ func CheckListHasElements(namedTFResource, listAttributeName string) resource.Te
 // of keys. Otherwise, if keys list is empty, it is assumed all key and value
 // pairs should be asserted to exist in one of the nested objects under a list
 // or set block (specified by attr).
-func CheckTypeSetElemNestedAttrsFromResource(t *testing.T, nameFirst string, keys []string, nameSecond string, attr string) resource.TestCheckFunc {
+func CheckTypeSetElemNestedAttrsFromResource(nameFirst string, keys []string, nameSecond string, attr string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[nameFirst]
 		if !ok {
@@ -227,13 +227,15 @@ func CheckTypeSetElemNestedAttrsFromResource(t *testing.T, nameFirst string, key
 			// Otherwise, assume all key and value pairs to exist in a nested
 			// object
 			values = rs.Primary.Attributes
-			t.Logf("values: %#v", values)
 		}
 
 		return resource.TestCheckTypeSetElemNestedAttrs(nameSecond, attr, values)(s)
 	}
 }
 
+// CheckResourceDisappears loads namedTFResource from the Terraform state and
+// runs f to delete the API object at BastionZero. The ID passed to f is taken
+// from the state file
 func CheckResourceDisappears(namedTFResource string, f func(client *bzapi.Client, ctx context.Context, id string) (*http.Response, error)) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[namedTFResource]
