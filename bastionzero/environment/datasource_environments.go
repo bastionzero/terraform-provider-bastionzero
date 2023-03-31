@@ -14,7 +14,7 @@ import (
 func NewEnvironmentsDataSource() datasource.DataSource {
 	return bzdatasource.NewListDataSource(&bzdatasource.ListDataSourceConfig[environmentModel, environments.Environment]{
 		BaseListDataSourceConfig: &bzdatasource.BaseListDataSourceConfig[environmentModel, environments.Environment]{
-			RecordSchema:        internal.ResourceSchemaToDataSourceSchema(MakeEnvironmentResourceSchema(), nil),
+			RecordSchema:        internal.ResourceSchemaToDataSourceSchema(makeEnvironmentResourceSchema(), nil),
 			ResultAttributeName: "environments",
 			PrettyAttributeName: "environments",
 			FlattenAPIModel: func(ctx context.Context, apiObject *environments.Environment) (state *environmentModel, diags diag.Diagnostics) {

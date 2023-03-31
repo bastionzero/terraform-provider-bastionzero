@@ -79,6 +79,15 @@ func TestAccEnvironment_Disappears(t *testing.T) {
 						return c.Environments.DeleteEnvironment(ctx, id)
 					}),
 				),
+				// The resource was deleted in CheckResourceDisappears (if no
+				// error occurs in calling the API); therefore, the final plan
+				// should not be empty (it should ask to re-create the object
+				// since it was deleted by someone else).
+				//
+				// See:
+				// https://developer.hashicorp.com/terraform/plugin/testing/testing-patterns#built-in-patterns
+				// and
+				// https://github.com/hashicorp/terraform-provider-aws/blob/main/docs/running-and-writing-acceptance-tests.md#disappears-acceptance-tests
 				ExpectNonEmptyPlan: true,
 			},
 		},

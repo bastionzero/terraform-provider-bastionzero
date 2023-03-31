@@ -190,6 +190,46 @@ func CheckListHasElements(namedTFResource, listAttributeName string) resource.Te
 	}
 }
 
+// CheckTypeSetElemNestedAttrsFromResource ensures a subset map of values is
+// stored in state for the given name (nameSecond) and key (attr) combination of
+// attributes nested under a list or set block. The expected subset map is built
+// by copying one for one the key and value combinations found at nameFirst in
+// the state.
+//
+// Optionally, copy certain key and value cominations by providing a whitelist
+// of keys. Otherwise, if keys list is empty, it is assumed all key and value
+// pairs should be asserted to exist in one of the nested objects under a list
+// or set block (specified by attr).
+func CheckTypeSetElemNestedAttrsFromResource(nameFirst string, keys []string, nameSecond string, attr string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs1, ok := s.RootModule().Resources[nameFirst]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", nameFirst)
+		}
+
+		var values map[string]string
+		if len(keys) > 0 {
+			// Build dictionary of keys to filter for in resource
+			keysMap := make(map[string]struct{})
+			for _, v := range keys {
+				keysMap[v] = struct{}{}
+			}
+
+			// Create expected, nested object using only select keys
+			values = make(map[string]string, 0)
+			for k, v := range rs1.Primary.Attributes {
+				if _, ok := keysMap[k]; ok {
+					values[k] = v
+				}
+			}
+		} else {
+			values = rs1.Primary.Attributes
+		}
+
+		return resource.TestCheckTypeSetElemNestedAttrs(nameSecond, attr, values)(s)
+	}
+}
+
 func CheckResourceDisappears(namedTFResource string, f func(client *bzapi.Client, ctx context.Context, id string) (*http.Response, error)) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[namedTFResource]

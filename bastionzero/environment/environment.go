@@ -78,7 +78,7 @@ func setEnvironmentAttributes(ctx context.Context, schema *environmentModel, env
 	schema.Targets = types.MapValueMust(elementType, targetsMap)
 }
 
-func MakeEnvironmentResourceSchema() map[string]schema.Attribute {
+func makeEnvironmentResourceSchema() map[string]schema.Attribute {
 	res := map[string]schema.Attribute{
 		"id": schema.StringAttribute{
 			Computed: true,
