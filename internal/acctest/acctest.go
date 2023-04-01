@@ -257,7 +257,7 @@ func CheckResourceDisappears(namedTFResource string, f func(client *bzapi.Client
 	}
 }
 
-func ToTerraformList(arr []string) string {
+func ToTerraformStringList(arr []string) string {
 	// Source: https://stackoverflow.com/questions/24489384/how-to-print-the-values-of-slices#comment126502244_53672500
 	return strings.ReplaceAll(fmt.Sprintf("%+q", arr), "\" \"", "\",\"")
 }
