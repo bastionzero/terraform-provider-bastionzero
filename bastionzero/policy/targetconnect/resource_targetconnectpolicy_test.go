@@ -176,7 +176,7 @@ func TestAccTargetConnectPolicy_TargetUsers(t *testing.T) {
 					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
 					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
 						Name:        &rName,
-						TargetUsers: &[]policies.TargetUser{{Username: "bar"}, {Username: "foo"}},
+						TargetUsers: &[]policies.TargetUser{{Username: "bar"}},
 					}),
 					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
 					resource.TestCheckTypeSetElemAttr(resourceName, "target_users.*", "bar"),
