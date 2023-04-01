@@ -35,7 +35,7 @@ func TestAccEnvironment_Basic(t *testing.T) {
 					// Check environment exists at BastionZero
 					testAccCheckEnvironmentExists(resourceName, &env),
 					// Check environment stored at BastionZero looks correct
-					testAccCheckEnvironmentAttributes(&env, &expectedEnvironmentResource{
+					testAccCheckEnvironmentAttributes(&env, &expectedEnvironment{
 						Name:                       &rName,
 						Description:                bastionzero.PtrTo(""),
 						OfflineCleanupTimeoutHours: bastionzero.PtrTo(environment.DefaultOfflineCleanupTimeoutHours)},
@@ -114,7 +114,7 @@ func TestAccEnvironment_Description(t *testing.T) {
 					// Check environment exists at BastionZero
 					testAccCheckEnvironmentExists(resourceName, &env1),
 					// Check environment stored at BastionZero looks correct
-					testAccCheckEnvironmentAttributes(&env1, &expectedEnvironmentResource{
+					testAccCheckEnvironmentAttributes(&env1, &expectedEnvironment{
 						Name:                       &rName,
 						Description:                bastionzero.PtrTo(desc1),
 						OfflineCleanupTimeoutHours: bastionzero.PtrTo(environment.DefaultOfflineCleanupTimeoutHours)},
@@ -138,7 +138,7 @@ func TestAccEnvironment_Description(t *testing.T) {
 					// Check environment exists at BastionZero
 					testAccCheckEnvironmentExists(resourceName, &env2),
 					// Check environment stored at BastionZero looks correct
-					testAccCheckEnvironmentAttributes(&env2, &expectedEnvironmentResource{
+					testAccCheckEnvironmentAttributes(&env2, &expectedEnvironment{
 						Name:                       &rName,
 						Description:                bastionzero.PtrTo(desc2),
 						OfflineCleanupTimeoutHours: bastionzero.PtrTo(environment.DefaultOfflineCleanupTimeoutHours)},
@@ -169,7 +169,7 @@ func TestAccEnvironment_OfflineCleanupTimeoutHours(t *testing.T) {
 				Config: testAccEnvironmentConfigOfflineCleanupTimeoutHours(rName, strconv.Itoa(timeout1)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEnvironmentExists(resourceName, &env1),
-					testAccCheckEnvironmentAttributes(&env1, &expectedEnvironmentResource{
+					testAccCheckEnvironmentAttributes(&env1, &expectedEnvironment{
 						Name:                       &rName,
 						Description:                bastionzero.PtrTo(""),
 						OfflineCleanupTimeoutHours: bastionzero.PtrTo(timeout1)},
@@ -188,7 +188,7 @@ func TestAccEnvironment_OfflineCleanupTimeoutHours(t *testing.T) {
 				Config: testAccEnvironmentConfigOfflineCleanupTimeoutHours(rName, strconv.Itoa(timeout2)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEnvironmentExists(resourceName, &env2),
-					testAccCheckEnvironmentAttributes(&env2, &expectedEnvironmentResource{
+					testAccCheckEnvironmentAttributes(&env2, &expectedEnvironment{
 						Name:                       &rName,
 						Description:                bastionzero.PtrTo(""),
 						OfflineCleanupTimeoutHours: bastionzero.PtrTo(timeout2)},
@@ -217,7 +217,7 @@ func TestAccEnvironment_RecreateOnNameChange(t *testing.T) {
 				Config: testAccEnvironmentConfigName(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEnvironmentExists(resourceName, &afterCreate),
-					testAccCheckEnvironmentAttributes(&afterCreate, &expectedEnvironmentResource{Name: &name}),
+					testAccCheckEnvironmentAttributes(&afterCreate, &expectedEnvironment{Name: &name}),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 				),
 			},
@@ -226,7 +226,7 @@ func TestAccEnvironment_RecreateOnNameChange(t *testing.T) {
 				Config: testAccEnvironmentConfigName(name2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEnvironmentExists(resourceName, &afterUpdate),
-					testAccCheckEnvironmentAttributes(&afterUpdate, &expectedEnvironmentResource{Name: &name2}),
+					testAccCheckEnvironmentAttributes(&afterUpdate, &expectedEnvironment{Name: &name2}),
 					resource.TestCheckResourceAttr(resourceName, "name", name2),
 					testAccCheckEnvironmentRecreated(t, &afterCreate, &afterUpdate),
 				),
@@ -261,13 +261,13 @@ resource "bastionzero_environment" "test" {
 `, rName, timeoutHours)
 }
 
-type expectedEnvironmentResource struct {
+type expectedEnvironment struct {
 	Name                       *string
 	Description                *string
 	OfflineCleanupTimeoutHours *int
 }
 
-func testAccCheckEnvironmentAttributes(env *environments.Environment, expected *expectedEnvironmentResource) resource.TestCheckFunc {
+func testAccCheckEnvironmentAttributes(env *environments.Environment, expected *expectedEnvironment) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 
 		if expected.Name != nil && *expected.Name != env.Name {
