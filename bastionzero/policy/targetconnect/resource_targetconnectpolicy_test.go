@@ -289,25 +289,32 @@ func TestAccTargetConnectPolicy_Subjects(t *testing.T) {
 	var policy1, policy2 policies.TargetConnectPolicy
 	subject1 := new(policies.Subject)
 	subject2 := new(policies.Subject)
-
-	// These checks are here because we need subject1 and subject2 to have
-	// values before constructing arguments for Test block below. Otherwise, any
-	// preemptive pointer dereference will have the values set to nil
-	acctest.PreCheck(ctx, t)
-	// Find two users or skip this entire test
-	findTwoUsersOrSkip(t, ctx, subject1, subject2)
+	subjects1 := new([]policies.Subject)
+	subjects2 := new([]policies.Subject)
+	subjects1TF := new(types.Set)
+	subjects2TF := new(types.Set)
 
 	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			acctest.PreCheck(ctx, t)
+			// Find two users or skip this entire test
+			findTwoUsersOrSkip(t, ctx, subject1, subject2)
+
+			*subjects1 = []policies.Subject{*subject1}
+			*subjects2 = []policies.Subject{*subject2}
+			*subjects1TF = policy.FlattenPolicySubjects(ctx, *subjects1)
+			*subjects2TF = policy.FlattenPolicySubjects(ctx, *subjects2)
+		},
 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckTargetConnectPolicyDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccTargetConnectPolicyConfigSubjects(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicySubjects(ctx, []policies.Subject{*subject1})),
+				Config: testAccTargetConnectPolicyConfigSubjects(rName, []string{"foo"}, []string{string(verbtype.Shell)}, subjects1TF),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTargetConnectPolicyExists(resourceName, &policy1),
 					testAccCheckTargetConnectPolicyAttributes(t, &policy1, &expectedTargetConnectPolicy{
 						Name:     &rName,
-						Subjects: &[]policies.Subject{*subject1},
+						Subjects: subjects1,
 					}),
 					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
 					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "subjects.*", map[string]string{"id": subject1.ID, "type": string(subject1.Type)}),
@@ -321,12 +328,12 @@ func TestAccTargetConnectPolicy_Subjects(t *testing.T) {
 			},
 			// Verify update subjects
 			{
-				Config: testAccTargetConnectPolicyConfigSubjects(rName, []string{"foo"}, []string{string(verbtype.Tunnel)}, policy.FlattenPolicySubjects(ctx, []policies.Subject{*subject2})),
+				Config: testAccTargetConnectPolicyConfigSubjects(rName, []string{"foo"}, []string{string(verbtype.Tunnel)}, subjects2TF),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
 					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
 						Name:     &rName,
-						Subjects: &[]policies.Subject{*subject2},
+						Subjects: subjects2,
 					}),
 					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
 					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "subjects.*", map[string]string{"id": subject2.ID, "type": string(subject2.Type)}),
@@ -373,7 +380,7 @@ resource "bastionzero_targetconnect_policy" "test" {
 `, rName, acctest.ToTerraformStringList(targetUsers), acctest.ToTerraformStringList(verbs), description)
 }
 
-func testAccTargetConnectPolicyConfigSubjects(rName string, targetUsers []string, verbs []string, subjects types.Set) string {
+func testAccTargetConnectPolicyConfigSubjects(rName string, targetUsers []string, verbs []string, subjects *types.Set) string {
 	// 	 targets = [
 	//    {
 	//      id   = "cb0aecd0-2aae-4b2b-acda-5197250f1851",
