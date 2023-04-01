@@ -31,7 +31,7 @@ func TestAccTargetConnectPolicy_Basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Verify create works for a config set with all required attributes
 			{
-				Config: testAccTargetConnectPolicyConfigBasic(rName, []string{"foo", "bar"}, []string{"Shell"}),
+				Config: testAccTargetConnectPolicyConfigBasic(rName, []string{"foo", "bar"}, []string{string(verbtype.Shell)}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTargetConnectPolicyExists(resourceName, &policy),
 					testAccCheckTargetConnectPolicyAttributes(t, &policy, &expectedTargetConnectPolicy{
@@ -50,10 +50,9 @@ func TestAccTargetConnectPolicy_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckTypeSetElemAttr(resourceName, "target_users.*", "foo"),
 					resource.TestCheckTypeSetElemAttr(resourceName, "target_users.*", "bar"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "verbs.*", "Shell"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "verbs.*", string(verbtype.Shell)),
 					// Check default values are set in state
 					resource.TestCheckResourceAttr(resourceName, "description", ""),
-					resource.TestCheckResourceAttr(resourceName, "type", string(policytype.TargetConnect)),
 					// Check that unspecified values remain null
 					resource.TestCheckNoResourceAttr(resourceName, "subjects"),
 					resource.TestCheckNoResourceAttr(resourceName, "groups"),
@@ -66,6 +65,122 @@ func TestAccTargetConnectPolicy_Basic(t *testing.T) {
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccTargetConnectPolicy_Disappears(t *testing.T) {
+	ctx := context.Background()
+	rName := acctest.RandomName()
+	resourceName := "bastionzero_targetconnect_policy.test"
+	var policy policies.TargetConnectPolicy
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckTargetConnectPolicyDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTargetConnectPolicyConfigBasic(rName, []string{"foo"}, []string{string(verbtype.Tunnel)}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy),
+					acctest.CheckResourceDisappears(resourceName, func(c *bastionzero.Client, ctx context.Context, id string) (*http.Response, error) {
+						return c.Policies.DeleteTargetConnectPolicy(ctx, id)
+					}),
+				),
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
+
+func TestAccTargetConnectPolicy_Name(t *testing.T) {
+	ctx := context.Background()
+	rName1 := acctest.RandomName()
+	rName2 := acctest.RandomName()
+	resourceName := "bastionzero_targetconnect_policy.test"
+	var policy1, policy2 policies.TargetConnectPolicy
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckTargetConnectPolicyDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTargetConnectPolicyConfigBasic(rName1, []string{"foo"}, []string{string(verbtype.Shell)}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy1),
+					testAccCheckTargetConnectPolicyAttributes(t, &policy1, &expectedTargetConnectPolicy{
+						Name: &rName1,
+					}),
+					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", rName1),
+				),
+			},
+			// Verify import works
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Verify update name
+			{
+				Config: testAccTargetConnectPolicyConfigBasic(rName2, []string{"foo"}, []string{string(verbtype.Shell)}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
+					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
+						Name: &rName2,
+					}),
+					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", rName2),
+				),
+			},
+		},
+	})
+}
+
+func TestAccTargetConnectPolicy_TargetUsers(t *testing.T) {
+	ctx := context.Background()
+	rName := acctest.RandomName()
+	resourceName := "bastionzero_targetconnect_policy.test"
+	var policy1, policy2 policies.TargetConnectPolicy
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckTargetConnectPolicyDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTargetConnectPolicyConfigBasic(rName, []string{"foo"}, []string{string(verbtype.Shell)}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy1),
+					testAccCheckTargetConnectPolicyAttributes(t, &policy1, &expectedTargetConnectPolicy{
+						Name:        &rName,
+						TargetUsers: &[]policies.TargetUser{{Username: "foo"}},
+					}),
+					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
+					resource.TestCheckTypeSetElemAttr(resourceName, "target_users.*", "foo"),
+				),
+			},
+			// Verify import works
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Verify update name
+			{
+				Config: testAccTargetConnectPolicyConfigBasic(rName, []string{"bar"}, []string{string(verbtype.Shell)}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
+					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
+						Name:        &rName,
+						TargetUsers: &[]policies.TargetUser{{Username: "bar"}, {Username: "foo"}},
+					}),
+					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
+					resource.TestCheckTypeSetElemAttr(resourceName, "target_users.*", "bar"),
+				),
 			},
 		},
 	})
@@ -133,6 +248,7 @@ func testAccCheckTargetConnectPolicyExists(namedTFResource string, policy *polic
 func testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName string) resource.TestCheckFunc {
 	return resource.ComposeTestCheckFunc(
 		resource.TestMatchResourceAttr(resourceName, "id", regexp.MustCompile(acctest.UUIDV4RegexPattern)),
+		resource.TestCheckResourceAttr(resourceName, "type", string(policytype.TargetConnect)),
 	)
 }
 

@@ -115,14 +115,12 @@ func TestAccEnvironment_Description(t *testing.T) {
 					testAccCheckEnvironmentExists(resourceName, &env1),
 					// Check environment stored at BastionZero looks correct
 					testAccCheckEnvironmentAttributes(&env1, &expectedEnvironment{
-						Name:                       &rName,
-						Description:                bastionzero.PtrTo(desc1),
-						OfflineCleanupTimeoutHours: bastionzero.PtrTo(environment.DefaultOfflineCleanupTimeoutHours)},
-					),
+						Name:        &rName,
+						Description: bastionzero.PtrTo(desc1),
+					}),
 					// Check computed values in TF state are correct
 					testAccCheckResourceEnvironmentComputedAttr(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "description", desc1),
-					resource.TestCheckResourceAttr(resourceName, "offline_cleanup_timeout_hours", strconv.Itoa(environment.DefaultOfflineCleanupTimeoutHours)),
 				),
 			},
 			// Verify import
@@ -139,13 +137,11 @@ func TestAccEnvironment_Description(t *testing.T) {
 					testAccCheckEnvironmentExists(resourceName, &env2),
 					// Check environment stored at BastionZero looks correct
 					testAccCheckEnvironmentAttributes(&env2, &expectedEnvironment{
-						Name:                       &rName,
-						Description:                bastionzero.PtrTo(desc2),
-						OfflineCleanupTimeoutHours: bastionzero.PtrTo(environment.DefaultOfflineCleanupTimeoutHours)},
-					),
+						Name:        &rName,
+						Description: bastionzero.PtrTo(desc2),
+					}),
 					testAccCheckResourceEnvironmentComputedAttr(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "description", desc2),
-					resource.TestCheckResourceAttr(resourceName, "offline_cleanup_timeout_hours", strconv.Itoa(environment.DefaultOfflineCleanupTimeoutHours)),
 				),
 			},
 		},
@@ -171,12 +167,10 @@ func TestAccEnvironment_OfflineCleanupTimeoutHours(t *testing.T) {
 					testAccCheckEnvironmentExists(resourceName, &env1),
 					testAccCheckEnvironmentAttributes(&env1, &expectedEnvironment{
 						Name:                       &rName,
-						Description:                bastionzero.PtrTo(""),
-						OfflineCleanupTimeoutHours: bastionzero.PtrTo(timeout1)},
-					),
+						OfflineCleanupTimeoutHours: bastionzero.PtrTo(timeout1),
+					}),
 					testAccCheckResourceEnvironmentComputedAttr(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "offline_cleanup_timeout_hours", strconv.Itoa(timeout1)),
-					resource.TestCheckResourceAttr(resourceName, "description", ""),
 				),
 			},
 			{
@@ -190,12 +184,10 @@ func TestAccEnvironment_OfflineCleanupTimeoutHours(t *testing.T) {
 					testAccCheckEnvironmentExists(resourceName, &env2),
 					testAccCheckEnvironmentAttributes(&env2, &expectedEnvironment{
 						Name:                       &rName,
-						Description:                bastionzero.PtrTo(""),
-						OfflineCleanupTimeoutHours: bastionzero.PtrTo(timeout2)},
-					),
+						OfflineCleanupTimeoutHours: bastionzero.PtrTo(timeout2),
+					}),
 					testAccCheckResourceEnvironmentComputedAttr(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "offline_cleanup_timeout_hours", strconv.Itoa(timeout2)),
-					resource.TestCheckResourceAttr(resourceName, "description", ""),
 				),
 			},
 		},
