@@ -19,8 +19,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// targetConnectPolicyModel maps the target connect policy schema data.
-type targetConnectPolicyModel struct {
+// TargetConnectPolicyModel maps the target connect policy schema data.
+type TargetConnectPolicyModel struct {
 	ID           types.String `tfsdk:"id"`
 	Name         types.String `tfsdk:"name"`
 	Type         types.String `tfsdk:"type"`
@@ -33,19 +33,19 @@ type targetConnectPolicyModel struct {
 	Verbs        types.Set    `tfsdk:"verbs"`
 }
 
-func (m *targetConnectPolicyModel) SetID(value types.String)          { m.ID = value }
-func (m *targetConnectPolicyModel) SetName(value types.String)        { m.Name = value }
-func (m *targetConnectPolicyModel) SetType(value types.String)        { m.Type = value }
-func (m *targetConnectPolicyModel) SetDescription(value types.String) { m.Description = value }
-func (m *targetConnectPolicyModel) SetSubjects(value types.Set)       { m.Subjects = value }
-func (m *targetConnectPolicyModel) SetGroups(value types.Set)         { m.Groups = value }
+func (m *TargetConnectPolicyModel) SetID(value types.String)          { m.ID = value }
+func (m *TargetConnectPolicyModel) SetName(value types.String)        { m.Name = value }
+func (m *TargetConnectPolicyModel) SetType(value types.String)        { m.Type = value }
+func (m *TargetConnectPolicyModel) SetDescription(value types.String) { m.Description = value }
+func (m *TargetConnectPolicyModel) SetSubjects(value types.Set)       { m.Subjects = value }
+func (m *TargetConnectPolicyModel) SetGroups(value types.Set)         { m.Groups = value }
 
-func (m *targetConnectPolicyModel) GetSubjects() types.Set { return m.Subjects }
-func (m *targetConnectPolicyModel) GetGroups() types.Set   { return m.Groups }
+func (m *TargetConnectPolicyModel) GetSubjects() types.Set { return m.Subjects }
+func (m *TargetConnectPolicyModel) GetGroups() types.Set   { return m.Groups }
 
-// setTargetConnectPolicyAttributes populates the TF schema data from a target
+// SetTargetConnectPolicyAttributes populates the TF schema data from a target
 // connect policy
-func setTargetConnectPolicyAttributes(ctx context.Context, schema *targetConnectPolicyModel, apiPolicy *policies.TargetConnectPolicy, modelIsDataSource bool) {
+func SetTargetConnectPolicyAttributes(ctx context.Context, schema *TargetConnectPolicyModel, apiPolicy *policies.TargetConnectPolicy, modelIsDataSource bool) {
 	policy.SetBasePolicyAttributes(ctx, schema, apiPolicy, modelIsDataSource)
 
 	// See comment in SetBasePolicyAttributes that explains this conditional
@@ -61,6 +61,21 @@ func setTargetConnectPolicyAttributes(ctx context.Context, schema *targetConnect
 	// the refreshed value is
 	schema.TargetUsers = policy.FlattenPolicyTargetUsers(ctx, apiPolicy.GetTargetUsers())
 	schema.Verbs = FlattenPolicyVerbs(ctx, apiPolicy.GetVerbs())
+
+}
+
+func ExpandTargetConnectPolicy(ctx context.Context, schema *TargetConnectPolicyModel) *policies.TargetConnectPolicy {
+	p := new(policies.TargetConnectPolicy)
+	p.Name = schema.Name.ValueString()
+	p.Description = internal.StringFromFramework(ctx, schema.Description)
+	p.Subjects = bastionzero.PtrTo(policy.ExpandPolicySubjects(ctx, schema.Subjects))
+	p.Groups = bastionzero.PtrTo(policy.ExpandPolicyGroups(ctx, schema.Groups))
+	p.Environments = bastionzero.PtrTo(policy.ExpandPolicyEnvironments(ctx, schema.Environments))
+	p.Targets = bastionzero.PtrTo(policy.ExpandPolicyTargets(ctx, schema.Targets))
+	p.TargetUsers = bastionzero.PtrTo(policy.ExpandPolicyTargetUsers(ctx, schema.TargetUsers))
+	p.Verbs = bastionzero.PtrTo(ExpandPolicyVerbs(ctx, schema.Verbs))
+
+	return p
 }
 
 func ExpandPolicyVerbs(ctx context.Context, tfSet types.Set) []policies.Verb {

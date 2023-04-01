@@ -4,313 +4,83 @@ import (
 	"context"
 	"testing"
 
-	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal/testgen/bzpolicygen"
 	"github.com/stretchr/testify/require"
+	"pgregory.net/rapid"
 )
 
-func TestFlatExpandPolicySubjects(t *testing.T) {
-	elementType := policy.GetPolicySubjectModelType(context.Background())
-	attributeTypes := elementType.AttrTypes
+func TestFlatExpandPolicySubjects_NoDataLoss(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		genAPI := rapid.SliceOf(bzpolicygen.PolicySubjectGen()).Draw(t, "Subjects")
 
-	cases := []struct {
-		setSubjects basetypes.SetValue
-		expected    []policies.Subject
-	}{
-		// simple
-		{
-			setSubjects: basetypes.NewSetValueMust(elementType, []attr.Value{
-				basetypes.NewObjectValueMust(attributeTypes, map[string]attr.Value{
-					"id":   basetypes.NewStringValue("id"),
-					"type": basetypes.NewStringValue("type"),
-				}),
-			}),
-			expected: []policies.Subject{
-				{ID: "id", Type: "type"},
-			},
-		},
-		// many
-		{
-			setSubjects: basetypes.NewSetValueMust(elementType, []attr.Value{
-				basetypes.NewObjectValueMust(attributeTypes, map[string]attr.Value{
-					"id":   basetypes.NewStringValue("id"),
-					"type": basetypes.NewStringValue("type"),
-				}),
-				basetypes.NewObjectValueMust(attributeTypes, map[string]attr.Value{
-					"id":   basetypes.NewStringValue("id2"),
-					"type": basetypes.NewStringValue("type2"),
-				}),
-			}),
-			expected: []policies.Subject{
-				{ID: "id", Type: "type"},
-				{ID: "id2", Type: "type2"},
-			},
-		},
-		// missing field value
-		{
-			setSubjects: basetypes.NewSetValueMust(elementType, []attr.Value{
-				basetypes.NewObjectValueMust(attributeTypes, map[string]attr.Value{
-					"id":   basetypes.NewStringValue("id"),
-					"type": basetypes.NewStringValue(""),
-				}),
-				basetypes.NewObjectValueMust(attributeTypes, map[string]attr.Value{
-					"id":   basetypes.NewStringValue("id2"),
-					"type": basetypes.NewStringValue(""),
-				}),
-			}),
-			expected: []policies.Subject{
-				{ID: "id", Type: ""},
-				{ID: "id2", Type: ""},
-			},
-		},
-	}
+		// Flatten the generated BastionZero type into a TF type
+		flattened := policy.FlattenPolicySubjects(context.Background(), genAPI)
 
-	for _, c := range cases {
-		// Expand
-		gotExpand := policy.ExpandPolicySubjects(context.Background(), c.setSubjects)
-		require.EqualValues(t, c.expected, gotExpand)
+		// Then expand the value back into a BastionZero API type
+		expanded := policy.ExpandPolicySubjects(context.Background(), flattened)
 
-		// Flatten back
-		gotFlatten := policy.FlattenPolicySubjects(context.Background(), gotExpand)
-		require.EqualValues(t, c.setSubjects, gotFlatten)
-	}
+		// And assert no data loss occurred
+		require.EqualValues(t, genAPI, expanded)
+	})
 }
 
-func TestFlatExpandPolicyGroups(t *testing.T) {
-	elementType := policy.GetPolicyGroupModelType(context.Background())
-	attributeTypes := elementType.AttrTypes
+func TestFlatExpandPolicyGroups_NoDataLoss(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		genAPI := rapid.SliceOf(bzpolicygen.PolicyGroupGen()).Draw(t, "Groups")
 
-	cases := []struct {
-		setGroups basetypes.SetValue
-		expected  []policies.Group
-	}{
-		// simple
-		{
-			setGroups: basetypes.NewSetValueMust(elementType, []attr.Value{
-				basetypes.NewObjectValueMust(attributeTypes, map[string]attr.Value{
-					"id":   basetypes.NewStringValue("id"),
-					"name": basetypes.NewStringValue("name"),
-				}),
-			}),
-			expected: []policies.Group{
-				{ID: "id", Name: "name"},
-			},
-		},
-		// many
-		{
-			setGroups: basetypes.NewSetValueMust(elementType, []attr.Value{
-				basetypes.NewObjectValueMust(attributeTypes, map[string]attr.Value{
-					"id":   basetypes.NewStringValue("id"),
-					"name": basetypes.NewStringValue("name"),
-				}),
-				basetypes.NewObjectValueMust(attributeTypes, map[string]attr.Value{
-					"id":   basetypes.NewStringValue("id2"),
-					"name": basetypes.NewStringValue("name2"),
-				}),
-			}),
-			expected: []policies.Group{
-				{ID: "id", Name: "name"},
-				{ID: "id2", Name: "name2"},
-			},
-		},
-		// missing field value
-		{
-			setGroups: basetypes.NewSetValueMust(elementType, []attr.Value{
-				basetypes.NewObjectValueMust(attributeTypes, map[string]attr.Value{
-					"id":   basetypes.NewStringValue("id"),
-					"name": basetypes.NewStringValue(""),
-				}),
-				basetypes.NewObjectValueMust(attributeTypes, map[string]attr.Value{
-					"id":   basetypes.NewStringValue("id2"),
-					"name": basetypes.NewStringValue(""),
-				}),
-			}),
-			expected: []policies.Group{
-				{ID: "id", Name: ""},
-				{ID: "id2", Name: ""},
-			},
-		},
-	}
+		// Flatten the generated BastionZero type into a TF type
+		flattened := policy.FlattenPolicyGroups(context.Background(), genAPI)
 
-	for _, c := range cases {
-		// Expand
-		gotExpand := policy.ExpandPolicyGroups(context.Background(), c.setGroups)
-		require.EqualValues(t, c.expected, gotExpand)
+		// Then expand the value back into a BastionZero API type
+		expanded := policy.ExpandPolicyGroups(context.Background(), flattened)
 
-		// Flatten back
-		gotFlatten := policy.FlattenPolicyGroups(context.Background(), gotExpand)
-		require.EqualValues(t, c.setGroups, gotFlatten)
-	}
+		// And assert no data loss occurred
+		require.EqualValues(t, genAPI, expanded)
+	})
 }
 
-func TestFlatExpandEnvironments(t *testing.T) {
-	elementType := basetypes.StringType{}
+func TestFlatExpandPolicyEnvironments_NoDataLoss(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		genAPI := rapid.SliceOf(bzpolicygen.PolicyEnvironmentGen()).Draw(t, "Environments")
 
-	cases := []struct {
-		setEnvs  basetypes.SetValue
-		expected []policies.Environment
-	}{
-		// simple
-		{
-			setEnvs: basetypes.NewSetValueMust(elementType, []attr.Value{
-				types.StringValue("env"),
-			}),
-			expected: []policies.Environment{
-				{ID: "env"},
-			},
-		},
-		// many
-		{
-			setEnvs: basetypes.NewSetValueMust(elementType, []attr.Value{
-				types.StringValue("env1"),
-				types.StringValue("env2"),
-			}),
-			expected: []policies.Environment{
-				{ID: "env1"},
-				{ID: "env2"},
-			},
-		},
-		// missing field value
-		{
-			setEnvs: basetypes.NewSetValueMust(elementType, []attr.Value{
-				types.StringValue("env1"),
-				types.StringValue(""),
-			}),
-			expected: []policies.Environment{
-				{ID: "env1"},
-				{ID: ""},
-			},
-		},
-	}
+		// Flatten the generated BastionZero type into a TF type
+		flattened := policy.FlattenPolicyEnvironments(context.Background(), genAPI)
 
-	for _, c := range cases {
-		// Expand
-		gotExpand := policy.ExpandPolicyEnvironments(context.Background(), c.setEnvs)
-		require.EqualValues(t, c.expected, gotExpand)
+		// Then expand the value back into a BastionZero API type
+		expanded := policy.ExpandPolicyEnvironments(context.Background(), flattened)
 
-		// Flatten back
-		gotFlatten := policy.FlattenPolicyEnvironments(context.Background(), gotExpand)
-		require.EqualValues(t, c.setEnvs, gotFlatten)
-	}
+		// And assert no data loss occurred
+		require.EqualValues(t, genAPI, expanded)
+	})
 }
 
-func TestFlatExpandPolicyTargets(t *testing.T) {
-	elementType := policy.GetPolicyTargetModelType(context.Background())
-	attributeTypes := elementType.AttrTypes
+func TestFlatExpandPolicyTargets_NoDataLoss(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		genAPI := rapid.SliceOf(bzpolicygen.PolicyTargetGen()).Draw(t, "Targets")
 
-	cases := []struct {
-		setTargets basetypes.SetValue
-		expected   []policies.Target
-	}{
-		// simple
-		{
-			setTargets: basetypes.NewSetValueMust(elementType, []attr.Value{
-				basetypes.NewObjectValueMust(attributeTypes, map[string]attr.Value{
-					"id":   basetypes.NewStringValue("id"),
-					"type": basetypes.NewStringValue("type"),
-				}),
-			}),
-			expected: []policies.Target{
-				{ID: "id", Type: "type"},
-			},
-		},
-		// many
-		{
-			setTargets: basetypes.NewSetValueMust(elementType, []attr.Value{
-				basetypes.NewObjectValueMust(attributeTypes, map[string]attr.Value{
-					"id":   basetypes.NewStringValue("id"),
-					"type": basetypes.NewStringValue("type"),
-				}),
-				basetypes.NewObjectValueMust(attributeTypes, map[string]attr.Value{
-					"id":   basetypes.NewStringValue("id2"),
-					"type": basetypes.NewStringValue("type2"),
-				}),
-			}),
-			expected: []policies.Target{
-				{ID: "id", Type: "type"},
-				{ID: "id2", Type: "type2"},
-			},
-		},
-		// missing field value
-		{
-			setTargets: basetypes.NewSetValueMust(elementType, []attr.Value{
-				basetypes.NewObjectValueMust(attributeTypes, map[string]attr.Value{
-					"id":   basetypes.NewStringValue("id"),
-					"type": basetypes.NewStringValue(""),
-				}),
-				basetypes.NewObjectValueMust(attributeTypes, map[string]attr.Value{
-					"id":   basetypes.NewStringValue("id2"),
-					"type": basetypes.NewStringValue(""),
-				}),
-			}),
-			expected: []policies.Target{
-				{ID: "id", Type: ""},
-				{ID: "id2", Type: ""},
-			},
-		},
-	}
+		// Flatten the generated BastionZero type into a TF type
+		flattened := policy.FlattenPolicyTargets(context.Background(), genAPI)
 
-	for _, c := range cases {
-		// Expand
-		gotExpand := policy.ExpandPolicyTargets(context.Background(), c.setTargets)
-		require.EqualValues(t, c.expected, gotExpand)
+		// Then expand the value back into a BastionZero API type
+		expanded := policy.ExpandPolicyTargets(context.Background(), flattened)
 
-		// Flatten back
-		gotFlatten := policy.FlattenPolicyTargets(context.Background(), gotExpand)
-		require.EqualValues(t, c.setTargets, gotFlatten)
-	}
+		// And assert no data loss occurred
+		require.EqualValues(t, genAPI, expanded)
+	})
 }
 
-func TestFlatExpandTargetUsers(t *testing.T) {
-	elementType := basetypes.StringType{}
+func TestFlatExpandPolicyTargetUsers_NoDataLoss(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		genAPI := rapid.SliceOf(bzpolicygen.PolicyTargetUserGen()).Draw(t, "TargetUsers")
 
-	cases := []struct {
-		setTargetUsers basetypes.SetValue
-		expected       []policies.TargetUser
-	}{
-		// simple
-		{
-			setTargetUsers: basetypes.NewSetValueMust(elementType, []attr.Value{
-				types.StringValue("user"),
-			}),
-			expected: []policies.TargetUser{
-				{Username: "user"},
-			},
-		},
-		// many
-		{
-			setTargetUsers: basetypes.NewSetValueMust(elementType, []attr.Value{
-				types.StringValue("user1"),
-				types.StringValue("user2"),
-			}),
-			expected: []policies.TargetUser{
-				{Username: "user1"},
-				{Username: "user2"},
-			},
-		},
-		// missing field value
-		{
-			setTargetUsers: basetypes.NewSetValueMust(elementType, []attr.Value{
-				types.StringValue("user1"),
-				types.StringValue(""),
-			}),
-			expected: []policies.TargetUser{
-				{Username: "user1"},
-				{Username: ""},
-			},
-		},
-	}
+		// Flatten the generated BastionZero type into a TF type
+		flattened := policy.FlattenPolicyTargetUsers(context.Background(), genAPI)
 
-	for _, c := range cases {
-		// Expand
-		gotExpand := policy.ExpandPolicyTargetUsers(context.Background(), c.setTargetUsers)
-		require.EqualValues(t, c.expected, gotExpand)
+		// Then expand the value back into a BastionZero API type
+		expanded := policy.ExpandPolicyTargetUsers(context.Background(), flattened)
 
-		// Flatten back
-		gotFlatten := policy.FlattenPolicyTargetUsers(context.Background(), gotExpand)
-		require.EqualValues(t, c.setTargetUsers, gotFlatten)
-	}
+		// And assert no data loss occurred
+		require.EqualValues(t, genAPI, expanded)
+	})
 }

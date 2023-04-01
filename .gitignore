@@ -4,3 +4,4 @@ examples/*/*.tfstate.backup
 .terraform
 .terraform.lock.hcl
 examples/test
+**/testdata

@@ -9,7 +9,6 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/apierror"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy"
-	"github.com/bastionzero/terraform-provider-bastionzero/internal"
 	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -71,22 +70,14 @@ func (r *targetConnectPolicyResource) Schema(ctx context.Context, _ resource.Sch
 // Create creates the target connect policy resource and sets the initial Terraform state.
 func (r *targetConnectPolicyResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Read Terraform plan data into the model
-	var plan targetConnectPolicyModel
+	var plan TargetConnectPolicyModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Generate API request body from plan
-	p := new(policies.TargetConnectPolicy)
-	p.Name = plan.Name.ValueString()
-	p.Description = internal.StringFromFramework(ctx, plan.Description)
-	p.Subjects = bastionzero.PtrTo(policy.ExpandPolicySubjects(ctx, plan.Subjects))
-	p.Groups = bastionzero.PtrTo(policy.ExpandPolicyGroups(ctx, plan.Groups))
-	p.Environments = bastionzero.PtrTo(policy.ExpandPolicyEnvironments(ctx, plan.Environments))
-	p.Targets = bastionzero.PtrTo(policy.ExpandPolicyTargets(ctx, plan.Targets))
-	p.TargetUsers = bastionzero.PtrTo(policy.ExpandPolicyTargetUsers(ctx, plan.TargetUsers))
-	p.Verbs = bastionzero.PtrTo(ExpandPolicyVerbs(ctx, plan.Verbs))
+	p := ExpandTargetConnectPolicy(ctx, &plan)
 
 	ctx = tflog.SetField(ctx, "policy_name", p.Name)
 
@@ -103,7 +94,7 @@ func (r *targetConnectPolicyResource) Create(ctx context.Context, req resource.C
 	ctx = tflog.SetField(ctx, "policy_id", createResp.ID)
 	tflog.Debug(ctx, "Created target connect policy")
 
-	setTargetConnectPolicyAttributes(ctx, &plan, createResp, false)
+	SetTargetConnectPolicyAttributes(ctx, &plan, createResp, false)
 
 	// Set state to fully populated data
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
@@ -112,7 +103,7 @@ func (r *targetConnectPolicyResource) Create(ctx context.Context, req resource.C
 // Read refreshes the target connect policy Terraform state with the latest data.
 func (r *targetConnectPolicyResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// Read Terraform prior state data into the model
-	var state targetConnectPolicyModel
+	var state TargetConnectPolicyModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -134,7 +125,7 @@ func (r *targetConnectPolicyResource) Read(ctx context.Context, req resource.Rea
 	}
 	tflog.Debug(ctx, "Queried for target connect policy")
 
-	setTargetConnectPolicyAttributes(ctx, &state, p, false)
+	SetTargetConnectPolicyAttributes(ctx, &state, p, false)
 
 	// Overwrite with refreshed state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -144,7 +135,7 @@ func (r *targetConnectPolicyResource) Read(ctx context.Context, req resource.Rea
 // on success.
 func (r *targetConnectPolicyResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	// Read Terraform plan and current state data into the model
-	var plan, state targetConnectPolicyModel
+	var plan, state TargetConnectPolicyModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -191,7 +182,7 @@ func (r *targetConnectPolicyResource) Update(ctx context.Context, req resource.U
 		return
 	}
 
-	setTargetConnectPolicyAttributes(ctx, &plan, updateResp, false)
+	SetTargetConnectPolicyAttributes(ctx, &plan, updateResp, false)
 
 	// Overwrite with refreshed state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
@@ -201,7 +192,7 @@ func (r *targetConnectPolicyResource) Update(ctx context.Context, req resource.U
 // success.
 func (r *targetConnectPolicyResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	// Retrieve values from state
-	var state targetConnectPolicyModel
+	var state TargetConnectPolicyModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return

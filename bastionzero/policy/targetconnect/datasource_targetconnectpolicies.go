@@ -15,15 +15,15 @@ import (
 
 func NewTargetConnectPoliciesDataSource() datasource.DataSource {
 	return bzdatasource.NewListDataSourceWithPractitionerParameters(
-		&bzdatasource.ListDataSourceWithPractitionerParametersConfig[targetConnectPolicyModel, policy.ListPolicyParametersModel, policies.TargetConnectPolicy]{
-			BaseListDataSourceConfig: &bzdatasource.BaseListDataSourceConfig[targetConnectPolicyModel, policies.TargetConnectPolicy]{
+		&bzdatasource.ListDataSourceWithPractitionerParametersConfig[TargetConnectPolicyModel, policy.ListPolicyParametersModel, policies.TargetConnectPolicy]{
+			BaseListDataSourceConfig: &bzdatasource.BaseListDataSourceConfig[TargetConnectPolicyModel, policies.TargetConnectPolicy]{
 				RecordSchema:        internal.ResourceSchemaToDataSourceSchema(makeTargetConnectPolicyResourceSchema(), nil),
 				MetadataTypeName:    "targetconnect_policies",
 				ResultAttributeName: "policies",
 				PrettyAttributeName: "target connect policies",
-				FlattenAPIModel: func(ctx context.Context, apiObject *policies.TargetConnectPolicy) (state *targetConnectPolicyModel, diags diag.Diagnostics) {
-					state = new(targetConnectPolicyModel)
-					setTargetConnectPolicyAttributes(ctx, state, apiObject, true)
+				FlattenAPIModel: func(ctx context.Context, apiObject *policies.TargetConnectPolicy) (state *TargetConnectPolicyModel, diags diag.Diagnostics) {
+					state = new(TargetConnectPolicyModel)
+					SetTargetConnectPolicyAttributes(ctx, state, apiObject, true)
 					return
 				},
 				Description: "Get a list of all target connect policies in your BastionZero organization.",
