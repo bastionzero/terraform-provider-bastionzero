@@ -10,6 +10,7 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/apierror"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/policytype"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/verbtype"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -31,7 +32,7 @@ func TestAccTargetConnectPolicy_Basic(t *testing.T) {
 			// Verify create works for a config set with all required attributes
 			{
 				Config: testAccTargetConnectPolicyConfigBasic(rName, []string{"foo", "bar"}, []string{"Shell"}),
-				Check: resource.ComposeAggregateTestCheckFunc(
+				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTargetConnectPolicyExists(resourceName, &policy),
 					testAccCheckTargetConnectPolicyAttributes(t, &policy, &expectedTargetConnectPolicy{
 						Name:         &rName,
@@ -40,18 +41,20 @@ func TestAccTargetConnectPolicy_Basic(t *testing.T) {
 						Groups:       &[]policies.Group{},
 						Environments: &[]policies.Environment{},
 						Targets:      &[]policies.Target{},
-						TargetUsers:  &[]policies.TargetUser{{Username: "foo"}, {Username: "baz"}},
+						TargetUsers:  &[]policies.TargetUser{{Username: "foo"}, {Username: "bar"}},
 						Verbs:        &[]policies.Verb{{Type: verbtype.Shell}},
 					}),
 					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
 					// Check the state value we explicitly configured in this
 					// test is correct
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
-					resource.TestCheckTypeSetElemAttr(resourceName, "target_users", "foo"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "target_users", "bar"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "verbs", "Shell"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "target_users.*", "foo"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "target_users.*", "bar"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "verbs.*", "Shell"),
+					// Check default values are set in state
+					resource.TestCheckResourceAttr(resourceName, "description", ""),
+					resource.TestCheckResourceAttr(resourceName, "type", string(policytype.TargetConnect)),
 					// Check that unspecified values remain null
-					resource.TestCheckNoResourceAttr(resourceName, "description"),
 					resource.TestCheckNoResourceAttr(resourceName, "subjects"),
 					resource.TestCheckNoResourceAttr(resourceName, "groups"),
 					resource.TestCheckNoResourceAttr(resourceName, "environments"),
