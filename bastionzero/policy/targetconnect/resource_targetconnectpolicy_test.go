@@ -291,15 +291,16 @@ func TestAccTargetConnectPolicy_Subjects(t *testing.T) {
 	subjects1 := new([]policies.Subject)
 	subjects2 := new([]policies.Subject)
 
+	// Find two users or skip this entire test
+	findTwoUsersOrSkip(t, ctx, subjects1, subjects2)
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckTargetConnectPolicyDestroy,
 		Steps: []resource.TestStep{
 			{
-				// Find two users or skip this entire test
-				PreConfig: func() { findTwoUsersOrSkip(t, ctx, subjects1, subjects2) },
-				Config:    testAccTargetConnectPolicyConfigSubjects(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicySubjects(ctx, *subjects1)),
+				Config: testAccTargetConnectPolicyConfigSubjects(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicySubjects(ctx, *subjects1)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTargetConnectPolicyExists(resourceName, &policy1),
 					testAccCheckTargetConnectPolicyAttributes(t, &policy1, &expectedTargetConnectPolicy{
