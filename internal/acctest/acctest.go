@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	bzapi "github.com/bastionzero/bastionzero-sdk-go/bastionzero"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
@@ -49,6 +50,17 @@ func init() {
 		"bastionzero": providerserver.NewProtocol6WithError(bastionzero.New("test")()),
 	}
 
+}
+
+// SkipIfNotInAcceptanceTestMode performs the same check that the
+// terraform-plugin-testing library performs to see if the test should be
+// executed or not. Its logic is duplicated here, so we can call it ourselves
+// before the Test() block in case there are additional things that need to be
+// done that cannot be done in PreConfig() or PreCheck()
+func SkipIfNotInAcceptanceTestMode(t *testing.T) {
+	if os.Getenv(resource.EnvTfAcc) == "" {
+		t.Skip(fmt.Sprintf("Acceptance tests skipped unless env '%s' set", resource.EnvTfAcc))
+	}
 }
 
 // PreCheck verifies and sets required provider testing configuration
@@ -255,6 +267,23 @@ func CheckResourceDisappears(namedTFResource string, f func(client *bzapi.Client
 
 		return nil
 	}
+}
+
+// FindTwoUsersOrSkip lists the users in the BastionZero organization and sets
+// subject1 and subject2 to the first two users found. If there are less than 2
+// users, then the current test is skipped.
+func FindTwoUsersOrSkip(t *testing.T, ctx context.Context, subjects1, subjects2 *policies.Subject) {
+	users, _, err := APIClient.Users.ListUsers(ctx)
+	if err != nil {
+		t.Fatalf("failed to list users: %s", err)
+	}
+
+	if len(users) < 2 {
+		t.Skipf("skipping %s because we need at least two users to test correctly but have %v", t.Name(), len(users))
+	}
+
+	*subjects1 = policies.Subject{ID: users[0].ID, Type: users[0].GetSubjectType()}
+	*subjects2 = policies.Subject{ID: users[1].ID, Type: users[1].GetSubjectType()}
 }
 
 func ToTerraformStringList(arr []string) string {

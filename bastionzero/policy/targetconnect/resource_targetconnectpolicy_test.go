@@ -267,7 +267,7 @@ func TestAccTargetConnectPolicy_Description(t *testing.T) {
 			},
 			// Verify update description
 			{
-				Config: testAccTargetConnectPolicyConfigDescription(rName, []string{"foo"}, []string{string(verbtype.Tunnel)}, desc2),
+				Config: testAccTargetConnectPolicyConfigDescription(rName, []string{"foo"}, []string{string(verbtype.Shell)}, desc2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
 					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
@@ -289,32 +289,28 @@ func TestAccTargetConnectPolicy_Subjects(t *testing.T) {
 	var policy1, policy2 policies.TargetConnectPolicy
 	subject1 := new(policies.Subject)
 	subject2 := new(policies.Subject)
-	subjects1 := new([]policies.Subject)
-	subjects2 := new([]policies.Subject)
-	subjects1TF := new(types.Set)
-	subjects2TF := new(types.Set)
+
+	// These checks are here, instead of being inlined in PreCheck field,
+	// because we need subject1 and subject2 to have values before using them as
+	// arguments in the Test block below. Otherwise, any preemptive pointer
+	// dereference (e.g. in the TestSteps) will have the values set to nil which
+	// is not what we want.
+	acctest.SkipIfNotInAcceptanceTestMode(t)
+	acctest.PreCheck(ctx, t)
+	// Find two users or skip this entire test
+	acctest.FindTwoUsersOrSkip(t, ctx, subject1, subject2)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			acctest.PreCheck(ctx, t)
-			// Find two users or skip this entire test
-			findTwoUsersOrSkip(t, ctx, subject1, subject2)
-
-			*subjects1 = []policies.Subject{*subject1}
-			*subjects2 = []policies.Subject{*subject2}
-			*subjects1TF = policy.FlattenPolicySubjects(ctx, *subjects1)
-			*subjects2TF = policy.FlattenPolicySubjects(ctx, *subjects2)
-		},
 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckTargetConnectPolicyDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccTargetConnectPolicyConfigSubjects(rName, []string{"foo"}, []string{string(verbtype.Shell)}, subjects1TF),
+				Config: testAccTargetConnectPolicyConfigSubjects(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicySubjects(ctx, []policies.Subject{*subject1})),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTargetConnectPolicyExists(resourceName, &policy1),
 					testAccCheckTargetConnectPolicyAttributes(t, &policy1, &expectedTargetConnectPolicy{
 						Name:     &rName,
-						Subjects: subjects1,
+						Subjects: &[]policies.Subject{*subject1},
 					}),
 					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
 					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "subjects.*", map[string]string{"id": subject1.ID, "type": string(subject1.Type)}),
@@ -328,12 +324,12 @@ func TestAccTargetConnectPolicy_Subjects(t *testing.T) {
 			},
 			// Verify update subjects
 			{
-				Config: testAccTargetConnectPolicyConfigSubjects(rName, []string{"foo"}, []string{string(verbtype.Tunnel)}, subjects2TF),
+				Config: testAccTargetConnectPolicyConfigSubjects(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicySubjects(ctx, []policies.Subject{*subject2})),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
 					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
 						Name:     &rName,
-						Subjects: subjects2,
+						Subjects: &[]policies.Subject{*subject2},
 					}),
 					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
 					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "subjects.*", map[string]string{"id": subject2.ID, "type": string(subject2.Type)}),
@@ -341,22 +337,6 @@ func TestAccTargetConnectPolicy_Subjects(t *testing.T) {
 			},
 		},
 	})
-}
-
-func findTwoUsersOrSkip(t *testing.T, ctx context.Context, subjects1, subjects2 *policies.Subject) {
-	client := acctest.APIClient
-
-	users, _, err := client.Users.ListUsers(ctx)
-	if err != nil {
-		t.Fatalf("failed to list users: %s", err)
-	}
-
-	if len(users) < 2 {
-		t.Skipf("skipping %s because we need at least two users to test correctly but have %v", t.Name(), len(users))
-	}
-
-	*subjects1 = policies.Subject{ID: users[0].ID, Type: users[0].GetSubjectType()}
-	*subjects2 = policies.Subject{ID: users[1].ID, Type: users[1].GetSubjectType()}
 }
 
 func testAccTargetConnectPolicyConfigBasic(rName string, targetUsers []string, verbs []string) string {
@@ -380,14 +360,7 @@ resource "bastionzero_targetconnect_policy" "test" {
 `, rName, acctest.ToTerraformStringList(targetUsers), acctest.ToTerraformStringList(verbs), description)
 }
 
-func testAccTargetConnectPolicyConfigSubjects(rName string, targetUsers []string, verbs []string, subjects *types.Set) string {
-	// 	 targets = [
-	//    {
-	//      id   = "cb0aecd0-2aae-4b2b-acda-5197250f1851",
-	//      type = "Bzero"
-	//    }
-	//  ]
-
+func testAccTargetConnectPolicyConfigSubjects(rName string, targetUsers []string, verbs []string, subjects types.Set) string {
 	return fmt.Sprintf(`
 resource "bastionzero_targetconnect_policy" "test" {
   subjects = %[4]s
