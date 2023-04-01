@@ -297,6 +297,7 @@ func TestAccTargetConnectPolicy_Subjects(t *testing.T) {
 		CheckDestroy:             testAccCheckTargetConnectPolicyDestroy,
 		Steps: []resource.TestStep{
 			{
+				// Find two users or skip this entire test
 				PreConfig: func() { findTwoUsersOrSkip(t, ctx, subjects1, subjects2) },
 				Config:    testAccTargetConnectPolicyConfigSubjects(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicySubjects(ctx, *subjects1)),
 				Check: resource.ComposeTestCheckFunc(
@@ -340,7 +341,7 @@ func findTwoUsersOrSkip(t *testing.T, ctx context.Context, subjects1, subjects2 
 		t.Fatalf("failed to list users: %s", err)
 	}
 
-	if len(users) < 200 {
+	if len(users) < 2 {
 		t.Skipf("skipping %s because we need at least two users to test correctly but have %v", t.Name(), len(users))
 	}
 
