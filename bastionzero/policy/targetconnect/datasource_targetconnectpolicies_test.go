@@ -8,6 +8,7 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/verbtype"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal/acctest"
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
@@ -66,7 +67,7 @@ func TestAccDataSourceTargetConnectPolicies_FilterSubjects(t *testing.T) {
 				Config: acctest.ConfigCompose(testAccTargetConnectPoliciesDataSourceConfigFilterSubjects([]string{subject.ID})),
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckListOrSetHasElements(dataSourceName, "policies"),
-					CheckAllSubjectIDsMatch(dataSourceName, subject.ID),
+					CheckAllPoliciesHaveSubjectID(dataSourceName, subject.ID),
 				),
 			},
 		},
@@ -81,9 +82,9 @@ data "bastionzero_targetconnect_policies" "test" {
 `, acctest.ToTerraformStringList(subjectIDs))
 }
 
-// CheckAllSubjectIDsMatch checks that all subjects in a list of policies have
-// an expected subject ID
-func CheckAllSubjectIDsMatch(namedTFResource, expectedSubjectID string) resource.TestCheckFunc {
+// CheckAllPoliciesHaveSubjectID checks that all policies have at least one
+// subject that matches an expected ID
+func CheckAllPoliciesHaveSubjectID(namedTFResource, expectedSubjectID string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[namedTFResource]
 		if !ok {
@@ -95,6 +96,14 @@ func CheckAllSubjectIDsMatch(namedTFResource, expectedSubjectID string) resource
 			return err
 		}
 
+		if totalPolicies == 0 {
+			return fmt.Errorf("list of policies is empty")
+		}
+
+		// Aggregate attribute checked errors
+		var result *multierror.Error
+
+	POLICY:
 		for i := 0; i < totalPolicies; i++ {
 			totalSubjects, err := acctest.ListOrSetCount(rs, fmt.Sprintf("policies.%v.subjects", i))
 			if err != nil {
@@ -102,13 +111,16 @@ func CheckAllSubjectIDsMatch(namedTFResource, expectedSubjectID string) resource
 			}
 
 			for j := 0; j < totalSubjects; j++ {
-				if err := resource.TestCheckResourceAttr(namedTFResource, fmt.Sprintf("policies.%v.subjects.%v.id", i, j), expectedSubjectID)(s); err != nil {
-					return err
+				if err := resource.TestCheckResourceAttr(namedTFResource, fmt.Sprintf("policies.%v.subjects.%v.id", i, j), expectedSubjectID)(s); err == nil {
+					// Found at least one! Continue checking the next policy
+					continue POLICY
+				} else {
+					// This subject does not match. Aggregate this error.
+					result = multierror.Append(result, err)
 				}
 			}
-
 		}
 
-		return nil
+		return result.ErrorOrNil()
 	}
 }
