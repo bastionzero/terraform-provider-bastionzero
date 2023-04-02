@@ -8,7 +8,6 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/verbtype"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal/acctest"
-	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
@@ -69,11 +68,9 @@ func TestAccDataSourceTargetConnectPolicies_FilterSubjects(t *testing.T) {
 					acctest.CheckAllPoliciesHaveSubjectID(dataSourceName, subject.ID),
 				),
 			},
-			// Zero matches
-			{
-				Config: testAccTargetConnectPoliciesDataSourceConfigFilterSubjects([]string{uuid.New().String()}),
-				Check:  resource.TestCheckResourceAttr(dataSourceName, "policies.#", "0"),
-			},
+			// Cannot do zero matches test because must provide valid subject
+			// UUID which we can't guarantee. Can add later if we remove backend
+			// restriction that subject ID must exist
 		},
 	})
 }
@@ -108,7 +105,7 @@ func TestAccDataSourceTargetConnectPolicies_FilterGroups(t *testing.T) {
 			},
 			// Zero matches
 			{
-				Config: testAccTargetConnectPoliciesDataSourceConfigFilterGroups([]string{uuid.New().String()}),
+				Config: testAccTargetConnectPoliciesDataSourceConfigFilterGroups([]string{"foo"}),
 				Check:  resource.TestCheckResourceAttr(dataSourceName, "policies.#", "0"),
 			},
 		},
