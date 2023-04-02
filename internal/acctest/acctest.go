@@ -305,7 +305,7 @@ func FindNUsersOrSkip(t *testing.T, subjects ...*policies.Subject) {
 		return client.Users.ListUsers(ctx)
 	}, func(u users.User) policies.Subject {
 		return policies.Subject{ID: u.ID, Type: u.GetSubjectType()}
-	})
+	}, subjects...)
 }
 
 // FindTwoUsersOrSkip lists the users in the BastionZero organization and sets
