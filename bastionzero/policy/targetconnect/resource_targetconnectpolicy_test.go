@@ -188,6 +188,21 @@ func TestAccTargetConnectPolicy_TargetUsers(t *testing.T) {
 					resource.TestCheckTypeSetElemAttr(resourceName, "target_users.*", "bar"),
 				),
 			},
+			// Add another target user
+			{
+				Config: testAccTargetConnectPolicyConfigBasic(rName, []string{"bar", "baz"}, []string{string(verbtype.Shell)}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy),
+					testAccCheckTargetConnectPolicyAttributes(t, &policy, &expectedTargetConnectPolicy{
+						Name:        &rName,
+						TargetUsers: &[]policies.TargetUser{{Username: "bar"}, {Username: "baz"}},
+					}),
+					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "target_users.#", "2"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "target_users.*", "bar"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "target_users.*", "baz"),
+				),
+			},
 		},
 	})
 }
@@ -234,6 +249,21 @@ func TestAccTargetConnectPolicy_Verbs(t *testing.T) {
 					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "verbs.#", "1"),
 					resource.TestCheckTypeSetElemAttr(resourceName, "verbs.*", string(verbtype.Tunnel)),
+				),
+			},
+			// Add another verb
+			{
+				Config: testAccTargetConnectPolicyConfigBasic(rName, []string{"foo"}, []string{string(verbtype.Tunnel), string(verbtype.FileTransfer)}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy),
+					testAccCheckTargetConnectPolicyAttributes(t, &policy, &expectedTargetConnectPolicy{
+						Name:  &rName,
+						Verbs: &[]policies.Verb{{Type: verbtype.Tunnel}, {Type: verbtype.FileTransfer}},
+					}),
+					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "verbs.#", "2"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "verbs.*", string(verbtype.Tunnel)),
+					resource.TestCheckTypeSetElemAttr(resourceName, "verbs.*", string(verbtype.FileTransfer)),
 				),
 			},
 		},
