@@ -62,11 +62,16 @@ func TestAccDataSourceTargetConnectPolicies_FilterSubjects(t *testing.T) {
 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: acctest.ConfigCompose(testAccTargetConnectPoliciesDataSourceConfigFilterSubjects([]string{subject.ID})),
+				Config: testAccTargetConnectPoliciesDataSourceConfigFilterSubjects([]string{subject.ID}),
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckListOrSetHasElements(dataSourceName, "policies"),
 					acctest.CheckAllPoliciesHaveSubjectID(dataSourceName, subject.ID),
 				),
+			},
+			// Zero matches
+			{
+				Config: testAccTargetConnectPoliciesDataSourceConfigFilterSubjects([]string{"foobar"}),
+				Check:  resource.TestCheckResourceAttr(dataSourceName, "policies.#", "0"),
 			},
 		},
 	})
@@ -92,12 +97,18 @@ func TestAccDataSourceTargetConnectPolicies_FilterGroups(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
+			// Single ID
 			{
-				Config: acctest.ConfigCompose(testAccTargetConnectPoliciesDataSourceConfigFilterGroups([]string{group.ID})),
+				Config: testAccTargetConnectPoliciesDataSourceConfigFilterGroups([]string{group.ID}),
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckListOrSetHasElements(dataSourceName, "policies"),
 					acctest.CheckAllPoliciesHaveGroupID(dataSourceName, group.ID),
 				),
+			},
+			// Zero matches
+			{
+				Config: testAccTargetConnectPoliciesDataSourceConfigFilterGroups([]string{"foobar"}),
+				Check:  resource.TestCheckResourceAttr(dataSourceName, "policies.#", "0"),
 			},
 		},
 	})
