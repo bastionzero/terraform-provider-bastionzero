@@ -13,7 +13,7 @@ import (
 func TestAccDataSourceTargetConnectPolicies_Basic(t *testing.T) {
 	ctx := context.Background()
 	rName := acctest.RandomName()
-	resourceName := "bastionzero_targetconnect_policies.test"
+	resourceName := "bastionzero_targetconnect_policy.test"
 	dataSourceName := "data.bastionzero_targetconnect_policies.test"
 	var policy policies.TargetConnectPolicy
 
