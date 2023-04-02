@@ -292,7 +292,7 @@ func TestAccTargetConnectPolicy_Subjects(t *testing.T) {
 
 	// These checks are here, instead of being inlined in PreCheck field,
 	// because we need subject1 and subject2 to have values before using them as
-	// arguments in the Test block below. Otherwise, any preemptive pointer
+	// arguments in the Test block below. Otherwise, any immediate pointer
 	// dereference (e.g. in the TestSteps) will have the values set to nil which
 	// is not what we want.
 	acctest.SkipIfNotInAcceptanceTestMode(t)
@@ -324,14 +324,15 @@ func TestAccTargetConnectPolicy_Subjects(t *testing.T) {
 			},
 			// Verify update subjects
 			{
-				Config: testAccTargetConnectPolicyConfigSubjects(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicySubjects(ctx, []policies.Subject{*subject2})),
+				Config: testAccTargetConnectPolicyConfigSubjects(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicySubjects(ctx, []policies.Subject{*subject1, *subject2})),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
 					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
 						Name:     &rName,
-						Subjects: &[]policies.Subject{*subject2},
+						Subjects: &[]policies.Subject{*subject1, *subject2},
 					}),
 					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "subjects.*", map[string]string{"id": subject1.ID, "type": string(subject1.Type)}),
 					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "subjects.*", map[string]string{"id": subject2.ID, "type": string(subject2.Type)}),
 				),
 			},
