@@ -8,6 +8,7 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/verbtype"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal/acctest"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
@@ -70,7 +71,7 @@ func TestAccDataSourceTargetConnectPolicies_FilterSubjects(t *testing.T) {
 			},
 			// Zero matches
 			{
-				Config: testAccTargetConnectPoliciesDataSourceConfigFilterSubjects([]string{"foobar"}),
+				Config: testAccTargetConnectPoliciesDataSourceConfigFilterSubjects([]string{uuid.New().String()}),
 				Check:  resource.TestCheckResourceAttr(dataSourceName, "policies.#", "0"),
 			},
 		},
@@ -107,7 +108,7 @@ func TestAccDataSourceTargetConnectPolicies_FilterGroups(t *testing.T) {
 			},
 			// Zero matches
 			{
-				Config: testAccTargetConnectPoliciesDataSourceConfigFilterGroups([]string{"foobar"}),
+				Config: testAccTargetConnectPoliciesDataSourceConfigFilterGroups([]string{uuid.New().String()}),
 				Check:  resource.TestCheckResourceAttr(dataSourceName, "policies.#", "0"),
 			},
 		},
