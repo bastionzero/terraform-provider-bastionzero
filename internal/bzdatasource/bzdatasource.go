@@ -5,7 +5,7 @@ package bzdatasource
 // APIModel is a BastionZero API object struct.
 type APIModel = interface{}
 
-// TODO: Consider using less reflection in SingleDataSource and ListDataSource
+// TODO-Yuval: Consider using less reflection in SingleDataSource and ListDataSource
 // if https://github.com/hashicorp/terraform-plugin-framework/issues/242 is
 // resolved at some point.
 //

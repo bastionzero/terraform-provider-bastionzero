@@ -12,9 +12,11 @@ import (
 
 	bzapi "github.com/bastionzero/bastionzero-sdk-go/bastionzero"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/environments"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/organization"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/users"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero"
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
@@ -279,6 +281,98 @@ func CheckResourceDisappears(namedTFResource string, f func(client *bzapi.Client
 	}
 }
 
+// CheckAllPoliciesHaveSubjectID checks that all policies have at least one
+// subject that matches an expected ID. It is expected that namedTFResource has
+// a nested list/set attribute named "policies" and the container must contain
+// another attribute named "subjects" that contains nested subject objects
+func CheckAllPoliciesHaveSubjectID(namedTFResource, expectedSubjectID string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[namedTFResource]
+		if !ok {
+			return fmt.Errorf("Not found: %s", namedTFResource)
+		}
+
+		totalPolicies, err := ListOrSetCount(rs, "policies")
+		if err != nil {
+			return err
+		}
+
+		if totalPolicies == 0 {
+			return fmt.Errorf("list of policies is empty")
+		}
+
+		// Aggregate attribute checked errors
+		var result *multierror.Error
+
+	POLICY:
+		for i := 0; i < totalPolicies; i++ {
+			totalSubjects, err := ListOrSetCount(rs, fmt.Sprintf("policies.%v.subjects", i))
+			if err != nil {
+				return err
+			}
+
+			for j := 0; j < totalSubjects; j++ {
+				if err := resource.TestCheckResourceAttr(namedTFResource, fmt.Sprintf("policies.%v.subjects.%v.id", i, j), expectedSubjectID)(s); err == nil {
+					// Found at least one! Continue checking the next policy
+					continue POLICY
+				} else {
+					// This subject does not match. Aggregate this error.
+					result = multierror.Append(result, err)
+				}
+			}
+		}
+
+		return result.ErrorOrNil()
+	}
+}
+
+// CheckAllPoliciesHaveGroupID checks that all policies have at least one group
+// that matches an expected ID. It is expected that namedTFResource has a nested
+// list/set attribute named "policies" and the container must contain another
+// attribute named "groups" that contains nested group objects
+func CheckAllPoliciesHaveGroupID(namedTFResource, expectedGroupID string) resource.TestCheckFunc {
+	// TODO-Yuval: Potentially refactor and abstract common code with
+	// CheckAllPoliciesHaveSubjectID()
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[namedTFResource]
+		if !ok {
+			return fmt.Errorf("Not found: %s", namedTFResource)
+		}
+
+		totalPolicies, err := ListOrSetCount(rs, "policies")
+		if err != nil {
+			return err
+		}
+
+		if totalPolicies == 0 {
+			return fmt.Errorf("list of policies is empty")
+		}
+
+		// Aggregate attribute checked errors
+		var result *multierror.Error
+
+	POLICY:
+		for i := 0; i < totalPolicies; i++ {
+			totalGroups, err := ListOrSetCount(rs, fmt.Sprintf("policies.%v.groups", i))
+			if err != nil {
+				return err
+			}
+
+			for j := 0; j < totalGroups; j++ {
+				if err := resource.TestCheckResourceAttr(namedTFResource, fmt.Sprintf("policies.%v.groups.%v.id", i, j), expectedGroupID)(s); err == nil {
+					// Found at least one! Continue checking the next policy
+					continue POLICY
+				} else {
+					// This group does not match. Aggregate this error.
+					result = multierror.Append(result, err)
+				}
+			}
+		}
+
+		return result.ErrorOrNil()
+	}
+}
+
 // FindNAPIObjectsOrSkip calls f to find a list of API objects at BastionZero
 // and sets a variadic number (n) of pointers to the first n API objects found.
 // The API object is converted to another type, MappedT, by calling mapF (pass
@@ -331,6 +425,17 @@ func FindTwoUsersOrSkip(t *testing.T, ctx context.Context, subjects1, subjects2 
 
 	*subjects1 = policies.Subject{ID: users[0].ID, Type: users[0].GetSubjectType()}
 	*subjects2 = policies.Subject{ID: users[1].ID, Type: users[1].GetSubjectType()}
+}
+
+// FindNGroupsOrSkip lists the groups in the BastionZero organization and sets
+// groups to the first n groups found. If there are less than n groups, then the
+// current test is skipped.
+func FindNGroupsOrSkip(t *testing.T, groups ...*policies.Group) {
+	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]organization.Group, *http.Response, error) {
+		return client.Organization.ListGroups(ctx)
+	}, func(g organization.Group) policies.Group {
+		return policies.Group{ID: g.ID, Name: g.Name}
+	}, groups...)
 }
 
 // FindTwoGroupsOrSkip lists the IdP groups in the BastionZero organization and
