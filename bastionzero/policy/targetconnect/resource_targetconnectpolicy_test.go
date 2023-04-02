@@ -102,7 +102,7 @@ func TestAccTargetConnectPolicy_Name(t *testing.T) {
 	rName1 := acctest.RandomName()
 	rName2 := acctest.RandomName()
 	resourceName := "bastionzero_targetconnect_policy.test"
-	var policy1, policy2 policies.TargetConnectPolicy
+	var policy policies.TargetConnectPolicy
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
@@ -112,8 +112,8 @@ func TestAccTargetConnectPolicy_Name(t *testing.T) {
 			{
 				Config: testAccTargetConnectPolicyConfigBasic(rName1, []string{"foo"}, []string{string(verbtype.Shell)}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckTargetConnectPolicyExists(resourceName, &policy1),
-					testAccCheckTargetConnectPolicyAttributes(t, &policy1, &expectedTargetConnectPolicy{
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy),
+					testAccCheckTargetConnectPolicyAttributes(t, &policy, &expectedTargetConnectPolicy{
 						Name: &rName1,
 					}),
 					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
@@ -130,8 +130,8 @@ func TestAccTargetConnectPolicy_Name(t *testing.T) {
 			{
 				Config: testAccTargetConnectPolicyConfigBasic(rName2, []string{"foo"}, []string{string(verbtype.Shell)}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
-					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy),
+					testAccCheckTargetConnectPolicyAttributes(t, &policy, &expectedTargetConnectPolicy{
 						Name: &rName2,
 					}),
 					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
