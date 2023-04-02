@@ -282,7 +282,7 @@ type ListPolicyParametersModel struct {
 func ListPolicyParametersSchema() map[string]datasource_schema.Attribute {
 	return map[string]datasource_schema.Attribute{
 		"filter_subjects": datasource_schema.SetAttribute{
-			Description: "Filters the list of policies to only those that contain the provided subject ID(s).",
+			Description: "Filters the list of policies to only those that contain the provided subject ID(s). The IDs must correspond to subjects that exist in your organization otherwise an error is returned.",
 			ElementType: types.StringType,
 			Optional:    true,
 		},

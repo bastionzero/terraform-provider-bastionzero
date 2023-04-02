@@ -18,7 +18,7 @@ Get a list of all JIT policies in your BastionZero organization.
 ### Optional
 
 - `filter_groups` (Set of String) Filters the list of policies to only those that contain the provided group ID(s).
-- `filter_subjects` (Set of String) Filters the list of policies to only those that contain the provided subject ID(s).
+- `filter_subjects` (Set of String) Filters the list of policies to only those that contain the provided subject ID(s). The IDs must correspond to subjects that exist in your organization otherwise an error is returned.
 
 ### Read-Only
 
