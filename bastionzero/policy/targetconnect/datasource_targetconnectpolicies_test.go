@@ -7,6 +7,7 @@ import (
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/verbtype"
+	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -51,6 +52,7 @@ data "bastionzero_targetconnect_policies" "test" {
 
 func TestAccDataSourceTargetConnectPolicies_FilterSubjects(t *testing.T) {
 	ctx := context.Background()
+	rName := acctest.RandomName()
 	dataSourceName := "data.bastionzero_targetconnect_policies.test"
 	subject := new(policies.Subject)
 
@@ -58,11 +60,18 @@ func TestAccDataSourceTargetConnectPolicies_FilterSubjects(t *testing.T) {
 	acctest.PreCheck(ctx, t)
 	acctest.FindNUsersOrSkip(t, subject)
 
+	resourcePolicy := testAccTargetConnectPolicyConfigSubjects(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicySubjects(ctx, []policies.Subject{*subject}))
 	resource.ParallelTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckTargetConnectPolicyDestroy,
 		Steps: []resource.TestStep{
+			// First create resource
 			{
-				Config: testAccTargetConnectPoliciesDataSourceConfigFilterSubjects([]string{subject.ID}),
+				Config: resourcePolicy,
+			},
+			// Then check that we can filter for it
+			{
+				Config: acctest.ConfigCompose(resourcePolicy, testAccTargetConnectPoliciesDataSourceConfigFilterSubjects([]string{subject.ID})),
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckListOrSetHasElements(dataSourceName, "policies"),
 					acctest.CheckAllPoliciesHaveSubjectID(dataSourceName, subject.ID),
@@ -85,6 +94,7 @@ data "bastionzero_targetconnect_policies" "test" {
 
 func TestAccDataSourceTargetConnectPolicies_FilterGroups(t *testing.T) {
 	ctx := context.Background()
+	rName := acctest.RandomName()
 	dataSourceName := "data.bastionzero_targetconnect_policies.test"
 	group := new(policies.Group)
 
@@ -92,12 +102,18 @@ func TestAccDataSourceTargetConnectPolicies_FilterGroups(t *testing.T) {
 	acctest.PreCheck(ctx, t)
 	acctest.FindNGroupsOrSkip(t, group)
 
+	resourcePolicy := testAccTargetConnectPolicyConfigGroups(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicyGroups(ctx, []policies.Group{*group}))
 	resource.ParallelTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckTargetConnectPolicyDestroy,
 		Steps: []resource.TestStep{
-			// Single ID
+			// First create resource
 			{
-				Config: testAccTargetConnectPoliciesDataSourceConfigFilterGroups([]string{group.ID}),
+				Config: resourcePolicy,
+			},
+			// Then check that we can filter for it
+			{
+				Config: acctest.ConfigCompose(resourcePolicy, testAccTargetConnectPoliciesDataSourceConfigFilterGroups([]string{group.ID})),
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckListOrSetHasElements(dataSourceName, "policies"),
 					acctest.CheckAllPoliciesHaveGroupID(dataSourceName, group.ID),
