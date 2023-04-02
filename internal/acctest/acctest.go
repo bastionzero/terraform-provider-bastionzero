@@ -286,6 +286,41 @@ func FindTwoUsersOrSkip(t *testing.T, ctx context.Context, subjects1, subjects2 
 	*subjects2 = policies.Subject{ID: users[1].ID, Type: users[1].GetSubjectType()}
 }
 
+// FindTwoGroupsOrSkip lists the IdP groups in the BastionZero organization and
+// sets group1 and group2 to the first two groups found. If there are less than
+// 2 groups, then the current test is skipped.
+func FindTwoGroupsOrSkip(t *testing.T, ctx context.Context, group1, group2 *policies.Group) {
+	groups, _, err := APIClient.Organization.ListGroups(ctx)
+	if err != nil {
+		t.Fatalf("failed to list groups: %s", err)
+	}
+
+	if len(groups) < 2 {
+		t.Skipf("skipping %s because we need at least two groups to test correctly but have %v", t.Name(), len(groups))
+	}
+
+	*group1 = policies.Group{ID: groups[0].ID, Name: groups[0].Name}
+	*group2 = policies.Group{ID: groups[1].ID, Name: groups[1].Name}
+}
+
+// FindTwoBzeroTargetsOrSkip lists the Bzero targets in the BastionZero
+// organization and sets target1 and target2 to the first two Bzero targets
+// found. If there are less than 2 Bzero targets, then the current test is
+// skipped.
+func FindTwoBzeroTargetsOrSkip(t *testing.T, ctx context.Context, target1, target2 *policies.Target) {
+	targets, _, err := APIClient.Targets.ListBzeroTargets(ctx)
+	if err != nil {
+		t.Fatalf("failed to list Bzero targets: %s", err)
+	}
+
+	if len(targets) < 2 {
+		t.Skipf("skipping %s because we need at least two Bzero targets to test correctly but have %v", t.Name(), len(targets))
+	}
+
+	*target1 = policies.Target{ID: targets[0].ID, Type: targets[0].GetTargetType()}
+	*target2 = policies.Target{ID: targets[1].ID, Type: targets[1].GetTargetType()}
+}
+
 func ToTerraformStringList(arr []string) string {
 	// Source: https://stackoverflow.com/questions/24489384/how-to-print-the-values-of-slices#comment126502244_53672500
 	return strings.ReplaceAll(fmt.Sprintf("%+q", arr), "\" \"", "\",\"")

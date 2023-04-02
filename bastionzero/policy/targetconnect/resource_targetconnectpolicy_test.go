@@ -340,6 +340,110 @@ func TestAccTargetConnectPolicy_Subjects(t *testing.T) {
 	})
 }
 
+func TestAccTargetConnectPolicy_Groups(t *testing.T) {
+	ctx := context.Background()
+	rName := acctest.RandomName()
+	resourceName := "bastionzero_targetconnect_policy.test"
+	var policy1, policy2 policies.TargetConnectPolicy
+	group1 := new(policies.Group)
+	group2 := new(policies.Group)
+
+	acctest.SkipIfNotInAcceptanceTestMode(t)
+	acctest.PreCheck(ctx, t)
+	acctest.FindTwoGroupsOrSkip(t, ctx, group1, group2)
+
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckTargetConnectPolicyDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTargetConnectPolicyConfigGroups(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicyGroups(ctx, []policies.Group{*group1})),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy1),
+					testAccCheckTargetConnectPolicyAttributes(t, &policy1, &expectedTargetConnectPolicy{
+						Name:   &rName,
+						Groups: &[]policies.Group{*group1},
+					}),
+					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "groups.*", map[string]string{"id": group1.ID, "name": string(group1.Name)}),
+				),
+			},
+			// Verify import works
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Verify update groups
+			{
+				Config: testAccTargetConnectPolicyConfigGroups(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicyGroups(ctx, []policies.Group{*group1, *group2})),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
+					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
+						Name:   &rName,
+						Groups: &[]policies.Group{*group1, *group2},
+					}),
+					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "groups.*", map[string]string{"id": group1.ID, "name": string(group1.Name)}),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "groups.*", map[string]string{"id": group2.ID, "name": string(group2.Name)}),
+				),
+			},
+		},
+	})
+}
+
+func TestAccTargetConnectPolicy_Targets(t *testing.T) {
+	ctx := context.Background()
+	rName := acctest.RandomName()
+	resourceName := "bastionzero_targetconnect_policy.test"
+	var policy1, policy2 policies.TargetConnectPolicy
+	target1 := new(policies.Target)
+	target2 := new(policies.Target)
+
+	acctest.SkipIfNotInAcceptanceTestMode(t)
+	acctest.PreCheck(ctx, t)
+	acctest.FindTwoBzeroTargetsOrSkip(t, ctx, target1, target2)
+
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckTargetConnectPolicyDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTargetConnectPolicyConfigGroups(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicyTargets(ctx, []policies.Target{*target1})),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy1),
+					testAccCheckTargetConnectPolicyAttributes(t, &policy1, &expectedTargetConnectPolicy{
+						Name:    &rName,
+						Targets: &[]policies.Target{*target1},
+					}),
+					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "targets.*", map[string]string{"id": target1.ID, "type": string(target1.Type)}),
+				),
+			},
+			// Verify import works
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Verify update targets
+			{
+				Config: testAccTargetConnectPolicyConfigGroups(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicyTargets(ctx, []policies.Target{*target1, *target2})),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
+					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
+						Name:    &rName,
+						Targets: &[]policies.Target{*target1, *target2},
+					}),
+					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "targets.*", map[string]string{"id": target1.ID, "type": string(target1.Type)}),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "targets.*", map[string]string{"id": target2.ID, "type": string(target2.Type)}),
+				),
+			},
+		},
+	})
+}
+
 func testAccTargetConnectPolicyConfigBasic(rName string, targetUsers []string, verbs []string) string {
 	return fmt.Sprintf(`
 resource "bastionzero_targetconnect_policy" "test" {
@@ -370,6 +474,39 @@ resource "bastionzero_targetconnect_policy" "test" {
   verbs = %[3]s
 }
 `, rName, acctest.ToTerraformStringList(targetUsers), acctest.ToTerraformStringList(verbs), subjects.String())
+}
+
+func testAccTargetConnectPolicyConfigGroups(rName string, targetUsers []string, verbs []string, groups types.Set) string {
+	return fmt.Sprintf(`
+resource "bastionzero_targetconnect_policy" "test" {
+  groups = %[4]s
+  name = %[1]q
+  target_users = %[2]s
+  verbs = %[3]s
+}
+`, rName, acctest.ToTerraformStringList(targetUsers), acctest.ToTerraformStringList(verbs), groups.String())
+}
+
+func testAccTargetConnectPolicyConfigEnvironments(rName string, targetUsers []string, verbs []string, environments []string) string {
+	return fmt.Sprintf(`
+resource "bastionzero_targetconnect_policy" "test" {
+  environments = %[4]s
+  name = %[1]q
+  target_users = %[2]s
+  verbs = %[3]s
+}
+`, rName, acctest.ToTerraformStringList(targetUsers), acctest.ToTerraformStringList(verbs), acctest.ToTerraformStringList(environments))
+}
+
+func testAccTargetConnectPolicyConfigTargets(rName string, targetUsers []string, verbs []string, targets types.Set) string {
+	return fmt.Sprintf(`
+resource "bastionzero_targetconnect_policy" "test" {
+  targets = %[4]s
+  name = %[1]q
+  target_users = %[2]s
+  verbs = %[3]s
+}
+`, rName, acctest.ToTerraformStringList(targetUsers), acctest.ToTerraformStringList(verbs), targets.String())
 }
 
 type expectedTargetConnectPolicy struct {
