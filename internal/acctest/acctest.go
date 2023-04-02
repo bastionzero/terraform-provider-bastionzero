@@ -374,6 +374,11 @@ func CheckAllPoliciesHaveGroupID(namedTFResource, expectedGroupID string) resour
 	}
 }
 
+func typeof(v interface{}) string {
+	// Source: https://stackoverflow.com/a/27160765
+	return fmt.Sprintf("%T", v)
+}
+
 // FindNAPIObjectsOrSkip calls f to find a list of API objects at BastionZero
 // and sets a variadic number (n) of pointers to the first n API objects found.
 // The API object is converted to another type, MappedT, by calling mapF (pass
@@ -388,11 +393,11 @@ func FindNAPIObjectsOrSkip[APIObject any, MappedT any](
 ) {
 	apiObjects, _, err := f(APIClient, context.Background())
 	if err != nil {
-		t.Fatalf("failed to list API objects: %s", err)
+		t.Fatalf("failed to list %v API objects: %s", typeof(new(APIObject)), err)
 	}
 
 	if len(apiObjects) < len(mappedPointers) {
-		t.Skipf("skipping %s because we need at least %v API objects to test correctly but have %v", t.Name(), len(mappedPointers), len(apiObjects))
+		t.Skipf("skipping %s because we need at least %v %v API objects to test correctly but have %v", t.Name(), len(mappedPointers), typeof(new(APIObject)), len(apiObjects))
 	}
 
 	for i, mappedPointer := range mappedPointers {
