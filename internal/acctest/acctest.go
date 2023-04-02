@@ -13,6 +13,7 @@ import (
 	bzapi "github.com/bastionzero/bastionzero-sdk-go/bastionzero"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/environments"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/users"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
@@ -268,6 +269,43 @@ func CheckResourceDisappears(namedTFResource string, f func(client *bzapi.Client
 
 		return nil
 	}
+}
+
+// FindNAPIObjectsOrSkip calls f to find a list of API objects at BastionZero
+// and sets a variadic number (n) of pointers to the first n API objects found.
+// The API object is converted to another type, MappedT, by calling mapF (pass
+// the identity function if you don't want to map).
+//
+// If there are less than n API objects, then the current test is skipped.
+func FindNAPIObjectsOrSkip[APIObject any, MappedT any](
+	t *testing.T,
+	f func(client *bzapi.Client, ctx context.Context) ([]APIObject, *http.Response, error),
+	mapF func(apiObject APIObject) MappedT,
+	mappedPointers ...*MappedT,
+) {
+	apiObjects, _, err := f(APIClient, context.Background())
+	if err != nil {
+		t.Fatalf("failed to list API objects: %s", err)
+	}
+
+	if len(apiObjects) < len(mappedPointers) {
+		t.Skipf("skipping %s because we need at least %v API objects to test correctly but have %v", t.Name(), len(mappedPointers), len(apiObjects))
+	}
+
+	for i, mappedPointer := range mappedPointers {
+		*mappedPointer = mapF(apiObjects[i])
+	}
+}
+
+// FindNUsersOrSkip lists the users in the BastionZero organization and sets
+// subjects to the first n subjects found. If there are less than n users, then
+// the current test is skipped.
+func FindNUsersOrSkip(t *testing.T, subjects ...*policies.Subject) {
+	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]users.User, *http.Response, error) {
+		return client.Users.ListUsers(ctx)
+	}, func(u users.User) policies.Subject {
+		return policies.Subject{ID: u.ID, Type: u.GetSubjectType()}
+	})
 }
 
 // FindTwoUsersOrSkip lists the users in the BastionZero organization and sets
