@@ -278,6 +278,19 @@ func TestAccTargetConnectPolicy_Description(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "description", desc2),
 				),
 			},
+			// Verify setting to empty string clears
+			{
+				Config: testAccTargetConnectPolicyConfigDescription(rName, []string{"foo"}, []string{string(verbtype.Shell)}, ""),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
+					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
+						Name:        &rName,
+						Description: bastionzero.PtrTo(""),
+					}),
+					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "description", ""),
+				),
+			},
 		},
 	})
 }
@@ -336,6 +349,21 @@ func TestAccTargetConnectPolicy_Subjects(t *testing.T) {
 					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "subjects.*", map[string]string{"id": subject2.ID, "type": string(subject2.Type)}),
 				),
 			},
+			// Verify setting to empty list clears
+			{
+				Config: testAccTargetConnectPolicyConfigSubjects(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicySubjects(ctx, []policies.Subject{})),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
+					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
+						Name:     &rName,
+						Subjects: &[]policies.Subject{},
+					}),
+					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
+					// Explicit empty list in config should result in a config
+					// with 0 elements (not null)
+					resource.TestCheckResourceAttr(resourceName, "subjects.#", "0"),
+				),
+			},
 		},
 	})
 }
@@ -386,6 +414,21 @@ func TestAccTargetConnectPolicy_Groups(t *testing.T) {
 					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
 					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "groups.*", map[string]string{"id": group1.ID, "name": string(group1.Name)}),
 					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "groups.*", map[string]string{"id": group2.ID, "name": string(group2.Name)}),
+				),
+			},
+			// Verify setting to empty list clears
+			{
+				Config: testAccTargetConnectPolicyConfigGroups(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicyGroups(ctx, []policies.Group{})),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
+					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
+						Name:   &rName,
+						Groups: &[]policies.Group{},
+					}),
+					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
+					// Explicit empty list in config should result in a config
+					// with 0 elements (not null)
+					resource.TestCheckResourceAttr(resourceName, "groups.#", "0"),
 				),
 			},
 		},
@@ -441,6 +484,21 @@ func TestAccTargetConnectPolicy_Environments(t *testing.T) {
 					resource.TestCheckTypeSetElemAttr(resourceName, "environments.*", env2.ID),
 				),
 			},
+			// Verify setting to empty list clears
+			{
+				Config: testAccTargetConnectPolicyConfigEnvironments(rName, []string{"foo"}, []string{string(verbtype.Shell)}, []string{}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
+					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
+						Name:         &rName,
+						Environments: &[]policies.Environment{},
+					}),
+					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
+					// Explicit empty list in config should result in a config
+					// with 0 elements (not null)
+					resource.TestCheckResourceAttr(resourceName, "environments.#", "0"),
+				),
+			},
 		},
 	})
 }
@@ -491,6 +549,21 @@ func TestAccTargetConnectPolicy_Targets(t *testing.T) {
 					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
 					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "targets.*", map[string]string{"id": target1.ID, "type": string(target1.Type)}),
 					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "targets.*", map[string]string{"id": target2.ID, "type": string(target2.Type)}),
+				),
+			},
+			// Verify setting to empty list clears
+			{
+				Config: testAccTargetConnectPolicyConfigTargets(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicyTargets(ctx, []policies.Target{})),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
+					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
+						Name:    &rName,
+						Targets: &[]policies.Target{},
+					}),
+					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
+					// Explicit empty list in config should result in a config
+					// with 0 elements (not null)
+					resource.TestCheckResourceAttr(resourceName, "targets.#", "0"),
 				),
 			},
 		},
