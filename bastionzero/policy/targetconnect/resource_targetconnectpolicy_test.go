@@ -392,6 +392,59 @@ func TestAccTargetConnectPolicy_Groups(t *testing.T) {
 	})
 }
 
+func TestAccTargetConnectPolicy_Environments(t *testing.T) {
+	ctx := context.Background()
+	rName := acctest.RandomName()
+	resourceName := "bastionzero_targetconnect_policy.test"
+	var policy1, policy2 policies.TargetConnectPolicy
+	env1 := new(policies.Environment)
+	env2 := new(policies.Environment)
+
+	acctest.SkipIfNotInAcceptanceTestMode(t)
+	acctest.PreCheck(ctx, t)
+	acctest.FindTwoEnvironmentsOrSkip(t, ctx, env1, env2)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckTargetConnectPolicyDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTargetConnectPolicyConfigEnvironments(rName, []string{"foo"}, []string{string(verbtype.Shell)}, []string{env1.ID}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy1),
+					testAccCheckTargetConnectPolicyAttributes(t, &policy1, &expectedTargetConnectPolicy{
+						Name:         &rName,
+						Environments: &[]policies.Environment{*env1},
+					}),
+					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
+					resource.TestCheckTypeSetElemAttr(resourceName, "environments.*", env1.ID),
+				),
+			},
+			// Verify import works
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Verify update environments
+			{
+				Config: testAccTargetConnectPolicyConfigEnvironments(rName, []string{"foo"}, []string{string(verbtype.Shell)}, []string{env1.ID, env2.ID}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
+					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
+						Name:         &rName,
+						Environments: &[]policies.Environment{*env1, *env2},
+					}),
+					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
+					resource.TestCheckTypeSetElemAttr(resourceName, "environments.*", env1.ID),
+					resource.TestCheckTypeSetElemAttr(resourceName, "environments.*", env2.ID),
+				),
+			},
+		},
+	})
+}
+
 func TestAccTargetConnectPolicy_Targets(t *testing.T) {
 	ctx := context.Background()
 	rName := acctest.RandomName()

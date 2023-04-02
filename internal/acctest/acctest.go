@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	bzapi "github.com/bastionzero/bastionzero-sdk-go/bastionzero"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/environments"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -301,6 +302,34 @@ func FindTwoGroupsOrSkip(t *testing.T, ctx context.Context, group1, group2 *poli
 
 	*group1 = policies.Group{ID: groups[0].ID, Name: groups[0].Name}
 	*group2 = policies.Group{ID: groups[1].ID, Name: groups[1].Name}
+}
+
+// FindTwoEnvironmentsOrSkip lists the environments in the BastionZero
+// organization and sets env1 and env2 to the first two environments whose names
+// do not start with the acceptance test prefix. If there are less than 2
+// environments, then the current test is skipped.
+func FindTwoEnvironmentsOrSkip(t *testing.T, ctx context.Context, env1, env2 *policies.Environment) {
+	envs, _, err := APIClient.Environments.ListEnvironments(ctx)
+	if err != nil {
+		t.Fatalf("failed to list environments: %s", err)
+	}
+
+	// Filter out environments that are concurrently being created by other
+	// acceptance tests because they could be deleted by the time the caller of
+	// this function uses them
+	var filteredEnvs []environments.Environment
+	for _, env := range envs {
+		if !strings.HasPrefix(env.Name, TestNamePrefix) {
+			filteredEnvs = append(filteredEnvs, env)
+		}
+	}
+
+	if len(filteredEnvs) < 2 {
+		t.Skipf("skipping %s because we need at least two environments to test correctly but have %v", t.Name(), len(filteredEnvs))
+	}
+
+	*env1 = policies.Environment{ID: filteredEnvs[0].ID}
+	*env2 = policies.Environment{ID: filteredEnvs[1].ID}
 }
 
 // FindTwoBzeroTargetsOrSkip lists the Bzero targets in the BastionZero
