@@ -200,7 +200,7 @@ func TestAccEnvironment_RecreateOnNameChange(t *testing.T) {
 	name2 := acctest.RandomName()
 	resourceName := "bastionzero_environment.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(context.Background(), t) },
 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckEnvironmentDestroy,
