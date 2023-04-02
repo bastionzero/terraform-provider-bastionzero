@@ -100,7 +100,7 @@ func TestAccEnvironment_Description(t *testing.T) {
 	desc1 := "description1"
 	desc2 := "description2"
 	resourceName := "bastionzero_environment.test"
-	var env1, env2 environments.Environment
+	var env environments.Environment
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
@@ -112,9 +112,9 @@ func TestAccEnvironment_Description(t *testing.T) {
 				Config: testAccEnvironmentConfigDescription(rName, desc1),
 				Check: resource.ComposeTestCheckFunc(
 					// Check environment exists at BastionZero
-					testAccCheckEnvironmentExists(resourceName, &env1),
+					testAccCheckEnvironmentExists(resourceName, &env),
 					// Check environment stored at BastionZero looks correct
-					testAccCheckEnvironmentAttributes(&env1, &expectedEnvironment{
+					testAccCheckEnvironmentAttributes(&env, &expectedEnvironment{
 						Name:        &rName,
 						Description: bastionzero.PtrTo(desc1),
 					}),
@@ -134,9 +134,9 @@ func TestAccEnvironment_Description(t *testing.T) {
 				Config: testAccEnvironmentConfigDescription(rName, desc2),
 				Check: resource.ComposeTestCheckFunc(
 					// Check environment exists at BastionZero
-					testAccCheckEnvironmentExists(resourceName, &env2),
+					testAccCheckEnvironmentExists(resourceName, &env),
 					// Check environment stored at BastionZero looks correct
-					testAccCheckEnvironmentAttributes(&env2, &expectedEnvironment{
+					testAccCheckEnvironmentAttributes(&env, &expectedEnvironment{
 						Name:        &rName,
 						Description: bastionzero.PtrTo(desc2),
 					}),
@@ -154,7 +154,7 @@ func TestAccEnvironment_OfflineCleanupTimeoutHours(t *testing.T) {
 	timeout1 := 24
 	timeout2 := 48
 	resourceName := "bastionzero_environment.test"
-	var env1, env2 environments.Environment
+	var env environments.Environment
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
@@ -164,8 +164,8 @@ func TestAccEnvironment_OfflineCleanupTimeoutHours(t *testing.T) {
 			{
 				Config: testAccEnvironmentConfigOfflineCleanupTimeoutHours(rName, strconv.Itoa(timeout1)),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEnvironmentExists(resourceName, &env1),
-					testAccCheckEnvironmentAttributes(&env1, &expectedEnvironment{
+					testAccCheckEnvironmentExists(resourceName, &env),
+					testAccCheckEnvironmentAttributes(&env, &expectedEnvironment{
 						Name:                       &rName,
 						OfflineCleanupTimeoutHours: bastionzero.PtrTo(timeout1),
 					}),
@@ -181,8 +181,8 @@ func TestAccEnvironment_OfflineCleanupTimeoutHours(t *testing.T) {
 			{
 				Config: testAccEnvironmentConfigOfflineCleanupTimeoutHours(rName, strconv.Itoa(timeout2)),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEnvironmentExists(resourceName, &env2),
-					testAccCheckEnvironmentAttributes(&env2, &expectedEnvironment{
+					testAccCheckEnvironmentExists(resourceName, &env),
+					testAccCheckEnvironmentAttributes(&env, &expectedEnvironment{
 						Name:                       &rName,
 						OfflineCleanupTimeoutHours: bastionzero.PtrTo(timeout2),
 					}),

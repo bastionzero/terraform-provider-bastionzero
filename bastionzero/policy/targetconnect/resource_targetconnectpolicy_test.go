@@ -146,7 +146,7 @@ func TestAccTargetConnectPolicy_TargetUsers(t *testing.T) {
 	ctx := context.Background()
 	rName := acctest.RandomName()
 	resourceName := "bastionzero_targetconnect_policy.test"
-	var policy1, policy2 policies.TargetConnectPolicy
+	var policy policies.TargetConnectPolicy
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
@@ -156,8 +156,8 @@ func TestAccTargetConnectPolicy_TargetUsers(t *testing.T) {
 			{
 				Config: testAccTargetConnectPolicyConfigBasic(rName, []string{"foo"}, []string{string(verbtype.Shell)}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckTargetConnectPolicyExists(resourceName, &policy1),
-					testAccCheckTargetConnectPolicyAttributes(t, &policy1, &expectedTargetConnectPolicy{
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy),
+					testAccCheckTargetConnectPolicyAttributes(t, &policy, &expectedTargetConnectPolicy{
 						Name:        &rName,
 						TargetUsers: &[]policies.TargetUser{{Username: "foo"}},
 					}),
@@ -175,8 +175,8 @@ func TestAccTargetConnectPolicy_TargetUsers(t *testing.T) {
 			{
 				Config: testAccTargetConnectPolicyConfigBasic(rName, []string{"bar"}, []string{string(verbtype.Shell)}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
-					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy),
+					testAccCheckTargetConnectPolicyAttributes(t, &policy, &expectedTargetConnectPolicy{
 						Name:        &rName,
 						TargetUsers: &[]policies.TargetUser{{Username: "bar"}},
 					}),
@@ -192,7 +192,7 @@ func TestAccTargetConnectPolicy_Verbs(t *testing.T) {
 	ctx := context.Background()
 	rName := acctest.RandomName()
 	resourceName := "bastionzero_targetconnect_policy.test"
-	var policy1, policy2 policies.TargetConnectPolicy
+	var policy policies.TargetConnectPolicy
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
@@ -202,8 +202,8 @@ func TestAccTargetConnectPolicy_Verbs(t *testing.T) {
 			{
 				Config: testAccTargetConnectPolicyConfigBasic(rName, []string{"foo"}, []string{string(verbtype.Shell)}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckTargetConnectPolicyExists(resourceName, &policy1),
-					testAccCheckTargetConnectPolicyAttributes(t, &policy1, &expectedTargetConnectPolicy{
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy),
+					testAccCheckTargetConnectPolicyAttributes(t, &policy, &expectedTargetConnectPolicy{
 						Name:  &rName,
 						Verbs: &[]policies.Verb{{Type: verbtype.Shell}},
 					}),
@@ -221,8 +221,8 @@ func TestAccTargetConnectPolicy_Verbs(t *testing.T) {
 			{
 				Config: testAccTargetConnectPolicyConfigBasic(rName, []string{"foo"}, []string{string(verbtype.Tunnel)}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
-					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy),
+					testAccCheckTargetConnectPolicyAttributes(t, &policy, &expectedTargetConnectPolicy{
 						Name:  &rName,
 						Verbs: &[]policies.Verb{{Type: verbtype.Tunnel}},
 					}),
@@ -238,7 +238,7 @@ func TestAccTargetConnectPolicy_Description(t *testing.T) {
 	ctx := context.Background()
 	rName := acctest.RandomName()
 	resourceName := "bastionzero_targetconnect_policy.test"
-	var policy1, policy2 policies.TargetConnectPolicy
+	var policy policies.TargetConnectPolicy
 	desc1 := "desc1"
 	desc2 := "desc2"
 
@@ -250,8 +250,8 @@ func TestAccTargetConnectPolicy_Description(t *testing.T) {
 			{
 				Config: testAccTargetConnectPolicyConfigDescription(rName, []string{"foo"}, []string{string(verbtype.Shell)}, desc1),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckTargetConnectPolicyExists(resourceName, &policy1),
-					testAccCheckTargetConnectPolicyAttributes(t, &policy1, &expectedTargetConnectPolicy{
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy),
+					testAccCheckTargetConnectPolicyAttributes(t, &policy, &expectedTargetConnectPolicy{
 						Name:        &rName,
 						Description: &desc1,
 					}),
@@ -269,8 +269,8 @@ func TestAccTargetConnectPolicy_Description(t *testing.T) {
 			{
 				Config: testAccTargetConnectPolicyConfigDescription(rName, []string{"foo"}, []string{string(verbtype.Shell)}, desc2),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
-					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy),
+					testAccCheckTargetConnectPolicyAttributes(t, &policy, &expectedTargetConnectPolicy{
 						Name:        &rName,
 						Description: &desc2,
 					}),
@@ -282,8 +282,8 @@ func TestAccTargetConnectPolicy_Description(t *testing.T) {
 			{
 				Config: testAccTargetConnectPolicyConfigDescription(rName, []string{"foo"}, []string{string(verbtype.Shell)}, ""),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
-					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
+					testAccCheckTargetConnectPolicyExists(resourceName, &policy),
+					testAccCheckTargetConnectPolicyAttributes(t, &policy, &expectedTargetConnectPolicy{
 						Name:        &rName,
 						Description: bastionzero.PtrTo(""),
 					}),
@@ -299,7 +299,7 @@ func TestAccTargetConnectPolicy_Subjects(t *testing.T) {
 	ctx := context.Background()
 	rName := acctest.RandomName()
 	resourceName := "bastionzero_targetconnect_policy.test"
-	var policy1, policy2 policies.TargetConnectPolicy
+	var p policies.TargetConnectPolicy
 	subject1 := new(policies.Subject)
 	subject2 := new(policies.Subject)
 
@@ -320,8 +320,8 @@ func TestAccTargetConnectPolicy_Subjects(t *testing.T) {
 			{
 				Config: testAccTargetConnectPolicyConfigSubjects(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicySubjects(ctx, []policies.Subject{*subject1})),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckTargetConnectPolicyExists(resourceName, &policy1),
-					testAccCheckTargetConnectPolicyAttributes(t, &policy1, &expectedTargetConnectPolicy{
+					testAccCheckTargetConnectPolicyExists(resourceName, &p),
+					testAccCheckTargetConnectPolicyAttributes(t, &p, &expectedTargetConnectPolicy{
 						Name:     &rName,
 						Subjects: &[]policies.Subject{*subject1},
 					}),
@@ -339,8 +339,8 @@ func TestAccTargetConnectPolicy_Subjects(t *testing.T) {
 			{
 				Config: testAccTargetConnectPolicyConfigSubjects(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicySubjects(ctx, []policies.Subject{*subject1, *subject2})),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
-					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
+					testAccCheckTargetConnectPolicyExists(resourceName, &p),
+					testAccCheckTargetConnectPolicyAttributes(t, &p, &expectedTargetConnectPolicy{
 						Name:     &rName,
 						Subjects: &[]policies.Subject{*subject1, *subject2},
 					}),
@@ -353,8 +353,8 @@ func TestAccTargetConnectPolicy_Subjects(t *testing.T) {
 			{
 				Config: testAccTargetConnectPolicyConfigSubjects(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicySubjects(ctx, []policies.Subject{})),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
-					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
+					testAccCheckTargetConnectPolicyExists(resourceName, &p),
+					testAccCheckTargetConnectPolicyAttributes(t, &p, &expectedTargetConnectPolicy{
 						Name:     &rName,
 						Subjects: &[]policies.Subject{},
 					}),
@@ -372,7 +372,7 @@ func TestAccTargetConnectPolicy_Groups(t *testing.T) {
 	ctx := context.Background()
 	rName := acctest.RandomName()
 	resourceName := "bastionzero_targetconnect_policy.test"
-	var policy1, policy2 policies.TargetConnectPolicy
+	var p policies.TargetConnectPolicy
 	group1 := new(policies.Group)
 	group2 := new(policies.Group)
 
@@ -387,8 +387,8 @@ func TestAccTargetConnectPolicy_Groups(t *testing.T) {
 			{
 				Config: testAccTargetConnectPolicyConfigGroups(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicyGroups(ctx, []policies.Group{*group1})),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckTargetConnectPolicyExists(resourceName, &policy1),
-					testAccCheckTargetConnectPolicyAttributes(t, &policy1, &expectedTargetConnectPolicy{
+					testAccCheckTargetConnectPolicyExists(resourceName, &p),
+					testAccCheckTargetConnectPolicyAttributes(t, &p, &expectedTargetConnectPolicy{
 						Name:   &rName,
 						Groups: &[]policies.Group{*group1},
 					}),
@@ -406,8 +406,8 @@ func TestAccTargetConnectPolicy_Groups(t *testing.T) {
 			{
 				Config: testAccTargetConnectPolicyConfigGroups(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicyGroups(ctx, []policies.Group{*group1, *group2})),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
-					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
+					testAccCheckTargetConnectPolicyExists(resourceName, &p),
+					testAccCheckTargetConnectPolicyAttributes(t, &p, &expectedTargetConnectPolicy{
 						Name:   &rName,
 						Groups: &[]policies.Group{*group1, *group2},
 					}),
@@ -420,8 +420,8 @@ func TestAccTargetConnectPolicy_Groups(t *testing.T) {
 			{
 				Config: testAccTargetConnectPolicyConfigGroups(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicyGroups(ctx, []policies.Group{})),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
-					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
+					testAccCheckTargetConnectPolicyExists(resourceName, &p),
+					testAccCheckTargetConnectPolicyAttributes(t, &p, &expectedTargetConnectPolicy{
 						Name:   &rName,
 						Groups: &[]policies.Group{},
 					}),
@@ -439,7 +439,7 @@ func TestAccTargetConnectPolicy_Environments(t *testing.T) {
 	ctx := context.Background()
 	rName := acctest.RandomName()
 	resourceName := "bastionzero_targetconnect_policy.test"
-	var policy1, policy2 policies.TargetConnectPolicy
+	var p policies.TargetConnectPolicy
 	env1 := new(policies.Environment)
 	env2 := new(policies.Environment)
 
@@ -455,8 +455,8 @@ func TestAccTargetConnectPolicy_Environments(t *testing.T) {
 			{
 				Config: testAccTargetConnectPolicyConfigEnvironments(rName, []string{"foo"}, []string{string(verbtype.Shell)}, []string{env1.ID}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckTargetConnectPolicyExists(resourceName, &policy1),
-					testAccCheckTargetConnectPolicyAttributes(t, &policy1, &expectedTargetConnectPolicy{
+					testAccCheckTargetConnectPolicyExists(resourceName, &p),
+					testAccCheckTargetConnectPolicyAttributes(t, &p, &expectedTargetConnectPolicy{
 						Name:         &rName,
 						Environments: &[]policies.Environment{*env1},
 					}),
@@ -474,8 +474,8 @@ func TestAccTargetConnectPolicy_Environments(t *testing.T) {
 			{
 				Config: testAccTargetConnectPolicyConfigEnvironments(rName, []string{"foo"}, []string{string(verbtype.Shell)}, []string{env1.ID, env2.ID}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
-					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
+					testAccCheckTargetConnectPolicyExists(resourceName, &p),
+					testAccCheckTargetConnectPolicyAttributes(t, &p, &expectedTargetConnectPolicy{
 						Name:         &rName,
 						Environments: &[]policies.Environment{*env1, *env2},
 					}),
@@ -488,8 +488,8 @@ func TestAccTargetConnectPolicy_Environments(t *testing.T) {
 			{
 				Config: testAccTargetConnectPolicyConfigEnvironments(rName, []string{"foo"}, []string{string(verbtype.Shell)}, []string{}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
-					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
+					testAccCheckTargetConnectPolicyExists(resourceName, &p),
+					testAccCheckTargetConnectPolicyAttributes(t, &p, &expectedTargetConnectPolicy{
 						Name:         &rName,
 						Environments: &[]policies.Environment{},
 					}),
@@ -507,7 +507,7 @@ func TestAccTargetConnectPolicy_Targets(t *testing.T) {
 	ctx := context.Background()
 	rName := acctest.RandomName()
 	resourceName := "bastionzero_targetconnect_policy.test"
-	var policy1, policy2 policies.TargetConnectPolicy
+	var p policies.TargetConnectPolicy
 	target1 := new(policies.Target)
 	target2 := new(policies.Target)
 
@@ -522,8 +522,8 @@ func TestAccTargetConnectPolicy_Targets(t *testing.T) {
 			{
 				Config: testAccTargetConnectPolicyConfigTargets(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicyTargets(ctx, []policies.Target{*target1})),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckTargetConnectPolicyExists(resourceName, &policy1),
-					testAccCheckTargetConnectPolicyAttributes(t, &policy1, &expectedTargetConnectPolicy{
+					testAccCheckTargetConnectPolicyExists(resourceName, &p),
+					testAccCheckTargetConnectPolicyAttributes(t, &p, &expectedTargetConnectPolicy{
 						Name:    &rName,
 						Targets: &[]policies.Target{*target1},
 					}),
@@ -541,8 +541,8 @@ func TestAccTargetConnectPolicy_Targets(t *testing.T) {
 			{
 				Config: testAccTargetConnectPolicyConfigTargets(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicyTargets(ctx, []policies.Target{*target1, *target2})),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
-					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
+					testAccCheckTargetConnectPolicyExists(resourceName, &p),
+					testAccCheckTargetConnectPolicyAttributes(t, &p, &expectedTargetConnectPolicy{
 						Name:    &rName,
 						Targets: &[]policies.Target{*target1, *target2},
 					}),
@@ -555,8 +555,8 @@ func TestAccTargetConnectPolicy_Targets(t *testing.T) {
 			{
 				Config: testAccTargetConnectPolicyConfigTargets(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicyTargets(ctx, []policies.Target{})),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckTargetConnectPolicyExists(resourceName, &policy2),
-					testAccCheckTargetConnectPolicyAttributes(t, &policy2, &expectedTargetConnectPolicy{
+					testAccCheckTargetConnectPolicyExists(resourceName, &p),
+					testAccCheckTargetConnectPolicyAttributes(t, &p, &expectedTargetConnectPolicy{
 						Name:    &rName,
 						Targets: &[]policies.Target{},
 					}),
