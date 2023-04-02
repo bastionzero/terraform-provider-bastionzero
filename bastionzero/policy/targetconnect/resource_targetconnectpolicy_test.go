@@ -570,6 +570,58 @@ func TestAccTargetConnectPolicy_Targets(t *testing.T) {
 	})
 }
 
+func TestTargetConnectPolicy_MutualExclTargetsEnvs(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Cannot specify both environments and targets
+				Config: `
+				resource "bastionzero_targetconnect_policy" "test" {
+			      name = "foo"
+				  target_users = ["bar"]
+				  verbs = ["Shell"]
+				  environments = []
+				  targets = []
+				}
+				`,
+				ExpectError: regexp.MustCompile(`cannot be configured together`),
+			},
+		},
+	})
+}
+
+func TestTargetConnectPolicy_InvalidTargetUsers(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Empty target users not permitted
+				Config:      testAccTargetConnectPolicyConfigBasic("test", []string{}, []string{string(verbtype.Tunnel)}),
+				ExpectError: regexp.MustCompile(`at least 1 elements`),
+			},
+		},
+	})
+}
+
+func TestTargetConnectPolicy_InvalidVerbs(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Empty verbs not permitted
+				Config:      testAccTargetConnectPolicyConfigBasic("test", []string{"foo"}, []string{}),
+				ExpectError: regexp.MustCompile(`at least 1 elements`),
+			},
+			{
+				// Invalid verb not permitted
+				Config:      testAccTargetConnectPolicyConfigBasic("test", []string{"foo"}, []string{"bad-verb"}),
+				ExpectError: regexp.MustCompile(`must be one of`),
+			},
+		},
+	})
+}
+
 func testAccTargetConnectPolicyConfigBasic(rName string, targetUsers []string, verbs []string) string {
 	return fmt.Sprintf(`
 resource "bastionzero_targetconnect_policy" "test" {

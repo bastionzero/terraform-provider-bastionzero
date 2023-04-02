@@ -227,6 +227,32 @@ func TestAccEnvironment_RecreateOnNameChange(t *testing.T) {
 	})
 }
 
+func TestEnvironment_InvalidName(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Empty name not permitted
+				Config:      testAccEnvironmentConfigName(""),
+				ExpectError: regexp.MustCompile(`must be at least 1`),
+			},
+		},
+	})
+}
+
+func TestEnvironment_InvalidOfflineCleanupTimeoutHours(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Hours cannot be 0
+				Config:      testAccEnvironmentConfigOfflineCleanupTimeoutHours("test", "0"),
+				ExpectError: regexp.MustCompile(`must be at least 1`),
+			},
+		},
+	})
+}
+
 func testAccEnvironmentConfigName(rName string) string {
 	return fmt.Sprintf(`
 resource "bastionzero_environment" "test" {
