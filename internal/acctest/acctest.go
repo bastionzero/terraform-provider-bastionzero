@@ -14,6 +14,7 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/environments"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/organization"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/users"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero"
 	"github.com/hashicorp/go-multierror"
@@ -410,23 +411,6 @@ func FindNUsersOrSkip(t *testing.T, subjects ...*policies.Subject) {
 	}, subjects...)
 }
 
-// FindTwoUsersOrSkip lists the users in the BastionZero organization and sets
-// subject1 and subject2 to the first two users found. If there are less than 2
-// users, then the current test is skipped.
-func FindTwoUsersOrSkip(t *testing.T, ctx context.Context, subjects1, subjects2 *policies.Subject) {
-	users, _, err := APIClient.Users.ListUsers(ctx)
-	if err != nil {
-		t.Fatalf("failed to list users: %s", err)
-	}
-
-	if len(users) < 2 {
-		t.Skipf("skipping %s because we need at least two users to test correctly but have %v", t.Name(), len(users))
-	}
-
-	*subjects1 = policies.Subject{ID: users[0].ID, Type: users[0].GetSubjectType()}
-	*subjects2 = policies.Subject{ID: users[1].ID, Type: users[1].GetSubjectType()}
-}
-
 // FindNGroupsOrSkip lists the groups in the BastionZero organization and sets
 // groups to the first n groups found. If there are less than n groups, then the
 // current test is skipped.
@@ -438,67 +422,26 @@ func FindNGroupsOrSkip(t *testing.T, groups ...*policies.Group) {
 	}, groups...)
 }
 
-// FindTwoGroupsOrSkip lists the IdP groups in the BastionZero organization and
-// sets group1 and group2 to the first two groups found. If there are less than
-// 2 groups, then the current test is skipped.
-func FindTwoGroupsOrSkip(t *testing.T, ctx context.Context, group1, group2 *policies.Group) {
-	groups, _, err := APIClient.Organization.ListGroups(ctx)
-	if err != nil {
-		t.Fatalf("failed to list groups: %s", err)
-	}
-
-	if len(groups) < 2 {
-		t.Skipf("skipping %s because we need at least two groups to test correctly but have %v", t.Name(), len(groups))
-	}
-
-	*group1 = policies.Group{ID: groups[0].ID, Name: groups[0].Name}
-	*group2 = policies.Group{ID: groups[1].ID, Name: groups[1].Name}
+// FindNEnvironmentsOrSkip lists the environments in the BastionZero
+// organization and sets envs to the first n environments found. If there are
+// less than n environments, then the current test is skipped.
+func FindNEnvironmentsOrSkip(t *testing.T, envs ...*policies.Environment) {
+	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]environments.Environment, *http.Response, error) {
+		return client.Environments.ListEnvironments(ctx)
+	}, func(e environments.Environment) policies.Environment {
+		return policies.Environment{ID: e.ID}
+	}, envs...)
 }
 
-// FindTwoEnvironmentsOrSkip lists the environments in the BastionZero
-// organization and sets env1 and env2 to the first two environments whose names
-// do not start with the acceptance test prefix. If there are less than 2
-// environments, then the current test is skipped.
-func FindTwoEnvironmentsOrSkip(t *testing.T, ctx context.Context, env1, env2 *policies.Environment) {
-	envs, _, err := APIClient.Environments.ListEnvironments(ctx)
-	if err != nil {
-		t.Fatalf("failed to list environments: %s", err)
-	}
-
-	// Filter out environments that are concurrently being created by other
-	// acceptance tests because they could be deleted by the time the caller of
-	// this function uses them
-	var filteredEnvs []environments.Environment
-	for _, env := range envs {
-		if !strings.HasPrefix(env.Name, TestNamePrefix) {
-			filteredEnvs = append(filteredEnvs, env)
-		}
-	}
-
-	if len(filteredEnvs) < 2 {
-		t.Skipf("skipping %s because we need at least two environments to test correctly but have %v", t.Name(), len(filteredEnvs))
-	}
-
-	*env1 = policies.Environment{ID: filteredEnvs[0].ID}
-	*env2 = policies.Environment{ID: filteredEnvs[1].ID}
-}
-
-// FindTwoBzeroTargetsOrSkip lists the Bzero targets in the BastionZero
-// organization and sets target1 and target2 to the first two Bzero targets
-// found. If there are less than 2 Bzero targets, then the current test is
-// skipped.
-func FindTwoBzeroTargetsOrSkip(t *testing.T, ctx context.Context, target1, target2 *policies.Target) {
-	targets, _, err := APIClient.Targets.ListBzeroTargets(ctx)
-	if err != nil {
-		t.Fatalf("failed to list Bzero targets: %s", err)
-	}
-
-	if len(targets) < 2 {
-		t.Skipf("skipping %s because we need at least two Bzero targets to test correctly but have %v", t.Name(), len(targets))
-	}
-
-	*target1 = policies.Target{ID: targets[0].ID, Type: targets[0].GetTargetType()}
-	*target2 = policies.Target{ID: targets[1].ID, Type: targets[1].GetTargetType()}
+// FindNBzeroTargetsOrSkip lists the Bzero targets in the BastionZero
+// organization and sets bzeroTargets to the first n Bzero targets found. If
+// there are less than n Bzero targets, then the current test is skipped.
+func FindNBzeroTargetsOrSkip(t *testing.T, bzeroTargets ...*policies.Target) {
+	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]targets.BzeroTarget, *http.Response, error) {
+		return client.Targets.ListBzeroTargets(ctx)
+	}, func(t targets.BzeroTarget) policies.Target {
+		return policies.Target{ID: t.ID, Type: t.GetTargetType()}
+	}, bzeroTargets...)
 }
 
 func ToTerraformStringList(arr []string) string {

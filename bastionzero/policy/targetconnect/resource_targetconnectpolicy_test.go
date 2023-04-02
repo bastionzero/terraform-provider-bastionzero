@@ -347,7 +347,7 @@ func TestAccTargetConnectPolicy_Subjects(t *testing.T) {
 	acctest.SkipIfNotInAcceptanceTestMode(t)
 	acctest.PreCheck(ctx, t)
 	// Find two users or skip this entire test
-	acctest.FindTwoUsersOrSkip(t, ctx, subject1, subject2)
+	acctest.FindNUsersOrSkip(t, subject1, subject2)
 
 	resource.ParallelTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
@@ -416,7 +416,7 @@ func TestAccTargetConnectPolicy_Groups(t *testing.T) {
 
 	acctest.SkipIfNotInAcceptanceTestMode(t)
 	acctest.PreCheck(ctx, t)
-	acctest.FindTwoGroupsOrSkip(t, ctx, group1, group2)
+	acctest.FindNGroupsOrSkip(t, group1, group2)
 
 	resource.ParallelTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
@@ -485,7 +485,7 @@ func TestAccTargetConnectPolicy_Environments(t *testing.T) {
 
 	acctest.SkipIfNotInAcceptanceTestMode(t)
 	acctest.PreCheck(ctx, t)
-	acctest.FindTwoEnvironmentsOrSkip(t, ctx, env1, env2)
+	acctest.FindNEnvironmentsOrSkip(t, env1, env2)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
@@ -555,7 +555,7 @@ func TestAccTargetConnectPolicy_Targets(t *testing.T) {
 
 	acctest.SkipIfNotInAcceptanceTestMode(t)
 	acctest.PreCheck(ctx, t)
-	acctest.FindTwoBzeroTargetsOrSkip(t, ctx, target1, target2)
+	acctest.FindNBzeroTargetsOrSkip(t, target1, target2)
 
 	resource.ParallelTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
