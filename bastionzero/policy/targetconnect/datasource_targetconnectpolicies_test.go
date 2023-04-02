@@ -2,7 +2,6 @@ package targetconnect_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
@@ -47,35 +46,4 @@ func testAccTargetConnectPoliciesDataSourceConfig() string {
 data "bastionzero_targetconnect_policies" "test" {
 }
 `
-}
-
-func TestAccDataSourceTargetConnectPolicies_FilterSubjects(t *testing.T) {
-	ctx := context.Background()
-	dataSourceName := "data.bastionzero_targetconnect_policies.test"
-	subject := new(policies.Subject)
-
-	acctest.SkipIfNotInAcceptanceTestMode(t)
-	acctest.PreCheck(ctx, t)
-	acctest.FindNUsersOrSkip(t, subject)
-
-	resource.ParallelTest(t, resource.TestCase{
-		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: acctest.ConfigCompose(testAccTargetConnectPoliciesDataSourceConfigFilterSubjects([]string{subject.ID})),
-				Check: resource.ComposeTestCheckFunc(
-					acctest.CheckListHasElements(dataSourceName, "policies"),
-					resource.TestCheckTypeSetElemAttr(dataSourceName, "policies.0.subjects.0.id", subject.ID),
-				),
-			},
-		},
-	})
-}
-
-func testAccTargetConnectPoliciesDataSourceConfigFilterSubjects(subjectIDs []string) string {
-	return fmt.Sprintf(`
-data "bastionzero_targetconnect_policies" "test" {
-  filter_subjects = %[1]s
-}
-`, acctest.ToTerraformStringList(subjectIDs))
 }

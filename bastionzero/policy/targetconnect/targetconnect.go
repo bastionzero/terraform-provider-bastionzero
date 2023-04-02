@@ -59,7 +59,11 @@ func SetTargetConnectPolicyAttributes(ctx context.Context, schema *TargetConnect
 
 	// By def. of schema, these values cannot be null so just accept whatever
 	// the refreshed value is
-	schema.TargetUsers = policy.FlattenPolicyTargetUsers(ctx, apiPolicy.GetTargetUsers())
+	if modelIsDataSource {
+		schema.TargetUsers = policy.FlattenPolicyTargetUsers(ctx, apiPolicy.GetTargetUsers()[:len(apiPolicy.GetTargetUsers())-1])
+	} else {
+		schema.TargetUsers = policy.FlattenPolicyTargetUsers(ctx, apiPolicy.GetTargetUsers())
+	}
 	schema.Verbs = FlattenPolicyVerbs(ctx, apiPolicy.GetVerbs())
 
 }
