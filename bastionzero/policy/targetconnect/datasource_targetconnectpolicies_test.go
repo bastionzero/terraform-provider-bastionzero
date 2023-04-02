@@ -67,7 +67,7 @@ func TestAccDataSourceTargetConnectPolicies_FilterSubjects(t *testing.T) {
 				Config: acctest.ConfigCompose(testAccTargetConnectPoliciesDataSourceConfigFilterSubjects([]string{subject.ID})),
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckListOrSetHasElements(dataSourceName, "policies"),
-					CheckAllPoliciesHaveSubjectID(dataSourceName, subject.ID),
+					CheckAllPoliciesHaveSubjectID(dataSourceName, subject.ID+"foo"),
 				),
 			},
 		},
