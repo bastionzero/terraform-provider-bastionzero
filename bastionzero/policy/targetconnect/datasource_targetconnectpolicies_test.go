@@ -2,12 +2,14 @@ package targetconnect_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/verbtype"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccDataSourceTargetConnectPolicies_Basic(t *testing.T) {
@@ -33,7 +35,7 @@ func TestAccDataSourceTargetConnectPolicies_Basic(t *testing.T) {
 				Config: acctest.ConfigCompose(resourcePolicy, testAccTargetConnectPoliciesDataSourceConfig()),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTargetConnectPolicyExists(resourceName, &policy),
-					acctest.CheckListHasElements(dataSourceName, "policies"),
+					acctest.CheckListOrSetHasElements(dataSourceName, "policies"),
 					acctest.CheckTypeSetElemNestedAttrsFromResource(resourceName, []string{}, dataSourceName, "policies.*"),
 				),
 			},
@@ -46,4 +48,67 @@ func testAccTargetConnectPoliciesDataSourceConfig() string {
 data "bastionzero_targetconnect_policies" "test" {
 }
 `
+}
+
+func TestAccDataSourceTargetConnectPolicies_FilterSubjects(t *testing.T) {
+	ctx := context.Background()
+	dataSourceName := "data.bastionzero_targetconnect_policies.test"
+	subject := new(policies.Subject)
+
+	acctest.SkipIfNotInAcceptanceTestMode(t)
+	acctest.PreCheck(ctx, t)
+	acctest.FindNUsersOrSkip(t, subject)
+
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: acctest.ConfigCompose(testAccTargetConnectPoliciesDataSourceConfigFilterSubjects([]string{subject.ID})),
+				Check: resource.ComposeTestCheckFunc(
+					acctest.CheckListOrSetHasElements(dataSourceName, "policies"),
+					CheckAllSubjectIDsMatch(dataSourceName, subject.ID),
+				),
+			},
+		},
+	})
+}
+
+func testAccTargetConnectPoliciesDataSourceConfigFilterSubjects(subjectIDs []string) string {
+	return fmt.Sprintf(`
+data "bastionzero_targetconnect_policies" "test" {
+  filter_subjects = %[1]s
+}
+`, acctest.ToTerraformStringList(subjectIDs))
+}
+
+// CheckAllSubjectIDsMatch checks that all subjects in a list of policies have
+// an expected subject ID
+func CheckAllSubjectIDsMatch(namedTFResource, expectedSubjectID string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[namedTFResource]
+		if !ok {
+			return fmt.Errorf("Not found: %s", namedTFResource)
+		}
+
+		totalPolicies, err := acctest.ListOrSetCount(rs, "policies")
+		if err != nil {
+			return err
+		}
+
+		for i := 0; i < totalPolicies; i++ {
+			totalSubjects, err := acctest.ListOrSetCount(rs, fmt.Sprintf("policies.%v.subjects", i))
+			if err != nil {
+				return err
+			}
+
+			for j := 0; j < totalSubjects; j++ {
+				if err := resource.TestCheckResourceAttr(namedTFResource, fmt.Sprintf("policies.%v.subjects.%v.id", i, j), expectedSubjectID)(s); err != nil {
+					return err
+				}
+			}
+
+		}
+
+		return nil
+	}
 }

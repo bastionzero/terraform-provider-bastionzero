@@ -175,10 +175,23 @@ func CheckExistsAtBastionZero[T any](namedTFResource string, apiObject *T, f fun
 	}
 }
 
-// CheckListHasElements attempts to load a resource/datasource with name
-// namedTFResource from the TF state, and then check that the list at
-// listAttributeName has at least 1 element.
-func CheckListHasElements(namedTFResource, listAttributeName string) resource.TestCheckFunc {
+// ListOrSetCount returns the number of elements in a list or set attribute
+func ListOrSetCount(resourceState *terraform.ResourceState, listOrSetAttributeName string) (int, error) {
+	rawCount, ok := resourceState.Primary.Attributes[fmt.Sprintf("%s.#", listOrSetAttributeName)]
+	if !ok {
+		return 0, fmt.Errorf("Could not find list/set attribute %s", listOrSetAttributeName)
+	}
+	count, err := strconv.Atoi(rawCount)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+// CheckListOrSetHasElements attempts to load a resource/datasource with name
+// namedTFResource from the TF state, and then check that the list/set at
+// listOrSetAttributeName has at least 1 element.
+func CheckListOrSetHasElements(namedTFResource, listOrSetAttributeName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[namedTFResource]
 
@@ -186,18 +199,13 @@ func CheckListHasElements(namedTFResource, listAttributeName string) resource.Te
 			return fmt.Errorf("Not found: %s", namedTFResource)
 		}
 
-		rawTotal, ok := rs.Primary.Attributes[fmt.Sprintf("%s.#", listAttributeName)]
-		if !ok {
-			return fmt.Errorf("Not found %s", listAttributeName)
-		}
-
-		total, err := strconv.Atoi(rawTotal)
+		total, err := ListOrSetCount(rs, listOrSetAttributeName)
 		if err != nil {
 			return err
 		}
 
 		if total < 1 {
-			return fmt.Errorf("No %s retrieved", listAttributeName)
+			return fmt.Errorf("No %s retrieved", listOrSetAttributeName)
 		}
 
 		return nil
