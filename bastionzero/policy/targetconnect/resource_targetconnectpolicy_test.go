@@ -660,7 +660,46 @@ func TestTargetConnectPolicy_InvalidVerbs(t *testing.T) {
 			{
 				// Invalid verb not permitted
 				Config:      testAccTargetConnectPolicyConfigBasic("test", []string{"foo"}, []string{"bad-verb"}),
-				ExpectError: regexp.MustCompile(`must be one of`),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+		},
+	})
+}
+
+func TestTargetConnectPolicy_InvalidTargets(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Invalid target type not permitted
+				Config:      testAccTargetConnectPolicyConfigTargets("test", []string{"foo"}, []string{"bar"}, policy.FlattenPolicyTargets(context.Background(), []policies.Target{{ID: "foo", Type: "foo"}})),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+		},
+	})
+}
+
+func TestTargetConnectPolicy_InvalidName(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Empty name not permitted
+				Config:      testAccTargetConnectPolicyConfigBasic("", []string{"foo"}, []string{"bar"}),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Length`),
+			},
+		},
+	})
+}
+
+func TestTargetConnectPolicy_InvalidSubjects(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Invalid subject type not permitted
+				Config:      testAccTargetConnectPolicyConfigSubjects("test", []string{"foo"}, []string{"bar"}, policy.FlattenPolicySubjects(context.Background(), []policies.Subject{{ID: "foo", Type: "foo"}})),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
 			},
 		},
 	})

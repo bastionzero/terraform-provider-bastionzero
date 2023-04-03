@@ -438,6 +438,17 @@ func FindNClusterTargetsOrSkip(t *testing.T, clusterTargets ...*policies.Cluster
 	}, clusterTargets...)
 }
 
+// FindNDbTargetsOrSkip lists the Db targets in the BastionZero organization and
+// sets dbTargets to the first n Db targets found. If there are less than n Db
+// targets, then the current test is skipped.
+func FindNDbTargetsOrSkip(t *testing.T, dbTargets ...*policies.Target) {
+	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]targets.DatabaseTarget, *http.Response, error) {
+		return client.Targets.ListDatabaseTargets(ctx)
+	}, func(t targets.DatabaseTarget) policies.Target {
+		return policies.Target{ID: t.ID, Type: t.GetTargetType()}
+	}, dbTargets...)
+}
+
 func ToTerraformStringList(arr []string) string {
 	// Source: https://stackoverflow.com/questions/24489384/how-to-print-the-values-of-slices#comment126502244_53672500
 	return strings.ReplaceAll(fmt.Sprintf("%+q", arr), "\" \"", "\",\"")

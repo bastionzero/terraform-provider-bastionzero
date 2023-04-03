@@ -640,7 +640,7 @@ func TestAccKubernetesPolicy_ClusterGroups(t *testing.T) {
 	})
 }
 
-func TestAccKubernetesPolicy_MutualExclClustersEnvs(t *testing.T) {
+func TestKubernetesPolicy_MutualExclClustersEnvs(t *testing.T) {
 	resource.UnitTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -654,6 +654,32 @@ func TestAccKubernetesPolicy_MutualExclClustersEnvs(t *testing.T) {
 				}
 				`,
 				ExpectError: regexp.MustCompile(`cannot be configured together`),
+			},
+		},
+	})
+}
+
+func TestKubernetesPolicy_InvalidName(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Empty name not permitted
+				Config:      testAccKubernetesPolicyConfigBasic(""),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Length`),
+			},
+		},
+	})
+}
+
+func TestKubernetesPolicy_InvalidSubjects(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Invalid subject type not permitted
+				Config:      testAccKubernetesPolicyConfigSubjects("test", policy.FlattenPolicySubjects(context.Background(), []policies.Subject{{ID: "foo", Type: "foo"}})),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
 			},
 		},
 	})
