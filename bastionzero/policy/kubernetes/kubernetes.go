@@ -3,6 +3,7 @@ package kubernetes
 import (
 	"context"
 
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/policytype"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy"
@@ -12,8 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// kubernetesPolicyModel maps the kubernetes policy schema data.
-type kubernetesPolicyModel struct {
+// KubernetesPolicyModel maps the kubernetes policy schema data.
+type KubernetesPolicyModel struct {
 	ID            types.String `tfsdk:"id"`
 	Name          types.String `tfsdk:"name"`
 	Type          types.String `tfsdk:"type"`
@@ -26,19 +27,19 @@ type kubernetesPolicyModel struct {
 	ClusterGroups types.Set    `tfsdk:"cluster_groups"`
 }
 
-func (m *kubernetesPolicyModel) SetID(value types.String)          { m.ID = value }
-func (m *kubernetesPolicyModel) SetName(value types.String)        { m.Name = value }
-func (m *kubernetesPolicyModel) SetType(value types.String)        { m.Type = value }
-func (m *kubernetesPolicyModel) SetDescription(value types.String) { m.Description = value }
-func (m *kubernetesPolicyModel) SetSubjects(value types.Set)       { m.Subjects = value }
-func (m *kubernetesPolicyModel) SetGroups(value types.Set)         { m.Groups = value }
+func (m *KubernetesPolicyModel) SetID(value types.String)          { m.ID = value }
+func (m *KubernetesPolicyModel) SetName(value types.String)        { m.Name = value }
+func (m *KubernetesPolicyModel) SetType(value types.String)        { m.Type = value }
+func (m *KubernetesPolicyModel) SetDescription(value types.String) { m.Description = value }
+func (m *KubernetesPolicyModel) SetSubjects(value types.Set)       { m.Subjects = value }
+func (m *KubernetesPolicyModel) SetGroups(value types.Set)         { m.Groups = value }
 
-func (m *kubernetesPolicyModel) GetSubjects() types.Set { return m.Subjects }
-func (m *kubernetesPolicyModel) GetGroups() types.Set   { return m.Groups }
+func (m *KubernetesPolicyModel) GetSubjects() types.Set { return m.Subjects }
+func (m *KubernetesPolicyModel) GetGroups() types.Set   { return m.Groups }
 
-// setKubernetesPolicyAttributes populates the TF schema data from a kubernetes
+// SetKubernetesPolicyAttributes populates the TF schema data from a kubernetes
 // policy
-func setKubernetesPolicyAttributes(ctx context.Context, schema *kubernetesPolicyModel, apiPolicy *policies.KubernetesPolicy, modelIsDataSource bool) {
+func SetKubernetesPolicyAttributes(ctx context.Context, schema *KubernetesPolicyModel, apiPolicy *policies.KubernetesPolicy, modelIsDataSource bool) {
 	policy.SetBasePolicyAttributes(ctx, schema, apiPolicy, modelIsDataSource)
 
 	// See comment in SetBasePolicyAttributes that explains this conditional
@@ -55,6 +56,20 @@ func setKubernetesPolicyAttributes(ctx context.Context, schema *kubernetesPolicy
 	if !schema.ClusterGroups.IsNull() || len(apiPolicy.GetClusterGroups()) != 0 || modelIsDataSource {
 		schema.ClusterGroups = FlattenPolicyClusterGroups(ctx, apiPolicy.GetClusterGroups())
 	}
+}
+
+func ExpandKubernetesPolicy(ctx context.Context, schema *KubernetesPolicyModel) *policies.KubernetesPolicy {
+	p := new(policies.KubernetesPolicy)
+	p.Name = schema.Name.ValueString()
+	p.Description = internal.StringFromFramework(ctx, schema.Description)
+	p.Subjects = bastionzero.PtrTo(policy.ExpandPolicySubjects(ctx, schema.Subjects))
+	p.Groups = bastionzero.PtrTo(policy.ExpandPolicyGroups(ctx, schema.Groups))
+	p.Environments = bastionzero.PtrTo(policy.ExpandPolicyEnvironments(ctx, schema.Environments))
+	p.Clusters = bastionzero.PtrTo(ExpandPolicyClusters(ctx, schema.Clusters))
+	p.ClusterUsers = bastionzero.PtrTo(ExpandPolicyClusterUsers(ctx, schema.ClusterUsers))
+	p.ClusterGroups = bastionzero.PtrTo(ExpandPolicyClusterGroups(ctx, schema.ClusterGroups))
+
+	return p
 }
 
 func ExpandPolicyClusters(ctx context.Context, tfSet types.Set) []policies.Cluster {

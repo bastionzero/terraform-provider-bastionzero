@@ -15,15 +15,15 @@ import (
 
 func NewKubernetesPoliciesDataSource() datasource.DataSource {
 	return bzdatasource.NewListDataSourceWithPractitionerParameters(
-		&bzdatasource.ListDataSourceWithPractitionerParametersConfig[kubernetesPolicyModel, policy.ListPolicyParametersModel, policies.KubernetesPolicy]{
-			BaseListDataSourceConfig: &bzdatasource.BaseListDataSourceConfig[kubernetesPolicyModel, policies.KubernetesPolicy]{
+		&bzdatasource.ListDataSourceWithPractitionerParametersConfig[KubernetesPolicyModel, policy.ListPolicyParametersModel, policies.KubernetesPolicy]{
+			BaseListDataSourceConfig: &bzdatasource.BaseListDataSourceConfig[KubernetesPolicyModel, policies.KubernetesPolicy]{
 				RecordSchema:        internal.ResourceSchemaToDataSourceSchema(makeKubernetesPolicyResourceSchema(), nil),
 				MetadataTypeName:    "kubernetes_policies",
 				ResultAttributeName: "policies",
 				PrettyAttributeName: "Kubernetes policies",
-				FlattenAPIModel: func(ctx context.Context, apiObject *policies.KubernetesPolicy) (state *kubernetesPolicyModel, diags diag.Diagnostics) {
-					state = new(kubernetesPolicyModel)
-					setKubernetesPolicyAttributes(ctx, state, apiObject, true)
+				FlattenAPIModel: func(ctx context.Context, apiObject *policies.KubernetesPolicy) (state *KubernetesPolicyModel, diags diag.Diagnostics) {
+					state = new(KubernetesPolicyModel)
+					SetKubernetesPolicyAttributes(ctx, state, apiObject, true)
 					return
 				},
 				Description: "Get a list of all Kubernetes policies in your BastionZero organization.",

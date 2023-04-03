@@ -13,16 +13,16 @@ import (
 
 func NewKubernetesPolicyDataSource() datasource.DataSource {
 	return bzdatasource.NewSingleDataSource(
-		&bzdatasource.SingleDataSourceConfig[kubernetesPolicyModel, policies.KubernetesPolicy]{
-			BaseSingleDataSourceConfig: &bzdatasource.BaseSingleDataSourceConfig[kubernetesPolicyModel, policies.KubernetesPolicy]{
+		&bzdatasource.SingleDataSourceConfig[KubernetesPolicyModel, policies.KubernetesPolicy]{
+			BaseSingleDataSourceConfig: &bzdatasource.BaseSingleDataSourceConfig[KubernetesPolicyModel, policies.KubernetesPolicy]{
 				RecordSchema:        internal.ResourceSchemaToDataSourceSchema(makeKubernetesPolicyResourceSchema(), bastionzero.PtrTo("id")),
 				MetadataTypeName:    "kubernetes_policy",
 				PrettyAttributeName: "Kubernetes policy",
-				FlattenAPIModel: func(ctx context.Context, apiObject *policies.KubernetesPolicy, state *kubernetesPolicyModel) (diags diag.Diagnostics) {
-					setKubernetesPolicyAttributes(ctx, state, apiObject, true)
+				FlattenAPIModel: func(ctx context.Context, apiObject *policies.KubernetesPolicy, state *KubernetesPolicyModel) (diags diag.Diagnostics) {
+					SetKubernetesPolicyAttributes(ctx, state, apiObject, true)
 					return
 				},
-				GetAPIModel: func(ctx context.Context, tfModel kubernetesPolicyModel, client *bastionzero.Client) (*policies.KubernetesPolicy, error) {
+				GetAPIModel: func(ctx context.Context, tfModel KubernetesPolicyModel, client *bastionzero.Client) (*policies.KubernetesPolicy, error) {
 					policy, _, err := client.Policies.GetKubernetesPolicy(ctx, tfModel.ID.ValueString())
 					return policy, err
 				},

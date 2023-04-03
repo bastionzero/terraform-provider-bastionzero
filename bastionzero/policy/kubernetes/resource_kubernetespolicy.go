@@ -9,7 +9,6 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/apierror"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy"
-	"github.com/bastionzero/terraform-provider-bastionzero/internal"
 	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -71,22 +70,14 @@ func (r *kubernetesPolicyResource) Schema(ctx context.Context, _ resource.Schema
 // Create creates the Kubernetes policy resource and sets the initial Terraform state.
 func (r *kubernetesPolicyResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Read Terraform plan data into the model
-	var plan kubernetesPolicyModel
+	var plan KubernetesPolicyModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Generate API request body from plan
-	p := new(policies.KubernetesPolicy)
-	p.Name = plan.Name.ValueString()
-	p.Description = internal.StringFromFramework(ctx, plan.Description)
-	p.Subjects = bastionzero.PtrTo(policy.ExpandPolicySubjects(ctx, plan.Subjects))
-	p.Groups = bastionzero.PtrTo(policy.ExpandPolicyGroups(ctx, plan.Groups))
-	p.Environments = bastionzero.PtrTo(policy.ExpandPolicyEnvironments(ctx, plan.Environments))
-	p.Clusters = bastionzero.PtrTo(ExpandPolicyClusters(ctx, plan.Clusters))
-	p.ClusterUsers = bastionzero.PtrTo(ExpandPolicyClusterUsers(ctx, plan.ClusterUsers))
-	p.ClusterGroups = bastionzero.PtrTo(ExpandPolicyClusterGroups(ctx, plan.ClusterGroups))
+	p := ExpandKubernetesPolicy(ctx, &plan)
 
 	ctx = tflog.SetField(ctx, "policy_name", p.Name)
 
@@ -103,7 +94,7 @@ func (r *kubernetesPolicyResource) Create(ctx context.Context, req resource.Crea
 	ctx = tflog.SetField(ctx, "policy_id", createResp.ID)
 	tflog.Debug(ctx, "Created Kubernetes policy")
 
-	setKubernetesPolicyAttributes(ctx, &plan, createResp, false)
+	SetKubernetesPolicyAttributes(ctx, &plan, createResp, false)
 
 	// Set state to fully populated data
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
@@ -112,7 +103,7 @@ func (r *kubernetesPolicyResource) Create(ctx context.Context, req resource.Crea
 // Read refreshes the Kubernetes policy Terraform state with the latest data.
 func (r *kubernetesPolicyResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// Read Terraform prior state data into the model
-	var state kubernetesPolicyModel
+	var state KubernetesPolicyModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -134,7 +125,7 @@ func (r *kubernetesPolicyResource) Read(ctx context.Context, req resource.ReadRe
 	}
 	tflog.Debug(ctx, "Queried for Kubernetes policy")
 
-	setKubernetesPolicyAttributes(ctx, &state, p, false)
+	SetKubernetesPolicyAttributes(ctx, &state, p, false)
 
 	// Overwrite with refreshed state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -144,7 +135,7 @@ func (r *kubernetesPolicyResource) Read(ctx context.Context, req resource.ReadRe
 // on success.
 func (r *kubernetesPolicyResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	// Read Terraform plan and current state data into the model
-	var plan, state kubernetesPolicyModel
+	var plan, state KubernetesPolicyModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -191,7 +182,7 @@ func (r *kubernetesPolicyResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	setKubernetesPolicyAttributes(ctx, &plan, updateResp, false)
+	SetKubernetesPolicyAttributes(ctx, &plan, updateResp, false)
 
 	// Overwrite with refreshed state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
@@ -201,7 +192,7 @@ func (r *kubernetesPolicyResource) Update(ctx context.Context, req resource.Upda
 // success.
 func (r *kubernetesPolicyResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	// Retrieve values from state
-	var state kubernetesPolicyModel
+	var state KubernetesPolicyModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
