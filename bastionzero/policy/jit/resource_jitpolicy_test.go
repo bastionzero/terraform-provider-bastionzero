@@ -22,6 +22,10 @@ import (
 func getChildPoliciesOrSkip(ctx context.Context, t *testing.T) (tcPolicy *policies.TargetConnectPolicy, kubePolicy *policies.KubernetesPolicy, proxyPolicy *policies.ProxyPolicy) {
 	// We could create the policies using the respective resource types, but I
 	// want this test suite to work in isolation of whether those resources work
+	tcPolicy = new(policies.TargetConnectPolicy)
+	kubePolicy = new(policies.KubernetesPolicy)
+	proxyPolicy = new(policies.ProxyPolicy)
+
 	acctest.SkipIfNotInAcceptanceTestMode(t)
 	acctest.PreCheck(ctx, t)
 	acctest.FindNTargetConnectPoliciesOrSkip(t, tcPolicy)
