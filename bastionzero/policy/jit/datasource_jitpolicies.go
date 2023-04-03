@@ -15,15 +15,15 @@ import (
 
 func NewJITPoliciesDataSource() datasource.DataSource {
 	return bzdatasource.NewListDataSourceWithPractitionerParameters(
-		&bzdatasource.ListDataSourceWithPractitionerParametersConfig[jitPolicyModel, policy.ListPolicyParametersModel, policies.JITPolicy]{
-			BaseListDataSourceConfig: &bzdatasource.BaseListDataSourceConfig[jitPolicyModel, policies.JITPolicy]{
+		&bzdatasource.ListDataSourceWithPractitionerParametersConfig[JITPolicyModel, policy.ListPolicyParametersModel, policies.JITPolicy]{
+			BaseListDataSourceConfig: &bzdatasource.BaseListDataSourceConfig[JITPolicyModel, policies.JITPolicy]{
 				RecordSchema:        internal.ResourceSchemaToDataSourceSchema(makeJITPolicyResourceSchema(), nil),
 				MetadataTypeName:    "jit_policies",
 				ResultAttributeName: "policies",
 				PrettyAttributeName: "JIT policies",
-				FlattenAPIModel: func(ctx context.Context, apiObject *policies.JITPolicy) (state *jitPolicyModel, diags diag.Diagnostics) {
-					state = new(jitPolicyModel)
-					setJITPolicyAttributes(ctx, state, apiObject, true)
+				FlattenAPIModel: func(ctx context.Context, apiObject *policies.JITPolicy) (state *JITPolicyModel, diags diag.Diagnostics) {
+					state = new(JITPolicyModel)
+					SetJITPolicyAttributes(ctx, state, apiObject, true)
 					return
 				},
 				Description: "Get a list of all JIT policies in your BastionZero organization.",

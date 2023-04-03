@@ -71,21 +71,14 @@ func (r *jitPolicyResource) Schema(ctx context.Context, _ resource.SchemaRequest
 // Create creates the JIT policy resource and sets the initial Terraform state.
 func (r *jitPolicyResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Read Terraform plan data into the model
-	var plan jitPolicyModel
+	var plan JITPolicyModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Generate API request body from plan
-	p := new(policies.CreateJITPolicyRequest)
-	p.Name = plan.Name.ValueString()
-	p.Description = plan.Description.ValueString()
-	p.Subjects = policy.ExpandPolicySubjects(ctx, plan.Subjects)
-	p.Groups = policy.ExpandPolicyGroups(ctx, plan.Groups)
-	p.ChildPolicies = ExpandChildPolicies(ctx, plan.ChildPolicies)
-	p.AutomaticallyApproved = plan.AutomaticallyApproved.ValueBool()
-	p.Duration = uint(plan.Duration.ValueInt64())
+	p := ExpandJITPolicy(ctx, &plan)
 
 	ctx = tflog.SetField(ctx, "policy_name", p.Name)
 
@@ -102,7 +95,7 @@ func (r *jitPolicyResource) Create(ctx context.Context, req resource.CreateReque
 	ctx = tflog.SetField(ctx, "policy_id", createResp.ID)
 	tflog.Debug(ctx, "Created JIT policy")
 
-	setJITPolicyAttributes(ctx, &plan, createResp, false)
+	SetJITPolicyAttributes(ctx, &plan, createResp, false)
 
 	// Set state to fully populated data
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
@@ -111,7 +104,7 @@ func (r *jitPolicyResource) Create(ctx context.Context, req resource.CreateReque
 // Read refreshes the JIT policy Terraform state with the latest data.
 func (r *jitPolicyResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// Read Terraform prior state data into the model
-	var state jitPolicyModel
+	var state JITPolicyModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -133,7 +126,7 @@ func (r *jitPolicyResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 	tflog.Debug(ctx, "Queried for JIT policy")
 
-	setJITPolicyAttributes(ctx, &state, p, false)
+	SetJITPolicyAttributes(ctx, &state, p, false)
 
 	// Overwrite with refreshed state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -143,7 +136,7 @@ func (r *jitPolicyResource) Read(ctx context.Context, req resource.ReadRequest, 
 // on success.
 func (r *jitPolicyResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	// Read Terraform plan and current state data into the model
-	var plan, state jitPolicyModel
+	var plan, state JITPolicyModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -188,7 +181,7 @@ func (r *jitPolicyResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	setJITPolicyAttributes(ctx, &plan, updateResp, false)
+	SetJITPolicyAttributes(ctx, &plan, updateResp, false)
 
 	// Overwrite with refreshed state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
@@ -198,7 +191,7 @@ func (r *jitPolicyResource) Update(ctx context.Context, req resource.UpdateReque
 // success.
 func (r *jitPolicyResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	// Retrieve values from state
-	var state jitPolicyModel
+	var state JITPolicyModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return

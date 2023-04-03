@@ -20,8 +20,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// jitPolicyModel maps the JIT policy schema data.
-type jitPolicyModel struct {
+// JITPolicyModel maps the JIT policy schema data.
+type JITPolicyModel struct {
 	ID                    types.String `tfsdk:"id"`
 	Name                  types.String `tfsdk:"name"`
 	Type                  types.String `tfsdk:"type"`
@@ -33,24 +33,37 @@ type jitPolicyModel struct {
 	Duration              types.Int64  `tfsdk:"duration"`
 }
 
-func (m *jitPolicyModel) SetID(value types.String)          { m.ID = value }
-func (m *jitPolicyModel) SetName(value types.String)        { m.Name = value }
-func (m *jitPolicyModel) SetType(value types.String)        { m.Type = value }
-func (m *jitPolicyModel) SetDescription(value types.String) { m.Description = value }
-func (m *jitPolicyModel) SetSubjects(value types.Set)       { m.Subjects = value }
-func (m *jitPolicyModel) SetGroups(value types.Set)         { m.Groups = value }
+func (m *JITPolicyModel) SetID(value types.String)          { m.ID = value }
+func (m *JITPolicyModel) SetName(value types.String)        { m.Name = value }
+func (m *JITPolicyModel) SetType(value types.String)        { m.Type = value }
+func (m *JITPolicyModel) SetDescription(value types.String) { m.Description = value }
+func (m *JITPolicyModel) SetSubjects(value types.Set)       { m.Subjects = value }
+func (m *JITPolicyModel) SetGroups(value types.Set)         { m.Groups = value }
 
-func (m *jitPolicyModel) GetSubjects() types.Set { return m.Subjects }
-func (m *jitPolicyModel) GetGroups() types.Set   { return m.Groups }
+func (m *JITPolicyModel) GetSubjects() types.Set { return m.Subjects }
+func (m *JITPolicyModel) GetGroups() types.Set   { return m.Groups }
 
-// setJITPolicyAttributes populates the TF schema data from a JIT policy
-func setJITPolicyAttributes(ctx context.Context, schema *jitPolicyModel, apiPolicy *policies.JITPolicy, modelIsDataSource bool) {
+// SetJITPolicyAttributes populates the TF schema data from a JIT policy
+func SetJITPolicyAttributes(ctx context.Context, schema *JITPolicyModel, apiPolicy *policies.JITPolicy, modelIsDataSource bool) {
 	policy.SetBasePolicyAttributes(ctx, schema, apiPolicy, modelIsDataSource)
 	// By def. of schema, ChildPolicies set cannot be null so just accept
 	// whatever the refreshed value is
 	schema.ChildPolicies = FlattenChildPolicies(ctx, apiPolicy.GetChildPolicies())
 	schema.AutomaticallyApproved = types.BoolValue(apiPolicy.GetAutomaticallyApproved())
 	schema.Duration = types.Int64Value(int64(apiPolicy.GetDuration()))
+}
+
+func ExpandJITPolicy(ctx context.Context, schema *JITPolicyModel) *policies.CreateJITPolicyRequest {
+	p := new(policies.CreateJITPolicyRequest)
+	p.Name = schema.Name.ValueString()
+	p.Description = schema.Description.ValueString()
+	p.Subjects = policy.ExpandPolicySubjects(ctx, schema.Subjects)
+	p.Groups = policy.ExpandPolicyGroups(ctx, schema.Groups)
+	p.ChildPolicies = ExpandChildPolicies(ctx, schema.ChildPolicies)
+	p.AutomaticallyApproved = schema.AutomaticallyApproved.ValueBool()
+	p.Duration = uint(schema.Duration.ValueInt64())
+
+	return p
 }
 
 // ChildPolicyModel maps child policy data.

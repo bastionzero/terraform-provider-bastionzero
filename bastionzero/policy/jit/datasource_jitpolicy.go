@@ -13,16 +13,16 @@ import (
 
 func NewJITPolicyDataSource() datasource.DataSource {
 	return bzdatasource.NewSingleDataSource(
-		&bzdatasource.SingleDataSourceConfig[jitPolicyModel, policies.JITPolicy]{
-			BaseSingleDataSourceConfig: &bzdatasource.BaseSingleDataSourceConfig[jitPolicyModel, policies.JITPolicy]{
+		&bzdatasource.SingleDataSourceConfig[JITPolicyModel, policies.JITPolicy]{
+			BaseSingleDataSourceConfig: &bzdatasource.BaseSingleDataSourceConfig[JITPolicyModel, policies.JITPolicy]{
 				RecordSchema:        internal.ResourceSchemaToDataSourceSchema(makeJITPolicyResourceSchema(), bastionzero.PtrTo("id")),
 				MetadataTypeName:    "jit_policy",
 				PrettyAttributeName: "JIT policy",
-				FlattenAPIModel: func(ctx context.Context, apiObject *policies.JITPolicy, state *jitPolicyModel) (diags diag.Diagnostics) {
-					setJITPolicyAttributes(ctx, state, apiObject, true)
+				FlattenAPIModel: func(ctx context.Context, apiObject *policies.JITPolicy, state *JITPolicyModel) (diags diag.Diagnostics) {
+					SetJITPolicyAttributes(ctx, state, apiObject, true)
 					return
 				},
-				GetAPIModel: func(ctx context.Context, tfModel jitPolicyModel, client *bastionzero.Client) (*policies.JITPolicy, error) {
+				GetAPIModel: func(ctx context.Context, tfModel JITPolicyModel, client *bastionzero.Client) (*policies.JITPolicy, error) {
 					policy, _, err := client.Policies.GetJITPolicy(ctx, tfModel.ID.ValueString())
 					return policy, err
 				},

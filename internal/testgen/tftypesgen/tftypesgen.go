@@ -72,3 +72,12 @@ func BoolWithValueOrNullGen(ctx context.Context) *rapid.Generator[basetypes.Bool
 		).Draw(t, "BoolWithValueOrNull")
 	})
 }
+
+func Int64WithValueOrNullGen(ctx context.Context) *rapid.Generator[basetypes.Int64Value] {
+	return rapid.Custom(func(t *rapid.T) basetypes.Int64Value {
+		return rapid.OneOf(
+			rapid.Just(basetypes.NewInt64Null()),
+			rapid.Just(basetypes.NewInt64Value(rapid.Int64().Draw(t, "Value"))),
+		).Draw(t, "Int64WithValueOrNull")
+	})
+}
