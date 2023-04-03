@@ -34,10 +34,10 @@ func KubernetesPolicyGen() *rapid.Generator[policies.KubernetesPolicy] {
 	return rapid.Custom(func(t *rapid.T) policies.KubernetesPolicy {
 		return policies.KubernetesPolicy{
 			Policy:        PolicyGen().Draw(t, "BasePolicy"),
-			Environments:  rapid.Ptr(rapid.SliceOf(PolicyEnvironmentGen()), false).Draw(t, "Environments"),
-			Clusters:      rapid.Ptr(rapid.SliceOf(PolicyClusterGen()), false).Draw(t, "Clusters"),
-			ClusterUsers:  rapid.Ptr(rapid.SliceOf(PolicyClusterUserGen()), false).Draw(t, "ClusterUsers"),
-			ClusterGroups: rapid.Ptr(rapid.SliceOf(PolicyClusterGroupGen()), false).Draw(t, "ClusterGroups"),
+			Environments:  rapid.Ptr(rapid.SliceOf(PolicyEnvironmentGen()), true).Draw(t, "Environments"),
+			Clusters:      rapid.Ptr(rapid.SliceOf(PolicyClusterGen()), true).Draw(t, "Clusters"),
+			ClusterUsers:  rapid.Ptr(rapid.SliceOf(PolicyClusterUserGen()), true).Draw(t, "ClusterUsers"),
+			ClusterGroups: rapid.Ptr(rapid.SliceOf(PolicyClusterGroupGen()), true).Draw(t, "ClusterGroups"),
 		}
 	})
 }

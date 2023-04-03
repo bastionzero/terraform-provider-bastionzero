@@ -58,11 +58,11 @@ func PolicyGen() *rapid.Generator[policies.Policy] {
 	return rapid.Custom(func(t *rapid.T) policies.Policy {
 		return policies.Policy{
 			ID:          rapid.StringMatching(acctest.UUIDV4RegexPattern).Draw(t, "ID"),
-			Description: rapid.Ptr(rapid.String(), false).Draw(t, "Description"),
+			Description: rapid.Ptr(rapid.String(), true).Draw(t, "Description"),
 			Name:        rapid.String().Draw(t, "Name"),
 			TimeExpires: &types.Timestamp{Time: time.Now().Add(time.Duration(rapid.Int64().Draw(t, "TimeExpires")))},
-			Subjects:    rapid.Ptr(rapid.SliceOf(PolicySubjectGen()), false).Draw(t, "Subjects"),
-			Groups:      rapid.Ptr(rapid.SliceOf(PolicyGroupGen()), false).Draw(t, "Groups"),
+			Subjects:    rapid.Ptr(rapid.SliceOf(PolicySubjectGen()), true).Draw(t, "Subjects"),
+			Groups:      rapid.Ptr(rapid.SliceOf(PolicyGroupGen()), true).Draw(t, "Groups"),
 		}
 	})
 }
