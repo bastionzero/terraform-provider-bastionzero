@@ -5,6 +5,7 @@ import (
 
 	_ "github.com/bastionzero/terraform-provider-bastionzero/bastionzero/environment"
 	_ "github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/kubernetes"
+	_ "github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/proxy"
 	_ "github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/targetconnect"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
