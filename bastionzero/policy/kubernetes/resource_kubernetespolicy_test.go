@@ -640,6 +640,25 @@ func TestAccKubernetesPolicy_ClusterGroups(t *testing.T) {
 	})
 }
 
+func TestAccKubernetesPolicy_MutualExclClustersEnvs(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Cannot specify both environments and clusters
+				Config: `
+				resource "bastionzero_kubernetes_policy" "test" {
+			      name = "foo"
+				  environments = []
+				  clusters = []
+				}
+				`,
+				ExpectError: regexp.MustCompile(`cannot be configured together`),
+			},
+		},
+	})
+}
+
 func testAccKubernetesPolicyConfigBasic(rName string) string {
 	return fmt.Sprintf(`
 resource "bastionzero_kubernetes_policy" "test" {
