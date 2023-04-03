@@ -49,7 +49,7 @@ func testAccCheckResourceJITPolicyChildPolicies(resourceName string, childPolici
 	for _, childPolicy := range childPolicies {
 		checks = append(checks, resource.TestCheckTypeSetElemNestedAttrs(
 			resourceName,
-			"groups.*",
+			"child_policies.*",
 			map[string]string{
 				"id":   childPolicy.ID,
 				"name": childPolicy.Name,
