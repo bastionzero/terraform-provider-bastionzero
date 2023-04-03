@@ -9,7 +9,6 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/apierror"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy"
-	"github.com/bastionzero/terraform-provider-bastionzero/internal"
 	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -72,21 +71,14 @@ func (r *proxyPolicyResource) Schema(ctx context.Context, _ resource.SchemaReque
 // state.
 func (r *proxyPolicyResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Read Terraform plan data into the model
-	var plan proxyPolicyModel
+	var plan ProxyPolicyModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Generate API request body from plan
-	p := new(policies.ProxyPolicy)
-	p.Name = plan.Name.ValueString()
-	p.Description = internal.StringFromFramework(ctx, plan.Description)
-	p.Subjects = bastionzero.PtrTo(policy.ExpandPolicySubjects(ctx, plan.Subjects))
-	p.Groups = bastionzero.PtrTo(policy.ExpandPolicyGroups(ctx, plan.Groups))
-	p.Environments = bastionzero.PtrTo(policy.ExpandPolicyEnvironments(ctx, plan.Environments))
-	p.Targets = bastionzero.PtrTo(policy.ExpandPolicyTargets(ctx, plan.Targets))
-	p.TargetUsers = bastionzero.PtrTo(policy.ExpandPolicyTargetUsers(ctx, plan.TargetUsers))
+	p := ExpandProxyPolicy(ctx, &plan)
 
 	ctx = tflog.SetField(ctx, "policy_name", p.Name)
 
@@ -103,7 +95,7 @@ func (r *proxyPolicyResource) Create(ctx context.Context, req resource.CreateReq
 	ctx = tflog.SetField(ctx, "policy_id", createResp.ID)
 	tflog.Debug(ctx, "Created proxy policy")
 
-	setProxyPolicyAttributes(ctx, &plan, createResp, false)
+	SetProxyPolicyAttributes(ctx, &plan, createResp, false)
 
 	// Set state to fully populated data
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
@@ -112,7 +104,7 @@ func (r *proxyPolicyResource) Create(ctx context.Context, req resource.CreateReq
 // Read refreshes the proxy policy Terraform state with the latest data.
 func (r *proxyPolicyResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// Read Terraform prior state data into the model
-	var state proxyPolicyModel
+	var state ProxyPolicyModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -134,7 +126,7 @@ func (r *proxyPolicyResource) Read(ctx context.Context, req resource.ReadRequest
 	}
 	tflog.Debug(ctx, "Queried for proxy policy")
 
-	setProxyPolicyAttributes(ctx, &state, p, false)
+	SetProxyPolicyAttributes(ctx, &state, p, false)
 
 	// Overwrite with refreshed state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -144,7 +136,7 @@ func (r *proxyPolicyResource) Read(ctx context.Context, req resource.ReadRequest
 // on success.
 func (r *proxyPolicyResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	// Read Terraform plan and current state data into the model
-	var plan, state proxyPolicyModel
+	var plan, state ProxyPolicyModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -188,7 +180,7 @@ func (r *proxyPolicyResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	setProxyPolicyAttributes(ctx, &plan, updateResp, false)
+	SetProxyPolicyAttributes(ctx, &plan, updateResp, false)
 
 	// Overwrite with refreshed state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
@@ -198,7 +190,7 @@ func (r *proxyPolicyResource) Update(ctx context.Context, req resource.UpdateReq
 // success.
 func (r *proxyPolicyResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	// Retrieve values from state
-	var state proxyPolicyModel
+	var state ProxyPolicyModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return

@@ -15,15 +15,15 @@ import (
 
 func NewProxyPoliciesDataSource() datasource.DataSource {
 	return bzdatasource.NewListDataSourceWithPractitionerParameters(
-		&bzdatasource.ListDataSourceWithPractitionerParametersConfig[proxyPolicyModel, policy.ListPolicyParametersModel, policies.ProxyPolicy]{
-			BaseListDataSourceConfig: &bzdatasource.BaseListDataSourceConfig[proxyPolicyModel, policies.ProxyPolicy]{
+		&bzdatasource.ListDataSourceWithPractitionerParametersConfig[ProxyPolicyModel, policy.ListPolicyParametersModel, policies.ProxyPolicy]{
+			BaseListDataSourceConfig: &bzdatasource.BaseListDataSourceConfig[ProxyPolicyModel, policies.ProxyPolicy]{
 				RecordSchema:        internal.ResourceSchemaToDataSourceSchema(makeProxyPolicyResourceSchema(), nil),
 				MetadataTypeName:    "proxy_policies",
 				ResultAttributeName: "policies",
 				PrettyAttributeName: "proxy policies",
-				FlattenAPIModel: func(ctx context.Context, apiObject *policies.ProxyPolicy) (state *proxyPolicyModel, diags diag.Diagnostics) {
-					state = new(proxyPolicyModel)
-					setProxyPolicyAttributes(ctx, state, apiObject, true)
+				FlattenAPIModel: func(ctx context.Context, apiObject *policies.ProxyPolicy) (state *ProxyPolicyModel, diags diag.Diagnostics) {
+					state = new(ProxyPolicyModel)
+					SetProxyPolicyAttributes(ctx, state, apiObject, true)
 					return
 				},
 				Description: "Get a list of all proxy policies in your BastionZero organization.",
