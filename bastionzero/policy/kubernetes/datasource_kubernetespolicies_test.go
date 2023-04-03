@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
-func TestAccDataSourceKubernetesPolicies_Basic(t *testing.T) {
+func TestAccKubernetesPoliciesDataSource_Basic(t *testing.T) {
 	ctx := context.Background()
 	rName := acctest.RandomName()
 	resourceName := "bastionzero_kubernetes_policy.test"
@@ -49,7 +49,7 @@ data "bastionzero_kubernetes_policies" "test" {
 `
 }
 
-func TestAccDataSourceKubernetesPolicies_FilterSubjects(t *testing.T) {
+func TestAccKubernetesPoliciesDataSource_FilterSubjects(t *testing.T) {
 	ctx := context.Background()
 	rName := acctest.RandomName()
 	dataSourceName := "data.bastionzero_kubernetes_policies.test"
@@ -91,7 +91,7 @@ data "bastionzero_kubernetes_policies" "test" {
 `, acctest.ToTerraformStringList(subjectIDs))
 }
 
-func TestAccDataSourceKubernetesPolicies_FilterGroups(t *testing.T) {
+func TestAccKubernetesPoliciesDataSource_FilterGroups(t *testing.T) {
 	ctx := context.Background()
 	rName := acctest.RandomName()
 	dataSourceName := "data.bastionzero_kubernetes_policies.test"

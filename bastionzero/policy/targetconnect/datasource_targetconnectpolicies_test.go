@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
-func TestAccDataSourceTargetConnectPolicies_Basic(t *testing.T) {
+func TestAccTargetConnectPoliciesDataSource_Basic(t *testing.T) {
 	ctx := context.Background()
 	rName := acctest.RandomName()
 	resourceName := "bastionzero_targetconnect_policy.test"
@@ -50,7 +50,7 @@ data "bastionzero_targetconnect_policies" "test" {
 `
 }
 
-func TestAccDataSourceTargetConnectPolicies_FilterSubjects(t *testing.T) {
+func TestAccTargetConnectPoliciesDataSource_FilterSubjects(t *testing.T) {
 	ctx := context.Background()
 	rName := acctest.RandomName()
 	dataSourceName := "data.bastionzero_targetconnect_policies.test"
@@ -92,7 +92,7 @@ data "bastionzero_targetconnect_policies" "test" {
 `, acctest.ToTerraformStringList(subjectIDs))
 }
 
-func TestAccDataSourceTargetConnectPolicies_FilterGroups(t *testing.T) {
+func TestAccTargetConnectPoliciesDataSource_FilterGroups(t *testing.T) {
 	ctx := context.Background()
 	rName := acctest.RandomName()
 	dataSourceName := "data.bastionzero_targetconnect_policies.test"
