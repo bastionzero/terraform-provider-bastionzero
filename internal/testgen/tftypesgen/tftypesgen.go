@@ -32,7 +32,7 @@ func SetWithValueOrNullOrEmptyGen(ctx context.Context, gen *rapid.Generator[base
 			rapid.Just(basetypes.NewSetValueMust(gen.Example(0).ElementType(ctx), []attr.Value{})),
 			rapid.Just(basetypes.NewSetNull(gen.Example(0).ElementType(ctx))),
 			rapid.Just(gen.Draw(t, "Value")),
-		).Draw(t, "SetWithValueOrNull")
+		).Draw(t, "SetWithValueOrNullOrEmpty")
 	})
 }
 
@@ -60,6 +60,15 @@ func StringWithValueOrNullOrEmptyGen(gen *rapid.Generator[basetypes.StringValue]
 			rapid.Just(basetypes.NewStringValue("")),
 			rapid.Just(basetypes.NewStringNull()),
 			rapid.Just(gen.Draw(t, "Value")),
-		).Draw(t, "StringWithValueOrNull")
+		).Draw(t, "StringWithValueOrNullOrEmpty")
+	})
+}
+
+func BoolWithValueOrNullGen(ctx context.Context) *rapid.Generator[basetypes.BoolValue] {
+	return rapid.Custom(func(t *rapid.T) basetypes.BoolValue {
+		return rapid.OneOf(
+			rapid.Just(basetypes.NewBoolNull()),
+			rapid.Just(basetypes.NewBoolValue(rapid.Bool().Draw(t, "Value"))),
+		).Draw(t, "BoolWithValueOrNull")
 	})
 }

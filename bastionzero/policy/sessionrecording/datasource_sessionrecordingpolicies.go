@@ -15,15 +15,15 @@ import (
 
 func NewSessionRecordingPoliciesDataSource() datasource.DataSource {
 	return bzdatasource.NewListDataSourceWithPractitionerParameters(
-		&bzdatasource.ListDataSourceWithPractitionerParametersConfig[sessionRecordingPolicyModel, policy.ListPolicyParametersModel, policies.SessionRecordingPolicy]{
-			BaseListDataSourceConfig: &bzdatasource.BaseListDataSourceConfig[sessionRecordingPolicyModel, policies.SessionRecordingPolicy]{
+		&bzdatasource.ListDataSourceWithPractitionerParametersConfig[SessionRecordingPolicyModel, policy.ListPolicyParametersModel, policies.SessionRecordingPolicy]{
+			BaseListDataSourceConfig: &bzdatasource.BaseListDataSourceConfig[SessionRecordingPolicyModel, policies.SessionRecordingPolicy]{
 				RecordSchema:        internal.ResourceSchemaToDataSourceSchema(makeSessionRecordingPolicyResourceSchema(), nil),
 				MetadataTypeName:    "sessionrecording_policies",
 				ResultAttributeName: "policies",
 				PrettyAttributeName: "session recording policies",
-				FlattenAPIModel: func(ctx context.Context, apiObject *policies.SessionRecordingPolicy) (state *sessionRecordingPolicyModel, diags diag.Diagnostics) {
-					state = new(sessionRecordingPolicyModel)
-					setSessionRecordingPolicyAttributes(ctx, state, apiObject, true)
+				FlattenAPIModel: func(ctx context.Context, apiObject *policies.SessionRecordingPolicy) (state *SessionRecordingPolicyModel, diags diag.Diagnostics) {
+					state = new(SessionRecordingPolicyModel)
+					SetSessionRecordingPolicyAttributes(ctx, state, apiObject, true)
 					return
 				},
 				Description: "Get a list of all session recording policies in your BastionZero organization.",

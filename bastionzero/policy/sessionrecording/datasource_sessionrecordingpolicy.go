@@ -13,16 +13,16 @@ import (
 
 func NewSessionRecordingPolicyDataSource() datasource.DataSource {
 	return bzdatasource.NewSingleDataSource(
-		&bzdatasource.SingleDataSourceConfig[sessionRecordingPolicyModel, policies.SessionRecordingPolicy]{
-			BaseSingleDataSourceConfig: &bzdatasource.BaseSingleDataSourceConfig[sessionRecordingPolicyModel, policies.SessionRecordingPolicy]{
+		&bzdatasource.SingleDataSourceConfig[SessionRecordingPolicyModel, policies.SessionRecordingPolicy]{
+			BaseSingleDataSourceConfig: &bzdatasource.BaseSingleDataSourceConfig[SessionRecordingPolicyModel, policies.SessionRecordingPolicy]{
 				RecordSchema:        internal.ResourceSchemaToDataSourceSchema(makeSessionRecordingPolicyResourceSchema(), bastionzero.PtrTo("id")),
 				MetadataTypeName:    "sessionrecording_policy",
 				PrettyAttributeName: "session recording policy",
-				FlattenAPIModel: func(ctx context.Context, apiObject *policies.SessionRecordingPolicy, state *sessionRecordingPolicyModel) (diags diag.Diagnostics) {
-					setSessionRecordingPolicyAttributes(ctx, state, apiObject, true)
+				FlattenAPIModel: func(ctx context.Context, apiObject *policies.SessionRecordingPolicy, state *SessionRecordingPolicyModel) (diags diag.Diagnostics) {
+					SetSessionRecordingPolicyAttributes(ctx, state, apiObject, true)
 					return
 				},
-				GetAPIModel: func(ctx context.Context, tfModel sessionRecordingPolicyModel, client *bastionzero.Client) (*policies.SessionRecordingPolicy, error) {
+				GetAPIModel: func(ctx context.Context, tfModel SessionRecordingPolicyModel, client *bastionzero.Client) (*policies.SessionRecordingPolicy, error) {
 					policy, _, err := client.Policies.GetSessionRecordingPolicy(ctx, tfModel.ID.ValueString())
 					return policy, err
 				},

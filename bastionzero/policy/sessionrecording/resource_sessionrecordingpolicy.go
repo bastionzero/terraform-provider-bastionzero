@@ -9,7 +9,6 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/apierror"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy"
-	"github.com/bastionzero/terraform-provider-bastionzero/internal"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -70,19 +69,14 @@ func (r *sessionRecordingPolicyResource) Schema(ctx context.Context, _ resource.
 // Terraform state.
 func (r *sessionRecordingPolicyResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Read Terraform plan data into the model
-	var plan sessionRecordingPolicyModel
+	var plan SessionRecordingPolicyModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Generate API request body from plan
-	p := new(policies.SessionRecordingPolicy)
-	p.Name = plan.Name.ValueString()
-	p.Description = internal.StringFromFramework(ctx, plan.Description)
-	p.Subjects = bastionzero.PtrTo(policy.ExpandPolicySubjects(ctx, plan.Subjects))
-	p.Groups = bastionzero.PtrTo(policy.ExpandPolicyGroups(ctx, plan.Groups))
-	p.RecordInput = bastionzero.PtrTo(plan.RecordInput.ValueBool())
+	p := ExpandSessionRecordingPolicy(ctx, &plan)
 
 	ctx = tflog.SetField(ctx, "policy_name", p.Name)
 
@@ -99,7 +93,7 @@ func (r *sessionRecordingPolicyResource) Create(ctx context.Context, req resourc
 	ctx = tflog.SetField(ctx, "policy_id", createResp.ID)
 	tflog.Debug(ctx, "Created session recording policy")
 
-	setSessionRecordingPolicyAttributes(ctx, &plan, createResp, false)
+	SetSessionRecordingPolicyAttributes(ctx, &plan, createResp, false)
 
 	// Set state to fully populated data
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
@@ -109,7 +103,7 @@ func (r *sessionRecordingPolicyResource) Create(ctx context.Context, req resourc
 // data.
 func (r *sessionRecordingPolicyResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// Read Terraform prior state data into the model
-	var state sessionRecordingPolicyModel
+	var state SessionRecordingPolicyModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -131,7 +125,7 @@ func (r *sessionRecordingPolicyResource) Read(ctx context.Context, req resource.
 	}
 	tflog.Debug(ctx, "Queried for session recording policy")
 
-	setSessionRecordingPolicyAttributes(ctx, &state, p, false)
+	SetSessionRecordingPolicyAttributes(ctx, &state, p, false)
 
 	// Overwrite with refreshed state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -141,7 +135,7 @@ func (r *sessionRecordingPolicyResource) Read(ctx context.Context, req resource.
 // Terraform state on success.
 func (r *sessionRecordingPolicyResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	// Read Terraform plan and current state data into the model
-	var plan, state sessionRecordingPolicyModel
+	var plan, state SessionRecordingPolicyModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -179,7 +173,7 @@ func (r *sessionRecordingPolicyResource) Update(ctx context.Context, req resourc
 		return
 	}
 
-	setSessionRecordingPolicyAttributes(ctx, &plan, updateResp, false)
+	SetSessionRecordingPolicyAttributes(ctx, &plan, updateResp, false)
 
 	// Overwrite with refreshed state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
@@ -189,7 +183,7 @@ func (r *sessionRecordingPolicyResource) Update(ctx context.Context, req resourc
 // Terraform state on success.
 func (r *sessionRecordingPolicyResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	// Retrieve values from state
-	var state sessionRecordingPolicyModel
+	var state SessionRecordingPolicyModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
