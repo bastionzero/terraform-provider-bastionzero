@@ -34,7 +34,10 @@ func NewTargetConnectPoliciesDataSource() datasource.DataSource {
 				groupsFilter := strings.Join(internal.ExpandFrameworkStringSet(ctx, listParameters.Groups), ",")
 
 				ps, _, err := client.Policies.ListTargetConnectPolicies(ctx, &policies.ListPolicyOptions{Subjects: subjectsFilter, Groups: groupsFilter})
-				ps[0].Subjects = bastionzero.PtrTo(Reverse(ps[0].GetSubjects()))
+
+				if ps[0].Subjects != nil {
+					ps[0].Subjects = bastionzero.PtrTo(Reverse(ps[0].GetSubjects()))
+				}
 
 				return ps, err
 			},
