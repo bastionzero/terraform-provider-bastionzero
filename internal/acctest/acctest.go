@@ -312,7 +312,7 @@ func CheckAllPoliciesHaveSubjectID(namedTFResource, expectedSubjectID string) re
 				return err
 			}
 
-			for j := 0; j < totalSubjects; j++ {
+			for j := totalSubjects - 1; j >= 0; j-- {
 				if err := resource.TestCheckResourceAttr(namedTFResource, fmt.Sprintf("policies.%v.subjects.%v.id", i, j), expectedSubjectID)(s); err == nil {
 					// Found at least one! Continue checking the next policy
 					continue POLICY

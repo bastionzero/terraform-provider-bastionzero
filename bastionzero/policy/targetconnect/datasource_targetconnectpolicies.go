@@ -34,17 +34,7 @@ func NewTargetConnectPoliciesDataSource() datasource.DataSource {
 				groupsFilter := strings.Join(internal.ExpandFrameworkStringSet(ctx, listParameters.Groups), ",")
 
 				policies, _, err := client.Policies.ListTargetConnectPolicies(ctx, &policies.ListPolicyOptions{Subjects: subjectsFilter, Groups: groupsFilter})
-				return Reverse(policies), err
+				return policies, err
 			},
 		})
-}
-
-func Reverse[T any](input []T) []T {
-	var output []T
-
-	for i := len(input) - 1; i >= 0; i-- {
-		output = append(output, input[i])
-	}
-
-	return output
 }
