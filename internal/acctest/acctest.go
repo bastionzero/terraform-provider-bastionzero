@@ -304,22 +304,11 @@ func CheckAllPoliciesHaveSubjectID(namedTFResource, expectedSubjectID string) re
 
 		// Aggregate attribute checked errors
 		var result *multierror.Error
-
-	POLICY:
 		for i := 0; i < totalPolicies; i++ {
-			totalSubjects, err := ListOrSetCount(rs, fmt.Sprintf("policies.%v.subjects", i))
-			if err != nil {
-				return err
-			}
-
-			for j := totalSubjects - 1; j >= 0; j-- {
-				if err := resource.TestCheckResourceAttr(namedTFResource, fmt.Sprintf("policies.%v.subjects.%v.id", i, j), expectedSubjectID)(s); err == nil {
-					// Found at least one! Continue checking the next policy
-					continue POLICY
-				} else {
-					// This subject does not match. Aggregate this error.
-					result = multierror.Append(result, err)
-				}
+			if err := resource.TestCheckTypeSetElemNestedAttrs(namedTFResource, fmt.Sprintf("policies.%v.subjects.*", i), map[string]string{"id": expectedSubjectID})(s); err != nil {
+				// This policy does not have at least one subject with a
+				// matching ID. Aggregate this error.
+				result = multierror.Append(result, err)
 			}
 		}
 
@@ -351,22 +340,11 @@ func CheckAllPoliciesHaveGroupID(namedTFResource, expectedGroupID string) resour
 
 		// Aggregate attribute checked errors
 		var result *multierror.Error
-
-	POLICY:
 		for i := 0; i < totalPolicies; i++ {
-			totalGroups, err := ListOrSetCount(rs, fmt.Sprintf("policies.%v.groups", i))
-			if err != nil {
-				return err
-			}
-
-			for j := 0; j < totalGroups; j++ {
-				if err := resource.TestCheckResourceAttr(namedTFResource, fmt.Sprintf("policies.%v.groups.%v.id", i, j), expectedGroupID)(s); err == nil {
-					// Found at least one! Continue checking the next policy
-					continue POLICY
-				} else {
-					// This group does not match. Aggregate this error.
-					result = multierror.Append(result, err)
-				}
+			if err := resource.TestCheckTypeSetElemNestedAttrs(namedTFResource, fmt.Sprintf("policies.%v.groups.*", i), map[string]string{"id": expectedGroupID})(s); err != nil {
+				// This policy does not have at least one group with a matching
+				// ID. Aggregate this error.
+				result = multierror.Append(result, err)
 			}
 		}
 
