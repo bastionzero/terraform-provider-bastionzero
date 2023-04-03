@@ -41,8 +41,8 @@ func TestAccKubernetesPolicy_Basic(t *testing.T) {
 						Groups:        &[]policies.Group{},
 						Environments:  &[]policies.Environment{},
 						Clusters:      &[]policies.Cluster{},
-						ClusterUsers:  &[]policies.ClusterUser{{Name: "foo"}},
-						ClusterGroups: &[]policies.ClusterGroup{{Name: "bar"}},
+						ClusterUsers:  &[]policies.ClusterUser{},
+						ClusterGroups: &[]policies.ClusterGroup{},
 					}),
 					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
 					// Check the state value we explicitly configured in this
