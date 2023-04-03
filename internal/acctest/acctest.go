@@ -17,7 +17,6 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/users"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero"
-	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
@@ -302,17 +301,15 @@ func CheckAllPoliciesHaveSubjectID(namedTFResource, expectedSubjectID string) re
 			return fmt.Errorf("list of policies is empty")
 		}
 
-		// Aggregate attribute checked errors
-		var result *multierror.Error
 		for i := 0; i < totalPolicies; i++ {
 			if err := resource.TestCheckTypeSetElemNestedAttrs(namedTFResource, fmt.Sprintf("policies.%v.subjects.*", i), map[string]string{"id": expectedSubjectID})(s); err != nil {
 				// This policy does not have at least one subject with a
-				// matching ID. Aggregate this error.
-				result = multierror.Append(result, err)
+				// matching ID.
+				return err
 			}
 		}
 
-		return result.ErrorOrNil()
+		return nil
 	}
 }
 
@@ -338,17 +335,15 @@ func CheckAllPoliciesHaveGroupID(namedTFResource, expectedGroupID string) resour
 			return fmt.Errorf("list of policies is empty")
 		}
 
-		// Aggregate attribute checked errors
-		var result *multierror.Error
 		for i := 0; i < totalPolicies; i++ {
 			if err := resource.TestCheckTypeSetElemNestedAttrs(namedTFResource, fmt.Sprintf("policies.%v.groups.*", i), map[string]string{"id": expectedGroupID})(s); err != nil {
 				// This policy does not have at least one group with a matching
-				// ID. Aggregate this error.
-				result = multierror.Append(result, err)
+				// ID.
+				return err
 			}
 		}
 
-		return result.ErrorOrNil()
+		return nil
 	}
 }
 
