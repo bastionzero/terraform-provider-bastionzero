@@ -449,6 +449,17 @@ func FindNBzeroTargetsOrSkip(t *testing.T, bzeroTargets ...*policies.Target) {
 	}, bzeroTargets...)
 }
 
+// FindNClusterTargetsOrSkip lists the Cluster targets in the BastionZero
+// organization and sets clusterTargets to the first n Cluster targets found. If
+// there are less than n Cluster targets, then the current test is skipped.
+func FindNClusterTargetsOrSkip(t *testing.T, clusterTargets ...*policies.Cluster) {
+	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]targets.ClusterTarget, *http.Response, error) {
+		return client.Targets.ListClusterTargets(ctx)
+	}, func(t targets.ClusterTarget) policies.Cluster {
+		return policies.Cluster{ID: t.ID}
+	}, clusterTargets...)
+}
+
 func ToTerraformStringList(arr []string) string {
 	// Source: https://stackoverflow.com/questions/24489384/how-to-print-the-values-of-slices#comment126502244_53672500
 	return strings.ReplaceAll(fmt.Sprintf("%+q", arr), "\" \"", "\",\"")

@@ -11,6 +11,7 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/apierror"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/policytype"
+	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal/acctest"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -27,14 +28,14 @@ func TestAccKubernetesPolicy_Basic(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckTargetConnectPolicyDestroy,
+		CheckDestroy:             testAccCheckKubernetesPolicyDestroy,
 		Steps: []resource.TestStep{
 			// Verify create works for a config set with all required attributes
 			{
-				Config: testAccTargetConnectPolicyConfigBasic(rName),
+				Config: testAccKubernetesPolicyConfigBasic(rName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckTargetConnectPolicyExists(resourceName, &policy),
-					testAccCheckTargetConnectPolicyAttributes(t, &policy, &expectedTargetConnectPolicy{
+					testAccCheckKubernetesPolicyExists(resourceName, &policy),
+					testAccCheckKubernetesPolicyAttributes(t, &policy, &expectedKubernetesPolicy{
 						Name:          &rName,
 						Description:   bastionzero.PtrTo(""),
 						Subjects:      &[]policies.Subject{},
@@ -44,7 +45,7 @@ func TestAccKubernetesPolicy_Basic(t *testing.T) {
 						ClusterUsers:  &[]policies.ClusterUser{},
 						ClusterGroups: &[]policies.ClusterGroup{},
 					}),
-					testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName),
+					testAccCheckResourceKubernetesPolicyComputedAttr(resourceName),
 					// Check the state value we explicitly configured in this
 					// test is correct
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
@@ -69,7 +70,577 @@ func TestAccKubernetesPolicy_Basic(t *testing.T) {
 	})
 }
 
-func testAccTargetConnectPolicyConfigBasic(rName string) string {
+func TestAccKubernetesPolicy_Disappears(t *testing.T) {
+	ctx := context.Background()
+	rName := acctest.RandomName()
+	resourceName := "bastionzero_kubernetes_policy.test"
+	var policy policies.KubernetesPolicy
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckKubernetesPolicyDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKubernetesPolicyConfigBasic(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName, &policy),
+					acctest.CheckResourceDisappears(resourceName, func(c *bastionzero.Client, ctx context.Context, id string) (*http.Response, error) {
+						return c.Policies.DeleteKubernetesPolicy(ctx, id)
+					}),
+				),
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
+
+func TestAccKubernetesPolicy_Name(t *testing.T) {
+	ctx := context.Background()
+	rName1 := acctest.RandomName()
+	rName2 := acctest.RandomName()
+	resourceName := "bastionzero_kubernetes_policy.test"
+	var policy policies.KubernetesPolicy
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckKubernetesPolicyDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKubernetesPolicyConfigBasic(rName1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName, &policy),
+					testAccCheckKubernetesPolicyAttributes(t, &policy, &expectedKubernetesPolicy{
+						Name: &rName1,
+					}),
+					testAccCheckResourceKubernetesPolicyComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", rName1),
+				),
+			},
+			// Verify import works
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Verify update name
+			{
+				Config: testAccKubernetesPolicyConfigBasic(rName2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName, &policy),
+					testAccCheckKubernetesPolicyAttributes(t, &policy, &expectedKubernetesPolicy{
+						Name: &rName2,
+					}),
+					testAccCheckResourceKubernetesPolicyComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", rName2),
+				),
+			},
+		},
+	})
+}
+
+func TestAccKubernetesPolicy_Description(t *testing.T) {
+	ctx := context.Background()
+	rName := acctest.RandomName()
+	resourceName := "bastionzero_kubernetes_policy.test"
+	var policy policies.KubernetesPolicy
+	desc1 := "desc1"
+	desc2 := "desc2"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckKubernetesPolicyDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKubernetesPolicyConfigDescription(rName, desc1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName, &policy),
+					testAccCheckKubernetesPolicyAttributes(t, &policy, &expectedKubernetesPolicy{
+						Name:        &rName,
+						Description: &desc1,
+					}),
+					testAccCheckResourceKubernetesPolicyComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "description", desc1),
+				),
+			},
+			// Verify import works
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Verify update description
+			{
+				Config: testAccKubernetesPolicyConfigDescription(rName, desc2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName, &policy),
+					testAccCheckKubernetesPolicyAttributes(t, &policy, &expectedKubernetesPolicy{
+						Name:        &rName,
+						Description: &desc2,
+					}),
+					testAccCheckResourceKubernetesPolicyComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "description", desc2),
+				),
+			},
+			// Verify setting to empty string clears
+			{
+				Config: testAccKubernetesPolicyConfigDescription(rName, ""),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName, &policy),
+					testAccCheckKubernetesPolicyAttributes(t, &policy, &expectedKubernetesPolicy{
+						Name:        &rName,
+						Description: bastionzero.PtrTo(""),
+					}),
+					testAccCheckResourceKubernetesPolicyComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "description", ""),
+				),
+			},
+		},
+	})
+}
+
+func TestAccKubernetesPolicy_Subjects(t *testing.T) {
+	ctx := context.Background()
+	rName := acctest.RandomName()
+	resourceName := "bastionzero_kubernetes_policy.test"
+	var p policies.KubernetesPolicy
+	subject1 := new(policies.Subject)
+	subject2 := new(policies.Subject)
+
+	// These checks are here, instead of being inlined in PreCheck field,
+	// because we need subject1 and subject2 to have values before using them as
+	// arguments in the Test block below. Otherwise, any immediate pointer
+	// dereference (e.g. in the TestSteps) will have the values set to nil which
+	// is not what we want.
+	acctest.SkipIfNotInAcceptanceTestMode(t)
+	acctest.PreCheck(ctx, t)
+	// Find two users or skip this entire test
+	acctest.FindNUsersOrSkip(t, subject1, subject2)
+
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckKubernetesPolicyDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKubernetesPolicyConfigSubjects(rName, policy.FlattenPolicySubjects(ctx, []policies.Subject{*subject1})),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName, &p),
+					testAccCheckKubernetesPolicyAttributes(t, &p, &expectedKubernetesPolicy{
+						Name:     &rName,
+						Subjects: &[]policies.Subject{*subject1},
+					}),
+					testAccCheckResourceKubernetesPolicyComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "subjects.#", "1"),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "subjects.*", map[string]string{"id": subject1.ID, "type": string(subject1.Type)}),
+				),
+			},
+			// Verify import works
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Verify update subjects
+			{
+				Config: testAccKubernetesPolicyConfigSubjects(rName, policy.FlattenPolicySubjects(ctx, []policies.Subject{*subject1, *subject2})),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName, &p),
+					testAccCheckKubernetesPolicyAttributes(t, &p, &expectedKubernetesPolicy{
+						Name:     &rName,
+						Subjects: &[]policies.Subject{*subject1, *subject2},
+					}),
+					testAccCheckResourceKubernetesPolicyComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "subjects.#", "2"),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "subjects.*", map[string]string{"id": subject1.ID, "type": string(subject1.Type)}),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "subjects.*", map[string]string{"id": subject2.ID, "type": string(subject2.Type)}),
+				),
+			},
+			// Verify setting to empty list clears
+			{
+				Config: testAccKubernetesPolicyConfigSubjects(rName, policy.FlattenPolicySubjects(ctx, []policies.Subject{})),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName, &p),
+					testAccCheckKubernetesPolicyAttributes(t, &p, &expectedKubernetesPolicy{
+						Name:     &rName,
+						Subjects: &[]policies.Subject{},
+					}),
+					testAccCheckResourceKubernetesPolicyComputedAttr(resourceName),
+					// Explicit empty list in config should result in a config
+					// with 0 elements (not null)
+					resource.TestCheckResourceAttr(resourceName, "subjects.#", "0"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccKubernetesPolicy_Groups(t *testing.T) {
+	ctx := context.Background()
+	rName := acctest.RandomName()
+	resourceName := "bastionzero_kubernetes_policy.test"
+	var p policies.KubernetesPolicy
+	group1 := new(policies.Group)
+	group2 := new(policies.Group)
+
+	acctest.SkipIfNotInAcceptanceTestMode(t)
+	acctest.PreCheck(ctx, t)
+	acctest.FindNGroupsOrSkip(t, group1, group2)
+
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckKubernetesPolicyDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKubernetesPolicyConfigGroups(rName, policy.FlattenPolicyGroups(ctx, []policies.Group{*group1})),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName, &p),
+					testAccCheckKubernetesPolicyAttributes(t, &p, &expectedKubernetesPolicy{
+						Name:   &rName,
+						Groups: &[]policies.Group{*group1},
+					}),
+					testAccCheckResourceKubernetesPolicyComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "groups.#", "1"),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "groups.*", map[string]string{"id": group1.ID, "name": string(group1.Name)}),
+				),
+			},
+			// Verify import works
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Verify update groups
+			{
+				Config: testAccKubernetesPolicyConfigGroups(rName, policy.FlattenPolicyGroups(ctx, []policies.Group{*group1, *group2})),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName, &p),
+					testAccCheckKubernetesPolicyAttributes(t, &p, &expectedKubernetesPolicy{
+						Name:   &rName,
+						Groups: &[]policies.Group{*group1, *group2},
+					}),
+					testAccCheckResourceKubernetesPolicyComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "groups.#", "2"),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "groups.*", map[string]string{"id": group1.ID, "name": string(group1.Name)}),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "groups.*", map[string]string{"id": group2.ID, "name": string(group2.Name)}),
+				),
+			},
+			// Verify setting to empty list clears
+			{
+				Config: testAccKubernetesPolicyConfigGroups(rName, policy.FlattenPolicyGroups(ctx, []policies.Group{})),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName, &p),
+					testAccCheckKubernetesPolicyAttributes(t, &p, &expectedKubernetesPolicy{
+						Name:   &rName,
+						Groups: &[]policies.Group{},
+					}),
+					testAccCheckResourceKubernetesPolicyComputedAttr(resourceName),
+					// Explicit empty list in config should result in a config
+					// with 0 elements (not null)
+					resource.TestCheckResourceAttr(resourceName, "groups.#", "0"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccKubernetesPolicy_Environments(t *testing.T) {
+	ctx := context.Background()
+	rName := acctest.RandomName()
+	resourceName := "bastionzero_kubernetes_policy.test"
+	var p policies.KubernetesPolicy
+	env1 := new(policies.Environment)
+	env2 := new(policies.Environment)
+
+	acctest.SkipIfNotInAcceptanceTestMode(t)
+	acctest.PreCheck(ctx, t)
+	acctest.FindNEnvironmentsOrSkip(t, env1, env2)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckKubernetesPolicyDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKubernetesPolicyConfigEnvironments(rName, []string{env1.ID}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName, &p),
+					testAccCheckKubernetesPolicyAttributes(t, &p, &expectedKubernetesPolicy{
+						Name:         &rName,
+						Environments: &[]policies.Environment{*env1},
+					}),
+					testAccCheckResourceKubernetesPolicyComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "environments.#", "1"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "environments.*", env1.ID),
+				),
+			},
+			// Verify import works
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Verify update environments
+			{
+				Config: testAccKubernetesPolicyConfigEnvironments(rName, []string{env1.ID, env2.ID}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName, &p),
+					testAccCheckKubernetesPolicyAttributes(t, &p, &expectedKubernetesPolicy{
+						Name:         &rName,
+						Environments: &[]policies.Environment{*env1, *env2},
+					}),
+					testAccCheckResourceKubernetesPolicyComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "environments.#", "2"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "environments.*", env1.ID),
+					resource.TestCheckTypeSetElemAttr(resourceName, "environments.*", env2.ID),
+				),
+			},
+			// Verify setting to empty list clears
+			{
+				Config: testAccKubernetesPolicyConfigEnvironments(rName, []string{}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName, &p),
+					testAccCheckKubernetesPolicyAttributes(t, &p, &expectedKubernetesPolicy{
+						Name:         &rName,
+						Environments: &[]policies.Environment{},
+					}),
+					testAccCheckResourceKubernetesPolicyComputedAttr(resourceName),
+					// Explicit empty list in config should result in a config
+					// with 0 elements (not null)
+					resource.TestCheckResourceAttr(resourceName, "environments.#", "0"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccKubernetesPolicy_Clusters(t *testing.T) {
+	ctx := context.Background()
+	rName := acctest.RandomName()
+	resourceName := "bastionzero_kubernetes_policy.test"
+	var p policies.KubernetesPolicy
+	target1 := new(policies.Cluster)
+	target2 := new(policies.Cluster)
+
+	acctest.SkipIfNotInAcceptanceTestMode(t)
+	acctest.PreCheck(ctx, t)
+	acctest.FindNClusterTargetsOrSkip(t, target1, target2)
+
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckKubernetesPolicyDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKubernetesPolicyConfigClusters(rName, []string{target1.ID}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName, &p),
+					testAccCheckKubernetesPolicyAttributes(t, &p, &expectedKubernetesPolicy{
+						Name:     &rName,
+						Clusters: &[]policies.Cluster{*target1},
+					}),
+					testAccCheckResourceKubernetesPolicyComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "clusters.#", "1"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "clusters.*", target1.ID),
+				),
+			},
+			// Verify import works
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Verify update clusters
+			{
+				Config: testAccKubernetesPolicyConfigClusters(rName, []string{target1.ID, target2.ID}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName, &p),
+					testAccCheckKubernetesPolicyAttributes(t, &p, &expectedKubernetesPolicy{
+						Name:     &rName,
+						Clusters: &[]policies.Cluster{*target1, *target2},
+					}),
+					testAccCheckResourceKubernetesPolicyComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "clusters.#", "2"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "clusters.*", target1.ID),
+					resource.TestCheckTypeSetElemAttr(resourceName, "clusters.*", target2.ID),
+				),
+			},
+			// Verify setting to empty list clears
+			{
+				Config: testAccKubernetesPolicyConfigClusters(rName, []string{}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName, &p),
+					testAccCheckKubernetesPolicyAttributes(t, &p, &expectedKubernetesPolicy{
+						Name:     &rName,
+						Clusters: &[]policies.Cluster{},
+					}),
+					testAccCheckResourceKubernetesPolicyComputedAttr(resourceName),
+					// Explicit empty list in config should result in a config
+					// with 0 elements (not null)
+					resource.TestCheckResourceAttr(resourceName, "clusters.#", "0"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccKubernetesPolicy_ClusterUsers(t *testing.T) {
+	ctx := context.Background()
+	rName := acctest.RandomName()
+	resourceName := "bastionzero_kubernetes_policy.test"
+	var policy policies.KubernetesPolicy
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckKubernetesPolicyDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKubernetesPolicyConfigClusterUsers(rName, []string{"foo"}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName, &policy),
+					testAccCheckKubernetesPolicyAttributes(t, &policy, &expectedKubernetesPolicy{
+						Name:         &rName,
+						ClusterUsers: &[]policies.ClusterUser{{Name: "foo"}},
+					}),
+					testAccCheckResourceKubernetesPolicyComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "cluster_users.#", "1"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "cluster_users.*", "foo"),
+				),
+			},
+			// Verify import works
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Verify update cluster users
+			{
+				Config: testAccKubernetesPolicyConfigClusterUsers(rName, []string{"bar"}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName, &policy),
+					testAccCheckKubernetesPolicyAttributes(t, &policy, &expectedKubernetesPolicy{
+						Name:         &rName,
+						ClusterUsers: &[]policies.ClusterUser{{Name: "bar"}},
+					}),
+					testAccCheckResourceKubernetesPolicyComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "cluster_users.#", "1"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "cluster_users.*", "bar"),
+				),
+			},
+			// Add another cluster user
+			{
+				Config: testAccKubernetesPolicyConfigClusterUsers(rName, []string{"bar", "baz"}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName, &policy),
+					testAccCheckKubernetesPolicyAttributes(t, &policy, &expectedKubernetesPolicy{
+						Name:         &rName,
+						ClusterUsers: &[]policies.ClusterUser{{Name: "bar"}, {Name: "baz"}},
+					}),
+					testAccCheckResourceKubernetesPolicyComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "cluster_users.#", "2"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "cluster_users.*", "bar"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "cluster_users.*", "baz"),
+				),
+			},
+			// Verify setting to empty list clears
+			{
+				Config: testAccKubernetesPolicyConfigClusterUsers(rName, []string{}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName, &policy),
+					testAccCheckKubernetesPolicyAttributes(t, &policy, &expectedKubernetesPolicy{
+						Name:         &rName,
+						ClusterUsers: &[]policies.ClusterUser{},
+					}),
+					testAccCheckResourceKubernetesPolicyComputedAttr(resourceName),
+					// Explicit empty list in config should result in a config
+					// with 0 elements (not null)
+					resource.TestCheckResourceAttr(resourceName, "cluster_users.#", "0"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccKubernetesPolicy_ClusterGroups(t *testing.T) {
+	ctx := context.Background()
+	rName := acctest.RandomName()
+	resourceName := "bastionzero_kubernetes_policy.test"
+	var policy policies.KubernetesPolicy
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckKubernetesPolicyDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKubernetesPolicyConfigClusterGroups(rName, []string{"foo"}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName, &policy),
+					testAccCheckKubernetesPolicyAttributes(t, &policy, &expectedKubernetesPolicy{
+						Name:          &rName,
+						ClusterGroups: &[]policies.ClusterGroup{{Name: "foo"}},
+					}),
+					testAccCheckResourceKubernetesPolicyComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "cluster_groups.#", "1"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "cluster_groups.*", "foo"),
+				),
+			},
+			// Verify import works
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Verify update cluster groups
+			{
+				Config: testAccKubernetesPolicyConfigClusterGroups(rName, []string{"bar"}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName, &policy),
+					testAccCheckKubernetesPolicyAttributes(t, &policy, &expectedKubernetesPolicy{
+						Name:          &rName,
+						ClusterGroups: &[]policies.ClusterGroup{{Name: "bar"}},
+					}),
+					testAccCheckResourceKubernetesPolicyComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "cluster_groups.#", "1"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "cluster_groups.*", "bar"),
+				),
+			},
+			// Add another cluster group
+			{
+				Config: testAccKubernetesPolicyConfigClusterGroups(rName, []string{"bar", "baz"}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName, &policy),
+					testAccCheckKubernetesPolicyAttributes(t, &policy, &expectedKubernetesPolicy{
+						Name:          &rName,
+						ClusterGroups: &[]policies.ClusterGroup{{Name: "bar"}, {Name: "baz"}},
+					}),
+					testAccCheckResourceKubernetesPolicyComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "cluster_groups.#", "2"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "cluster_groups.*", "bar"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "cluster_groups.*", "baz"),
+				),
+			},
+			// Verify setting to empty list clears
+			{
+				Config: testAccKubernetesPolicyConfigClusterGroups(rName, []string{}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName, &policy),
+					testAccCheckKubernetesPolicyAttributes(t, &policy, &expectedKubernetesPolicy{
+						Name:          &rName,
+						ClusterGroups: &[]policies.ClusterGroup{},
+					}),
+					testAccCheckResourceKubernetesPolicyComputedAttr(resourceName),
+					// Explicit empty list in config should result in a config
+					// with 0 elements (not null)
+					resource.TestCheckResourceAttr(resourceName, "cluster_groups.#", "0"),
+				),
+			},
+		},
+	})
+}
+
+func testAccKubernetesPolicyConfigBasic(rName string) string {
 	return fmt.Sprintf(`
 resource "bastionzero_kubernetes_policy" "test" {
   name = %[1]q
@@ -77,7 +648,7 @@ resource "bastionzero_kubernetes_policy" "test" {
 `, rName)
 }
 
-func testAccTargetConnectPolicyConfigDescription(rName string, description string) string {
+func testAccKubernetesPolicyConfigDescription(rName string, description string) string {
 	return fmt.Sprintf(`
 resource "bastionzero_kubernetes_policy" "test" {
   description = %[2]q
@@ -86,7 +657,7 @@ resource "bastionzero_kubernetes_policy" "test" {
 `, rName, description)
 }
 
-func testAccTargetConnectPolicyConfigSubjects(rName string, subjects types.Set) string {
+func testAccKubernetesPolicyConfigSubjects(rName string, subjects types.Set) string {
 	return fmt.Sprintf(`
 resource "bastionzero_kubernetes_policy" "test" {
   subjects = %[2]s
@@ -95,7 +666,7 @@ resource "bastionzero_kubernetes_policy" "test" {
 `, rName, subjects.String())
 }
 
-func testAccTargetConnectPolicyConfigGroups(rName string, groups types.Set) string {
+func testAccKubernetesPolicyConfigGroups(rName string, groups types.Set) string {
 	return fmt.Sprintf(`
 resource "bastionzero_kubernetes_policy" "test" {
   groups = %[2]s
@@ -104,7 +675,7 @@ resource "bastionzero_kubernetes_policy" "test" {
 `, rName, groups.String())
 }
 
-func testAccTargetConnectPolicyConfigEnvironments(rName string, environments []string) string {
+func testAccKubernetesPolicyConfigEnvironments(rName string, environments []string) string {
 	return fmt.Sprintf(`
 resource "bastionzero_kubernetes_policy" "test" {
   environments = %[2]s
@@ -140,7 +711,7 @@ resource "bastionzero_kubernetes_policy" "test" {
 `, rName, acctest.ToTerraformStringList(clusterGroups))
 }
 
-type expectedTargetConnectPolicy struct {
+type expectedKubernetesPolicy struct {
 	Name          *string
 	Description   *string
 	Subjects      *[]policies.Subject
@@ -151,7 +722,7 @@ type expectedTargetConnectPolicy struct {
 	ClusterGroups *[]policies.ClusterGroup
 }
 
-func testAccCheckTargetConnectPolicyAttributes(t *testing.T, policy *policies.KubernetesPolicy, expected *expectedTargetConnectPolicy) resource.TestCheckFunc {
+func testAccCheckKubernetesPolicyAttributes(t *testing.T, policy *policies.KubernetesPolicy, expected *expectedKubernetesPolicy) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 
 		if expected.Name != nil && *expected.Name != policy.Name {
@@ -183,20 +754,20 @@ func testAccCheckTargetConnectPolicyAttributes(t *testing.T, policy *policies.Ku
 	}
 }
 
-func testAccCheckTargetConnectPolicyExists(namedTFResource string, policy *policies.KubernetesPolicy) resource.TestCheckFunc {
+func testAccCheckKubernetesPolicyExists(namedTFResource string, policy *policies.KubernetesPolicy) resource.TestCheckFunc {
 	return acctest.CheckExistsAtBastionZero(namedTFResource, policy, func(c *bastionzero.Client, ctx context.Context, id string) (*policies.KubernetesPolicy, *http.Response, error) {
 		return c.Policies.GetKubernetesPolicy(ctx, id)
 	})
 }
 
-func testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName string) resource.TestCheckFunc {
+func testAccCheckResourceKubernetesPolicyComputedAttr(resourceName string) resource.TestCheckFunc {
 	return resource.ComposeTestCheckFunc(
 		resource.TestMatchResourceAttr(resourceName, "id", regexp.MustCompile(acctest.UUIDV4RegexPattern)),
 		resource.TestCheckResourceAttr(resourceName, "type", string(policytype.Kubernetes)),
 	)
 }
 
-func testAccCheckTargetConnectPolicyDestroy(s *terraform.State) error {
+func testAccCheckKubernetesPolicyDestroy(s *terraform.State) error {
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "bastionzero_kubernetes_policy" {
 			continue
