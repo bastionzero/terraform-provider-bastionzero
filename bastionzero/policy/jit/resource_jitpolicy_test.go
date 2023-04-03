@@ -12,7 +12,9 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/apierror"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/policytype"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal/acctest"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -57,6 +59,22 @@ func testAccCheckResourceJITPolicyChildPolicies(resourceName string, childPolici
 	}
 
 	return resource.ComposeTestCheckFunc(checks...)
+}
+
+func toChildPoliciesSet(childPolicyIDs []string) types.Set {
+	// Anonymous type with just the required attributes for child_policies
+	// attribute
+	type requiredChildPolicyModel struct {
+		ID types.String `tfsdk:"id"`
+	}
+	attributeTypes, _ := internal.AttributeTypes[requiredChildPolicyModel](context.Background())
+	elementType := types.ObjectType{AttrTypes: attributeTypes}
+
+	return internal.FlattenFrameworkSet(context.Background(), elementType, childPolicyIDs, func(id string) attr.Value {
+		return types.ObjectValueMust(attributeTypes, map[string]attr.Value{
+			"id": types.StringValue(id),
+		})
+	})
 }
 
 func TestAccJITPolicy_Basic(t *testing.T) {
@@ -115,7 +133,7 @@ resource "bastionzero_jit_policy" "test" {
   name = %[1]q
   child_policies = %[2]s
 }
-`, rName, acctest.ToTerraformStringList(childPolicyIDs))
+`, rName, toChildPoliciesSet(childPolicyIDs).String())
 }
 
 func testAccTargetConnectPolicyConfigDescription(rName string, childPolicyIDs []string, description string) string {
@@ -125,7 +143,7 @@ resource "bastionzero_jit_policy" "test" {
   name = %[1]q
   child_policies = %[2]s
 }
-`, rName, acctest.ToTerraformStringList(childPolicyIDs), description)
+`, rName, toChildPoliciesSet(childPolicyIDs).String(), description)
 }
 
 func testAccTargetConnectPolicyConfigSubjects(rName string, childPolicyIDs []string, subjects types.Set) string {
@@ -135,7 +153,7 @@ resource "bastionzero_jit_policy" "test" {
   name = %[1]q
   child_policies = %[2]s
 }
-`, rName, acctest.ToTerraformStringList(childPolicyIDs), subjects.String())
+`, rName, toChildPoliciesSet(childPolicyIDs).String(), subjects.String())
 }
 
 func testAccTargetConnectPolicyConfigGroups(rName string, childPolicyIDs []string, groups types.Set) string {
@@ -145,7 +163,7 @@ resource "bastionzero_jit_policy" "test" {
   name = %[1]q
   child_policies = %[2]s
 }
-`, rName, acctest.ToTerraformStringList(childPolicyIDs), groups.String())
+`, rName, toChildPoliciesSet(childPolicyIDs).String(), groups.String())
 }
 
 func testAccJITPolicyConfigAutoApproved(rName string, childPolicyIDs []string, autoApproved bool) string {
@@ -155,7 +173,7 @@ resource "bastionzero_jit_policy" "test" {
   name = %[1]q
   child_policies = %[2]s
 }
-`, rName, acctest.ToTerraformStringList(childPolicyIDs), autoApproved)
+`, rName, toChildPoliciesSet(childPolicyIDs).String(), autoApproved)
 }
 
 func testAccJITPolicyConfigDuration(rName string, childPolicyIDs []string, duration uint) string {
@@ -165,7 +183,7 @@ resource "bastionzero_jit_policy" "test" {
   name = %[1]q
   child_policies = %[2]s
 }
-`, rName, acctest.ToTerraformStringList(childPolicyIDs), duration)
+`, rName, toChildPoliciesSet(childPolicyIDs).String(), duration)
 }
 
 type expectedTargetConnectPolicy struct {
