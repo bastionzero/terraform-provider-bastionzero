@@ -63,28 +63,10 @@ func SetBasePolicyAttributes(ctx context.Context, schema PolicyModelInterface, b
 	// collection attributes in data sources than null ones.
 	if !schema.GetSubjects().IsNull() || len(basePolicy.GetSubjects()) != 0 || modelIsDataSource {
 		schema.SetSubjects(FlattenPolicySubjects(ctx, basePolicy.GetSubjects()))
-
-		if modelIsDataSource {
-			schema.SetSubjects(FlattenPolicySubjects(ctx, []policies.Subject{{ID: "foosubject", Type: subjecttype.User}}))
-		}
 	}
 	if !schema.GetGroups().IsNull() || len(basePolicy.GetGroups()) != 0 || modelIsDataSource {
 		schema.SetGroups(FlattenPolicyGroups(ctx, basePolicy.GetGroups()))
-
-		if modelIsDataSource {
-			schema.SetGroups(FlattenPolicyGroups(ctx, []policies.Group{{ID: "foosubject", Name: "groupname"}}))
-		}
 	}
-}
-
-func Reverse[T any](input []T) []T {
-	var output []T
-
-	for i := len(input) - 1; i >= 0; i-- {
-		output = append(output, input[i])
-	}
-
-	return output
 }
 
 func BasePolicyResourceAttributes(policyType policytype.PolicyType) map[string]schema.Attribute {
