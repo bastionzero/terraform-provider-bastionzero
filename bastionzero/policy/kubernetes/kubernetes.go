@@ -53,9 +53,10 @@ func SetKubernetesPolicyAttributes(ctx context.Context, schema *KubernetesPolicy
 	if !schema.ClusterUsers.IsNull() || len(apiPolicy.GetClusterUsers()) != 0 || modelIsDataSource {
 		schema.ClusterUsers = FlattenPolicyClusterUsers(ctx, apiPolicy.GetClusterUsers())
 	}
-	if !schema.ClusterGroups.IsNull() || len(apiPolicy.GetClusterGroups()) != 0 || modelIsDataSource {
-		schema.ClusterGroups = FlattenPolicyClusterGroups(ctx, apiPolicy.GetClusterGroups())
-	}
+	// if !schema.ClusterGroups.IsNull() || len(apiPolicy.GetClusterGroups()) != 0 || modelIsDataSource {
+	// 	schema.ClusterGroups = FlattenPolicyClusterGroups(ctx, apiPolicy.GetClusterGroups())
+	// }
+	schema.ClusterGroups = FlattenPolicyClusterGroups(ctx, apiPolicy.GetClusterGroups())
 }
 
 func ExpandKubernetesPolicy(ctx context.Context, schema *KubernetesPolicyModel) *policies.KubernetesPolicy {
