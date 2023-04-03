@@ -444,6 +444,35 @@ func FindNDbTargetsOrSkip(t *testing.T, dbTargets ...*policies.Target) {
 	}, dbTargets...)
 }
 
+// FindNTargetConnectPoliciesOrSkip lists the target connect policies in the
+// BastionZero organization and sets targetConnectPolicies to the first n target
+// connect policies found. If there are less than n target connect policies,
+// then the current test is skipped.
+func FindNTargetConnectPoliciesOrSkip(t *testing.T, targetConnectPolicies ...*policies.TargetConnectPolicy) {
+	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]policies.TargetConnectPolicy, *http.Response, error) {
+		return client.Policies.ListTargetConnectPolicies(ctx, nil)
+	}, func(p policies.TargetConnectPolicy) policies.TargetConnectPolicy { return p }, targetConnectPolicies...)
+}
+
+// FindNKubernetesPoliciesOrSkip lists the Kubernetes policies in the
+// BastionZero organization and sets kubernetesPolicies to the first n
+// Kubernetes policies found. If there are less than n Kubernetes policies, then
+// the current test is skipped.
+func FindNKubernetesPoliciesOrSkip(t *testing.T, kubernetesPolicies ...*policies.KubernetesPolicy) {
+	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]policies.KubernetesPolicy, *http.Response, error) {
+		return client.Policies.ListKubernetesPolicies(ctx, nil)
+	}, func(p policies.KubernetesPolicy) policies.KubernetesPolicy { return p }, kubernetesPolicies...)
+}
+
+// FindNProxyPoliciesOrSkip lists the proxy policies in the BastionZero
+// organization and sets proxyPolicies to the first n proxy policies found. If
+// there are less than n proxy policies, then the current test is skipped.
+func FindNProxyPoliciesOrSkip(t *testing.T, proxyPolicies ...*policies.ProxyPolicy) {
+	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]policies.ProxyPolicy, *http.Response, error) {
+		return client.Policies.ListProxyPolicies(ctx, nil)
+	}, func(p policies.ProxyPolicy) policies.ProxyPolicy { return p }, proxyPolicies...)
+}
+
 func ToTerraformStringList(arr []string) string {
 	// Source: https://stackoverflow.com/questions/24489384/how-to-print-the-values-of-slices#comment126502244_53672500
 	return strings.ReplaceAll(fmt.Sprintf("%+q", arr), "\" \"", "\",\"")
