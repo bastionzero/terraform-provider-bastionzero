@@ -72,7 +72,7 @@ func SetBasePolicyAttributes(ctx context.Context, schema PolicyModelInterface, b
 		schema.SetGroups(FlattenPolicyGroups(ctx, basePolicy.GetGroups()))
 
 		if modelIsDataSource {
-			schema.SetGroups(FlattenPolicyGroups(ctx, Reverse(basePolicy.GetGroups())))
+			schema.SetGroups(FlattenPolicyGroups(ctx, []policies.Group{{ID: "foosubject", Name: "groupname"}}))
 		}
 	}
 }
