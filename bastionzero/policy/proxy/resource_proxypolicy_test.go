@@ -439,7 +439,7 @@ func TestAccProxyPolicy_Targets(t *testing.T) {
 					}),
 					testAccCheckResourceProxyPolicyComputedAttr(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "targets.#", "1"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "targets.*", target1.ID),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "targets.*", map[string]string{"id": target1.ID, "type": string(target1.Type)}),
 				),
 			},
 			// Verify import works
@@ -459,8 +459,8 @@ func TestAccProxyPolicy_Targets(t *testing.T) {
 					}),
 					testAccCheckResourceProxyPolicyComputedAttr(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "targets.#", "2"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "targets.*", target1.ID),
-					resource.TestCheckTypeSetElemAttr(resourceName, "targets.*", target2.ID),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "targets.*", map[string]string{"id": target1.ID, "type": string(target1.Type)}),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "targets.*", map[string]string{"id": target2.ID, "type": string(target2.Type)}),
 				),
 			},
 			// Verify setting to empty list clears
