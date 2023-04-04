@@ -355,13 +355,16 @@ func typeof(v interface{}) string {
 // FindNAPIObjectsOrSkip calls f to find a list of API objects at BastionZero
 // and sets a variadic number (n) of pointers to the first n API objects found.
 // The API object is converted to another type, MappedT, by calling mapF (pass
-// the identity function if you don't want to map).
+// nil if you don't want to map).
 //
-// If there are less than n API objects, then the current test is skipped.
+// Additionally, pass filterF if you wish to filter certain API objects from
+// being included as candidates (pass nil if you don't want to filter). If there
+// are less than n API objects, then the current test is skipped.
 func FindNAPIObjectsOrSkip[APIObject any, MappedT any](
 	t *testing.T,
 	f func(client *bzapi.Client, ctx context.Context) ([]APIObject, *http.Response, error),
-	mapF func(apiObject APIObject) MappedT,
+	mapF *func(apiObject APIObject) MappedT,
+	filterF *func(apiObject APIObject) bool,
 	mappedPointers ...*MappedT,
 ) {
 	apiObjects, _, err := f(APIClient, context.Background())
@@ -369,12 +372,30 @@ func FindNAPIObjectsOrSkip[APIObject any, MappedT any](
 		t.Fatalf("failed to list %v API objects: %s", typeof(new(APIObject)), err)
 	}
 
+	// Apply optional filter
+	if filterF != nil {
+		deRefFilterF := *filterF
+
+		var filteredAPIObjects []APIObject
+		for _, apiObject := range apiObjects {
+			if deRefFilterF(apiObject) {
+				filteredAPIObjects = append(filteredAPIObjects, apiObject)
+			}
+		}
+
+		// Use filtered list
+		apiObjects = filteredAPIObjects
+	}
+
 	if len(apiObjects) < len(mappedPointers) {
 		t.Skipf("skipping %s because we need at least %v %v API objects to test correctly but have %v", t.Name(), len(mappedPointers), typeof(new(APIObject)), len(apiObjects))
 	}
 
 	for i, mappedPointer := range mappedPointers {
-		*mappedPointer = mapF(apiObjects[i])
+		if mapF != nil {
+			deRefMapF := *mapF
+			*mappedPointer = deRefMapF(apiObjects[i])
+		}
 	}
 }
 
@@ -384,9 +405,9 @@ func FindNAPIObjectsOrSkip[APIObject any, MappedT any](
 func FindNUsersOrSkip(t *testing.T, subjects ...*policies.Subject) {
 	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]users.User, *http.Response, error) {
 		return client.Users.ListUsers(ctx)
-	}, func(u users.User) policies.Subject {
+	}, bzapi.PtrTo(func(u users.User) policies.Subject {
 		return policies.Subject{ID: u.ID, Type: u.GetSubjectType()}
-	}, subjects...)
+	}), nil, subjects...)
 }
 
 // FindNGroupsOrSkip lists the groups in the BastionZero organization and sets
@@ -395,9 +416,9 @@ func FindNUsersOrSkip(t *testing.T, subjects ...*policies.Subject) {
 func FindNGroupsOrSkip(t *testing.T, groups ...*policies.Group) {
 	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]organization.Group, *http.Response, error) {
 		return client.Organization.ListGroups(ctx)
-	}, func(g organization.Group) policies.Group {
+	}, bzapi.PtrTo(func(g organization.Group) policies.Group {
 		return policies.Group{ID: g.ID, Name: g.Name}
-	}, groups...)
+	}), nil, groups...)
 }
 
 // FindNEnvironmentsOrSkip lists the environments in the BastionZero
@@ -406,9 +427,14 @@ func FindNGroupsOrSkip(t *testing.T, groups ...*policies.Group) {
 func FindNEnvironmentsOrSkip(t *testing.T, envs ...*policies.Environment) {
 	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]environments.Environment, *http.Response, error) {
 		return client.Environments.ListEnvironments(ctx)
-	}, func(e environments.Environment) policies.Environment {
+	}, bzapi.PtrTo(func(e environments.Environment) policies.Environment {
 		return policies.Environment{ID: e.ID}
-	}, envs...)
+	}), bzapi.PtrTo(func(e environments.Environment) bool {
+		// IMPORTANT: We must filter out environments that are concurrently
+		// being created by other parallel acceptance tests because they could
+		// be deleted by the time the caller of this function uses them
+		return !strings.HasPrefix(e.Name, TestNamePrefix)
+	}), envs...)
 }
 
 // FindNBzeroTargetsOrSkip lists the Bzero targets in the BastionZero
@@ -417,9 +443,9 @@ func FindNEnvironmentsOrSkip(t *testing.T, envs ...*policies.Environment) {
 func FindNBzeroTargetsOrSkip(t *testing.T, bzeroTargets ...*policies.Target) {
 	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]targets.BzeroTarget, *http.Response, error) {
 		return client.Targets.ListBzeroTargets(ctx)
-	}, func(t targets.BzeroTarget) policies.Target {
+	}, bzapi.PtrTo(func(t targets.BzeroTarget) policies.Target {
 		return policies.Target{ID: t.ID, Type: t.GetTargetType()}
-	}, bzeroTargets...)
+	}), nil, bzeroTargets...)
 }
 
 // FindNClusterTargetsOrSkip lists the Cluster targets in the BastionZero
@@ -428,9 +454,9 @@ func FindNBzeroTargetsOrSkip(t *testing.T, bzeroTargets ...*policies.Target) {
 func FindNClusterTargetsOrSkip(t *testing.T, clusterTargets ...*policies.Cluster) {
 	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]targets.ClusterTarget, *http.Response, error) {
 		return client.Targets.ListClusterTargets(ctx)
-	}, func(t targets.ClusterTarget) policies.Cluster {
+	}, bzapi.PtrTo(func(t targets.ClusterTarget) policies.Cluster {
 		return policies.Cluster{ID: t.ID}
-	}, clusterTargets...)
+	}), nil, clusterTargets...)
 }
 
 // FindNDbTargetsOrSkip lists the Db targets in the BastionZero organization and
@@ -439,9 +465,9 @@ func FindNClusterTargetsOrSkip(t *testing.T, clusterTargets ...*policies.Cluster
 func FindNDbTargetsOrSkip(t *testing.T, dbTargets ...*policies.Target) {
 	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]targets.DatabaseTarget, *http.Response, error) {
 		return client.Targets.ListDatabaseTargets(ctx)
-	}, func(t targets.DatabaseTarget) policies.Target {
+	}, bzapi.PtrTo(func(t targets.DatabaseTarget) policies.Target {
 		return policies.Target{ID: t.ID, Type: t.GetTargetType()}
-	}, dbTargets...)
+	}), nil, dbTargets...)
 }
 
 // FindNTargetConnectPoliciesOrSkip lists the target connect policies in the
@@ -451,7 +477,12 @@ func FindNDbTargetsOrSkip(t *testing.T, dbTargets ...*policies.Target) {
 func FindNTargetConnectPoliciesOrSkip(t *testing.T, targetConnectPolicies ...*policies.TargetConnectPolicy) {
 	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]policies.TargetConnectPolicy, *http.Response, error) {
 		return client.Policies.ListTargetConnectPolicies(ctx, nil)
-	}, func(p policies.TargetConnectPolicy) policies.TargetConnectPolicy { return p }, targetConnectPolicies...)
+	}, nil, bzapi.PtrTo(func(p policies.TargetConnectPolicy) bool {
+		// IMPORTANT: We must filter out policies that are concurrently being
+		// created by other parallel acceptance tests because they could be
+		// deleted by the time the caller of this function uses them
+		return !strings.HasPrefix(p.Name, TestNamePrefix)
+	}), targetConnectPolicies...)
 }
 
 // FindNKubernetesPoliciesOrSkip lists the Kubernetes policies in the
@@ -461,7 +492,12 @@ func FindNTargetConnectPoliciesOrSkip(t *testing.T, targetConnectPolicies ...*po
 func FindNKubernetesPoliciesOrSkip(t *testing.T, kubernetesPolicies ...*policies.KubernetesPolicy) {
 	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]policies.KubernetesPolicy, *http.Response, error) {
 		return client.Policies.ListKubernetesPolicies(ctx, nil)
-	}, func(p policies.KubernetesPolicy) policies.KubernetesPolicy { return p }, kubernetesPolicies...)
+	}, nil, bzapi.PtrTo(func(p policies.KubernetesPolicy) bool {
+		// IMPORTANT: We must filter out policies that are concurrently being
+		// created by other parallel acceptance tests because they could be
+		// deleted by the time the caller of this function uses them
+		return !strings.HasPrefix(p.Name, TestNamePrefix)
+	}), kubernetesPolicies...)
 }
 
 // FindNProxyPoliciesOrSkip lists the proxy policies in the BastionZero
@@ -470,7 +506,12 @@ func FindNKubernetesPoliciesOrSkip(t *testing.T, kubernetesPolicies ...*policies
 func FindNProxyPoliciesOrSkip(t *testing.T, proxyPolicies ...*policies.ProxyPolicy) {
 	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]policies.ProxyPolicy, *http.Response, error) {
 		return client.Policies.ListProxyPolicies(ctx, nil)
-	}, func(p policies.ProxyPolicy) policies.ProxyPolicy { return p }, proxyPolicies...)
+	}, nil, bzapi.PtrTo(func(p policies.ProxyPolicy) bool {
+		// IMPORTANT: We must filter out policies that are concurrently being
+		// created by other parallel acceptance tests because they could be
+		// deleted by the time the caller of this function uses them
+		return !strings.HasPrefix(p.Name, TestNamePrefix)
+	}), proxyPolicies...)
 }
 
 func ToTerraformStringList(arr []string) string {
