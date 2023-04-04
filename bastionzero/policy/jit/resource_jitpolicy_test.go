@@ -568,7 +568,7 @@ func TestJITPolicy_InvalidDuration(t *testing.T) {
 			{
 				// Invalid duration not permitted
 				Config:      testAccJITPolicyConfigDuration("test", []string{"foo"}, 0),
-				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value`),
 			},
 		},
 	})
