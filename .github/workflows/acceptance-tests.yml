@@ -61,6 +61,7 @@ jobs:
         terraform_wrapper: false
     - name: Run acceptance tests
       run: make testacc | tee test_result.txt
+      shell: bash
       env:
         ACCTEST_PARALLELISM: 10
         BASTIONZERO_API_SECRET: ${{ secrets.ACCEPTANCE_TESTS_API_SECRET }}
@@ -70,10 +71,10 @@ jobs:
         grep "SKIP" test_result.txt -B 2;
         retVal=$?;
         if [ $retVal -ne 1 ]; then
-          echo "Some tests were skipped. Please ensure that no tests are skipped by creating the respective API objects listed above.";
+          echo "*** Some tests were skipped. Please ensure that no tests are skipped by creating the respective API objects listed above.";
           exit 1;
         else
-          echo "No tests were skipped!";
+          echo "*** No tests were skipped!";
           exit 0;
         fi
       shell: bash {0} # override -e default
