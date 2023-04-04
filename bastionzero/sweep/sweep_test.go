@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	_ "github.com/bastionzero/terraform-provider-bastionzero/bastionzero/environment"
+	_ "github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/jit"
 	_ "github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/kubernetes"
 	_ "github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/proxy"
 	_ "github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/sessionrecording"
