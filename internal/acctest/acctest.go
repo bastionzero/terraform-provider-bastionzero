@@ -544,3 +544,21 @@ func ToTerraformStringList(arr []string) string {
 	// Source: https://stackoverflow.com/questions/24489384/how-to-print-the-values-of-slices#comment126502244_53672500
 	return strings.ReplaceAll(fmt.Sprintf("%+q", arr), "\" \"", "\",\"")
 }
+
+func ExpandValuesCheckMapToSingleCheck[T any](resourceName string, apiObject *T, getValuesCheckMapFunc func(apiObject *T) map[string]string) resource.TestCheckFunc {
+	valuesCheckMap := getValuesCheckMapFunc(apiObject)
+	var checkFuncs []resource.TestCheckFunc
+	for attr, value := range valuesCheckMap {
+		if value != "" {
+			// TODO-Yuval: Figure out how to handle check for set or list
+			// attributes. Might be better to accept the code duplication and
+			// handle those checks outside of this func
+			checkFuncs = append(checkFuncs, resource.TestCheckResourceAttr(resourceName, attr, value))
+		} else {
+			// "" denotes attribute should be unset (null)
+			checkFuncs = append(checkFuncs, resource.TestCheckNoResourceAttr(resourceName, attr))
+		}
+	}
+
+	return resource.ComposeTestCheckFunc(checkFuncs...)
+}
