@@ -99,7 +99,7 @@ func TestAccSessionRecordingPoliciesDataSource_FilterGroups(t *testing.T) {
 
 	acctest.SkipIfNotInAcceptanceTestMode(t)
 	acctest.PreCheck(ctx, t)
-	acctest.FindNGroupsOrSkip(t, group)
+	acctest.FindNGroupsOrSkipAsPolicyGroup(t, group)
 
 	resourcePolicy := testAccSessionRecordingPolicyConfigGroups(rName, policy.FlattenPolicyGroups(ctx, []policies.Group{*group}))
 	resource.ParallelTest(t, resource.TestCase{
