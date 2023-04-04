@@ -216,10 +216,10 @@ func TestAccJITPolicy_ChildPolicies(t *testing.T) {
 					testAccCheckJITPolicyExists(resourceName, &policy),
 					testAccCheckJITPolicyAttributes(t, &policy, &expectedJITPolicy{
 						Name:          &rName,
-						ChildPolicies: bastionzero.PtrTo(asChildPolicies[:0]),
+						ChildPolicies: bastionzero.PtrTo(asChildPolicies[:1]),
 					}),
 					testAccCheckResourceJITPolicyComputedAttr(resourceName),
-					testAccCheckResourceJITPolicyChildPolicies(resourceName, asChildPolicies[0]),
+					testAccCheckResourceJITPolicyChildPolicies(resourceName, asChildPolicies[:1]...),
 				),
 			},
 			// Verify import works
@@ -235,10 +235,10 @@ func TestAccJITPolicy_ChildPolicies(t *testing.T) {
 					testAccCheckJITPolicyExists(resourceName, &policy),
 					testAccCheckJITPolicyAttributes(t, &policy, &expectedJITPolicy{
 						Name:          &rName,
-						ChildPolicies: bastionzero.PtrTo(asChildPolicies[:1]),
+						ChildPolicies: bastionzero.PtrTo(asChildPolicies[:2]),
 					}),
 					testAccCheckResourceJITPolicyComputedAttr(resourceName),
-					testAccCheckResourceJITPolicyChildPolicies(resourceName, asChildPolicies[:1]...),
+					testAccCheckResourceJITPolicyChildPolicies(resourceName, asChildPolicies[:2]...),
 				),
 			},
 			// Add another child policy
