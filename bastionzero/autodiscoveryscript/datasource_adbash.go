@@ -7,6 +7,7 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/autodiscoveryscripts"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/autodiscoveryscripts/targetnameoption"
+	"github.com/google/uuid"
 
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal/bzdatasource"
@@ -23,7 +24,7 @@ type adBashModel struct {
 	TargetNameOption types.String `tfsdk:"target_name_option"`
 	EnvironmentID    types.String `tfsdk:"environment_id"`
 	Script           types.String `tfsdk:"script"`
-	ID               types.String `tfsdk:"id"`
+	ID               *string      `tfsdk:"id"`
 }
 
 func makeAdBashModelDataSourceSchema() map[string]schema.Attribute {
@@ -69,6 +70,7 @@ func NewAdBashDataSource() datasource.DataSource {
 				PrettyAttributeName: "autodiscovery script (bash)",
 				FlattenAPIModel: func(ctx context.Context, apiObject *autodiscoveryscripts.BzeroBashAutodiscoveryScript, state *adBashModel) (diags diag.Diagnostics) {
 					state.Script = types.StringValue(apiObject.Script)
+					state.ID = bastionzero.PtrTo(uuid.New().String())
 					return
 				},
 				GetAPIModel: func(ctx context.Context, tfModel adBashModel, client *bastionzero.Client) (*autodiscoveryscripts.BzeroBashAutodiscoveryScript, error) {
