@@ -20,7 +20,7 @@ func getValuesCheckMap(user *users.User) map[string]string {
 		"is_admin":        fmt.Sprintf("%t", user.IsAdmin),
 		"organization_id": user.OrganizationID,
 		"time_created":    user.TimeCreated.UTC().Format(time.RFC3339),
-		"type":            string(subjecttype.ServiceAccount),
+		"type":            string(subjecttype.User),
 	}
 
 	if user.LastLogin != nil {
