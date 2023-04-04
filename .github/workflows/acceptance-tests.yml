@@ -60,8 +60,16 @@ jobs:
         terraform_version: ${{ matrix.terraform }}
         terraform_wrapper: false
     - name: Run acceptance tests
-      run: make testacc
+      run: make testacc | tee test_result.txt
       env:
         ACCTEST_PARALLELISM: 10
         BASTIONZERO_API_SECRET: ${{ secrets.ACCEPTANCE_TESTS_API_SECRET }}
         BASTIONZERO_HOST: ${{ secrets.ACCEPTANCE_TESTS_BASTIONZERO_HOST }}
+    - name: Check that no test is skipped
+      run: |
+        grep "SKIP" test_result.txt -B 2 
+        retVal=$?
+        if [ $retVal -ne 1 ]; then
+            echo "Some tests were skipped. Please ensure that no tests are skipped by creating the respective API objects listed above."
+            exit 1
+        fi
