@@ -56,7 +56,7 @@ func TestAccJITPoliciesDataSource_FilterSubjects(t *testing.T) {
 	subject := new(policies.Subject)
 	tcPolicy, kubePolicy, proxyPolicy := getChildPoliciesOrSkip(ctx, t)
 
-	acctest.FindNUsersOrSkip(t, subject)
+	acctest.FindNUsersOrSkipAsPolicySubject(t, subject)
 
 	resourcePolicy := testAccJITPolicyConfigSubjects(rName, []string{tcPolicy.ID, kubePolicy.ID, proxyPolicy.ID}, policy.FlattenPolicySubjects(ctx, []policies.Subject{*subject}))
 	resource.ParallelTest(t, resource.TestCase{

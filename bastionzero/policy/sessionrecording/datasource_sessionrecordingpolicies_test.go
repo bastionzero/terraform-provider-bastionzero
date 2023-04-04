@@ -57,7 +57,7 @@ func TestAccSessionRecordingPoliciesDataSource_FilterSubjects(t *testing.T) {
 
 	acctest.SkipIfNotInAcceptanceTestMode(t)
 	acctest.PreCheck(ctx, t)
-	acctest.FindNUsersOrSkip(t, subject)
+	acctest.FindNUsersOrSkipAsPolicySubject(t, subject)
 
 	resourcePolicy := testAccSessionRecordingPolicyConfigSubjects(rName, policy.FlattenPolicySubjects(ctx, []policies.Subject{*subject}))
 	resource.ParallelTest(t, resource.TestCase{

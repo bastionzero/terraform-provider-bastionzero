@@ -329,7 +329,7 @@ func TestAccJITPolicy_Subjects(t *testing.T) {
 	subject2 := new(policies.Subject)
 
 	// Find two users or skip this entire test
-	acctest.FindNUsersOrSkip(t, subject1, subject2)
+	acctest.FindNUsersOrSkipAsPolicySubject(t, subject1, subject2)
 
 	resource.ParallelTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,

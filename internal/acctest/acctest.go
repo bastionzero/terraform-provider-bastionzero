@@ -405,9 +405,21 @@ func FindNAPIObjectsOrSkip[APIObject any, MappedT any](
 }
 
 // FindNUsersOrSkip lists the users in the BastionZero organization and sets
-// subjects to the first n subjects found. If there are less than n users, then
+// userPointers to the first n users found. If there are less than n users, then
 // the current test is skipped.
-func FindNUsersOrSkip(t *testing.T, subjects ...*policies.Subject) {
+//
+// If you need the users mapped as the policy type (policies.Subject), use
+// FindNUsersOrSkipAsPolicySubject() instead.
+func FindNUsersOrSkip(t *testing.T, userPointers ...*users.User) {
+	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]users.User, *http.Response, error) {
+		return client.Users.ListUsers(ctx)
+	}, identity[users.User], nil, userPointers...)
+}
+
+// FindNUsersOrSkipAsPolicySubject lists the users in the BastionZero
+// organization and sets subjects to the first n subjects found. If there are
+// less than n users, then the current test is skipped.
+func FindNUsersOrSkipAsPolicySubject(t *testing.T, subjects ...*policies.Subject) {
 	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]users.User, *http.Response, error) {
 		return client.Users.ListUsers(ctx)
 	}, func(u users.User) policies.Subject {
