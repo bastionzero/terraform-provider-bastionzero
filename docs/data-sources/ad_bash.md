@@ -25,6 +25,7 @@ The data source's `script` does not contain the registration secret that is requ
 
 ### Read-Only
 
+- `id` (String, Deprecated) Deprecated. Do not depend on this attribute. This attribute will be removed in the future.
 - `script` (String) Bash script that can be used to autodiscover a target.
 
 
