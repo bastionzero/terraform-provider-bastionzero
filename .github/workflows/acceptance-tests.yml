@@ -76,4 +76,4 @@ jobs:
           echo "No tests were skipped!";
           exit 0;
         fi
-      shell: bash 
+      shell: bash {0} # override -e default
