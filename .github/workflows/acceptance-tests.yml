@@ -66,13 +66,13 @@ jobs:
         BASTIONZERO_API_SECRET: ${{ secrets.ACCEPTANCE_TESTS_API_SECRET }}
         BASTIONZERO_HOST: ${{ secrets.ACCEPTANCE_TESTS_BASTIONZERO_HOST }}
     - name: Check that no test is skipped
-      run: |
-        grep "SKIP" test_result.txt -B 2 \
-        retVal=$? \
-        if [ $retVal -ne 1 ]; then \
-          echo "Some tests were skipped. Please ensure that no tests are skipped by creating the respective API objects listed above." \
-          exit 1 \
-        else \
-          echo "No tests were skipped!" \
-          exit 0 \
-        fi \
+      run: >-
+        grep "SKIP" test_result.txt -B 2
+        retVal=$?
+        if [ $retVal -ne 1 ]; then
+          echo "Some tests were skipped. Please ensure that no tests are skipped by creating the respective API objects listed above."
+          exit 1
+        else
+          echo "No tests were skipped!"
+          exit 0
+        fi
