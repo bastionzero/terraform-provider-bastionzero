@@ -14,6 +14,7 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/environments"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/organization"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/serviceaccounts"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/users"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero"
@@ -412,6 +413,15 @@ func FindNUsersOrSkip(t *testing.T, subjects ...*policies.Subject) {
 	}, func(u users.User) policies.Subject {
 		return policies.Subject{ID: u.ID, Type: u.GetSubjectType()}
 	}, nil, subjects...)
+}
+
+// FindNServiceAccountsOrSkip lists the service accounts in the BastionZero
+// organization and sets serviceAccounts to the first n service accounts found.
+// If there are less than n service accounts, then the current test is skipped.
+func FindNServiceAccountsOrSkip(t *testing.T, serviceAccounts ...*serviceaccounts.ServiceAccount) {
+	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]serviceaccounts.ServiceAccount, *http.Response, error) {
+		return client.ServiceAccounts.ListServiceAccounts(ctx)
+	}, identity[serviceaccounts.ServiceAccount], nil, serviceAccounts...)
 }
 
 // FindNGroupsOrSkip lists the groups in the BastionZero organization and sets
