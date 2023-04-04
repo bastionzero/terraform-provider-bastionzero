@@ -19,8 +19,6 @@ func TestAccUserDataSource_ID(t *testing.T) {
 	acctest.PreCheck(ctx, t)
 	acctest.FindNUsersOrSkip(t, user)
 
-	t.Fail()
-
 	resource.ParallelTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
