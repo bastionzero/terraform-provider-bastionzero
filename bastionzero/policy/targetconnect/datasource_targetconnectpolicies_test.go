@@ -100,7 +100,7 @@ func TestAccTargetConnectPoliciesDataSource_FilterGroups(t *testing.T) {
 
 	acctest.SkipIfNotInAcceptanceTestMode(t)
 	acctest.PreCheck(ctx, t)
-	acctest.FindNGroupsOrSkip(t, group)
+	acctest.FindNGroupsOrSkipAsPolicyGroup(t, group)
 
 	resourcePolicy := testAccTargetConnectPolicyConfigGroups(rName, []string{"foo"}, []string{string(verbtype.Shell)}, policy.FlattenPolicyGroups(ctx, []policies.Group{*group}))
 	resource.ParallelTest(t, resource.TestCase{

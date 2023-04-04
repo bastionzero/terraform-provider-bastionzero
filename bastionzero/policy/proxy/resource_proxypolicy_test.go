@@ -284,7 +284,7 @@ func TestAccProxyPolicy_Groups(t *testing.T) {
 
 	acctest.SkipIfNotInAcceptanceTestMode(t)
 	acctest.PreCheck(ctx, t)
-	acctest.FindNGroupsOrSkip(t, group1, group2)
+	acctest.FindNGroupsOrSkipAsPolicyGroup(t, group1, group2)
 
 	resource.ParallelTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,

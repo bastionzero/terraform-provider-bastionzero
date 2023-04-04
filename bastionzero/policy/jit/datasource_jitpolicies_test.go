@@ -97,7 +97,7 @@ func TestAccJITPoliciesDataSource_FilterGroups(t *testing.T) {
 	group := new(policies.Group)
 	tcPolicy, kubePolicy, proxyPolicy := getChildPoliciesOrSkip(ctx, t)
 
-	acctest.FindNGroupsOrSkip(t, group)
+	acctest.FindNGroupsOrSkipAsPolicyGroup(t, group)
 
 	resourcePolicy := testAccJITPolicyConfigGroups(rName, []string{tcPolicy.ID, kubePolicy.ID, proxyPolicy.ID}, policy.FlattenPolicyGroups(ctx, []policies.Group{*group}))
 	resource.ParallelTest(t, resource.TestCase{

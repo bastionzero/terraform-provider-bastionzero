@@ -417,7 +417,19 @@ func FindNUsersOrSkip(t *testing.T, subjects ...*policies.Subject) {
 // FindNGroupsOrSkip lists the groups in the BastionZero organization and sets
 // groups to the first n groups found. If there are less than n groups, then the
 // current test is skipped.
-func FindNGroupsOrSkip(t *testing.T, groups ...*policies.Group) {
+//
+// If you need the groups mapped as the policy type (policies.Group), use
+// FindNGroupsOrSkipAsPolicyGroup() instead.
+func FindNGroupsOrSkip(t *testing.T, groups ...*organization.Group) {
+	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]organization.Group, *http.Response, error) {
+		return client.Organization.ListGroups(ctx)
+	}, identity[organization.Group], nil, groups...)
+}
+
+// FindNGroupsOrSkipAsPolicyGroup lists the groups in the BastionZero
+// organization and sets groups to the first n groups found. If there are less
+// than n groups, then the current test is skipped.
+func FindNGroupsOrSkipAsPolicyGroup(t *testing.T, groups ...*policies.Group) {
 	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]organization.Group, *http.Response, error) {
 		return client.Organization.ListGroups(ctx)
 	}, func(g organization.Group) policies.Group {
