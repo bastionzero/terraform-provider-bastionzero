@@ -24,7 +24,7 @@ func TestAccGroupsDataSource_Basic(t *testing.T) {
 			{
 				Config: testAccGroupsDataSourceConfig(),
 				// Check that the group we queried for is returned in the list
-				Check: resource.TestCheckTypeSetElemNestedAttrs(dataSourceName, "groups", map[string]string{"id": group.ID, "name": group.Name}),
+				Check: resource.TestCheckTypeSetElemNestedAttrs(dataSourceName, "groups.*", map[string]string{"id": group.ID, "name": group.Name}),
 			},
 		},
 	})
