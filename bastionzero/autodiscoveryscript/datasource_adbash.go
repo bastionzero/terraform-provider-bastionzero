@@ -23,6 +23,7 @@ type adBashModel struct {
 	TargetNameOption types.String `tfsdk:"target_name_option"`
 	EnvironmentID    types.String `tfsdk:"environment_id"`
 	Script           types.String `tfsdk:"script"`
+	ID               types.String `tfsdk:"id"`
 }
 
 func makeAdBashModelDataSourceSchema() map[string]schema.Attribute {
@@ -44,6 +45,16 @@ func makeAdBashModelDataSourceSchema() map[string]schema.Attribute {
 		"script": schema.StringAttribute{
 			Computed:    true,
 			Description: "Bash script that can be used to autodiscover a target.",
+		},
+		// Dummy "id" attribute. Required in order to test this data source.
+		//
+		// Source: https://github.com/hashicorp/terraform-plugin-testing/issues/84
+		// Source: https://github.com/hashicorp/terraform-plugin-testing/issues/84#issuecomment-1480006432
+		// Source: https://developer.hashicorp.com/terraform/plugin/framework/acctests#implement-id-attribute
+		"id": schema.StringAttribute{
+			Computed:           true,
+			Description:        "Deprecated. Do not depend on this attribute. This attribute will be removed in the future.",
+			DeprecationMessage: "Do not depend on this attribute. This attribute will be removed in the future.",
 		},
 	}
 }
