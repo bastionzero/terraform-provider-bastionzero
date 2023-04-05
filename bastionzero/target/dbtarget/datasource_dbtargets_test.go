@@ -39,7 +39,7 @@ func getValuesCheckMap(dbTarget *targets.DatabaseTarget) map[string]string {
 	} else {
 		valuesCheckMap["local_port"] = ""
 	}
-	if dbTarget.LocalPort.Value != nil {
+	if dbTarget.RemotePort.Value != nil {
 		valuesCheckMap["remote_port"] = strconv.Itoa(*dbTarget.RemotePort.Value)
 	} else {
 		valuesCheckMap["remote_port"] = ""

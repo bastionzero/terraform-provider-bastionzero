@@ -554,6 +554,15 @@ func FindNDbTargetsOrSkipAsPolicyTarget(t *testing.T, dbTargets ...*policies.Tar
 	}, nil, dbTargets...)
 }
 
+// FindNWebTargetsOrSkip lists the Web targets in the BastionZero organization
+// and sets webTargets to the first n Web targets found. If there are less than
+// n Web targets, then the current test is skipped.
+func FindNWebTargetsOrSkip(t *testing.T, webTargets ...*targets.WebTarget) {
+	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]targets.WebTarget, *http.Response, error) {
+		return client.Targets.ListWebTargets(ctx)
+	}, identity[targets.WebTarget], nil, webTargets...)
+}
+
 // FindNTargetConnectPoliciesOrSkip lists the target connect policies in the
 // BastionZero organization and sets targetConnectPolicies to the first n target
 // connect policies found. If there are less than n target connect policies,
