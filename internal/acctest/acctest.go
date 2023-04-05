@@ -478,7 +478,20 @@ func FindNEnvironmentsOrSkip(t *testing.T, envs ...*policies.Environment) {
 // FindNBzeroTargetsOrSkip lists the Bzero targets in the BastionZero
 // organization and sets bzeroTargets to the first n Bzero targets found. If
 // there are less than n Bzero targets, then the current test is skipped.
-func FindNBzeroTargetsOrSkip(t *testing.T, bzeroTargets ...*policies.Target) {
+//
+// If you need the targets mapped as the policy type (policies.Target), use
+// FindNBzeroTargetsOrSkipAsPolicyTarget() instead.
+func FindNBzeroTargetsOrSkip(t *testing.T, bzeroTargets ...*targets.BzeroTarget) {
+	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]targets.BzeroTarget, *http.Response, error) {
+		return client.Targets.ListBzeroTargets(ctx)
+	}, identity[targets.BzeroTarget], nil, bzeroTargets...)
+}
+
+// FindNBzeroTargetsOrSkipAsPolicyTarget lists the Bzero targets in the
+// BastionZero organization and sets bzeroTargets to the first n Bzero targets
+// found. If there are less than n Bzero targets, then the current test is
+// skipped.
+func FindNBzeroTargetsOrSkipAsPolicyTarget(t *testing.T, bzeroTargets ...*policies.Target) {
 	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]targets.BzeroTarget, *http.Response, error) {
 		return client.Targets.ListBzeroTargets(ctx)
 	}, func(t targets.BzeroTarget) policies.Target {

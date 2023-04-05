@@ -555,7 +555,7 @@ func TestAccTargetConnectPolicy_Targets(t *testing.T) {
 
 	acctest.SkipIfNotInAcceptanceTestMode(t)
 	acctest.PreCheck(ctx, t)
-	acctest.FindNBzeroTargetsOrSkip(t, target1, target2)
+	acctest.FindNBzeroTargetsOrSkipAsPolicyTarget(t, target1, target2)
 
 	resource.ParallelTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
