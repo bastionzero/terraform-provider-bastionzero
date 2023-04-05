@@ -61,7 +61,6 @@ func makeAdBashModelDataSourceSchema() map[string]schema.Attribute {
 }
 
 func NewAdBashDataSource() datasource.DataSource {
-	baseDesc := "Get a bash script that can be used to install the latest production BastionZero agent (bzero) on your targets."
 	return bzdatasource.NewSingleDataSource(
 		&bzdatasource.SingleDataSourceConfig[adBashModel, autodiscoveryscripts.BzeroBashAutodiscoveryScript]{
 			BaseSingleDataSourceConfig: &bzdatasource.BaseSingleDataSourceConfig[adBashModel, autodiscoveryscripts.BzeroBashAutodiscoveryScript]{
@@ -80,11 +79,7 @@ func NewAdBashDataSource() datasource.DataSource {
 					})
 					return script, err
 				},
-				Description: baseDesc,
-				MarkdownDescription: baseDesc +
-					"\n\nThe data source's `script` does not contain the registration secret that is required to register your targets with BastionZero. " +
-					"You must replace `<REGISTRATION-SECRET-GOES-HERE>` with " +
-					"a valid registration secret before attempting to execute the script.",
+				MarkdownDescription: "Get a bash script that can be used to install the latest production BastionZero agent ([`bzero`](https://github.com/bastionzero/bzero)) on your targets.",
 			},
 		},
 	)

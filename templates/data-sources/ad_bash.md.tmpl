@@ -1,0 +1,37 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+~> **Warning** The fetched `script` does not contain the registration secret
+that is required to register your targets with BastionZero. You must replace
+`<REGISTRATION-SECRET-GOES-HERE>` with a valid [registration
+secret](https://docs.bastionzero.com/docs/admin-guide/authorization#registration-api-keys)
+before attempting to execute the script. This can be done by using the
+[`replace`](https://www.terraform.io/language/functions/replace) function (see
+example [below](#replace-example)).
+
+## Example Usage
+
+### Basic example
+
+{{ tffile "examples/data-sources/bastionzero_ad_bash/data-source.tf" }}
+
+### Register in the default environment
+
+The following example fetches a script that registers your target in the default
+environment.
+
+{{ tffile "examples/data-sources/bastionzero_ad_bash/default-env-example.tf" }}
+
+### Replace example
+
+{{ tffile "examples/data-sources/bastionzero_ad_bash/replace-example.tf" }}
+
+{{ .SchemaMarkdown | trimspace }}
