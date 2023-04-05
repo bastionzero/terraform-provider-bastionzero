@@ -534,7 +534,19 @@ func FindNDACTargetsOrSkip(t *testing.T, dacTargets ...*targets.DynamicAccessCon
 // FindNDbTargetsOrSkip lists the Db targets in the BastionZero organization and
 // sets dbTargets to the first n Db targets found. If there are less than n Db
 // targets, then the current test is skipped.
-func FindNDbTargetsOrSkip(t *testing.T, dbTargets ...*policies.Target) {
+//
+// If you need the targets mapped as the policy type (policies.Target), use
+// FindNDbTargetsOrSkipAsPolicyTarget() instead.
+func FindNDbTargetsOrSkip(t *testing.T, dbTargets ...*targets.DatabaseTarget) {
+	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]targets.DatabaseTarget, *http.Response, error) {
+		return client.Targets.ListDatabaseTargets(ctx)
+	}, identity[targets.DatabaseTarget], nil, dbTargets...)
+}
+
+// FindNDbTargetsOrSkipAsPolicyTarget lists the Db targets in the BastionZero organization and
+// sets dbTargets to the first n Db targets found. If there are less than n Db
+// targets, then the current test is skipped.
+func FindNDbTargetsOrSkipAsPolicyTarget(t *testing.T, dbTargets ...*policies.Target) {
 	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]targets.DatabaseTarget, *http.Response, error) {
 		return client.Targets.ListDatabaseTargets(ctx)
 	}, func(t targets.DatabaseTarget) policies.Target {

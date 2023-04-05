@@ -423,7 +423,7 @@ func TestAccProxyPolicy_Targets(t *testing.T) {
 
 	acctest.SkipIfNotInAcceptanceTestMode(t)
 	acctest.PreCheck(ctx, t)
-	acctest.FindNDbTargetsOrSkip(t, target1, target2)
+	acctest.FindNDbTargetsOrSkipAsPolicyTarget(t, target1, target2)
 
 	resource.ParallelTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
