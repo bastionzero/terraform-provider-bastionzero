@@ -21,7 +21,7 @@ func getValuesCheckMap(clusterTarget *targets.ClusterTarget) map[string]string {
 		"environment_id":                     clusterTarget.EnvironmentID,
 		"region":                             clusterTarget.Region,
 		"status":                             string(clusterTarget.Status),
-		"type":                               string(targettype.Bzero),
+		"type":                               string(targettype.Cluster),
 		"id":                                 clusterTarget.ID,
 		"name":                               clusterTarget.Name,
 	}
