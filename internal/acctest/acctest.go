@@ -502,7 +502,19 @@ func FindNBzeroTargetsOrSkipAsPolicyTarget(t *testing.T, bzeroTargets ...*polici
 // FindNClusterTargetsOrSkip lists the Cluster targets in the BastionZero
 // organization and sets clusterTargets to the first n Cluster targets found. If
 // there are less than n Cluster targets, then the current test is skipped.
-func FindNClusterTargetsOrSkip(t *testing.T, clusterTargets ...*policies.Cluster) {
+//
+// If you need the targets mapped as the policy type (policies.Cluster), use
+// FindNClusterTargetsOrSkipAsPolicyCluster() instead.
+func FindNClusterTargetsOrSkip(t *testing.T, clusterTargets ...*targets.ClusterTarget) {
+	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]targets.ClusterTarget, *http.Response, error) {
+		return client.Targets.ListClusterTargets(ctx)
+	}, identity[targets.ClusterTarget], nil, clusterTargets...)
+}
+
+// FindNClusterTargetsOrSkipAsPolicyCluster lists the Cluster targets in the BastionZero
+// organization and sets clusterTargets to the first n Cluster targets found. If
+// there are less than n Cluster targets, then the current test is skipped.
+func FindNClusterTargetsOrSkipAsPolicyCluster(t *testing.T, clusterTargets ...*policies.Cluster) {
 	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]targets.ClusterTarget, *http.Response, error) {
 		return client.Targets.ListClusterTargets(ctx)
 	}, func(t targets.ClusterTarget) policies.Cluster {
@@ -575,9 +587,6 @@ func ExpandValuesCheckMapToSingleCheck[T any](resourceName string, apiObject *T,
 	var checkFuncs []resource.TestCheckFunc
 	for attr, value := range valuesCheckMap {
 		if value != "" {
-			// TODO-Yuval: Figure out how to handle check for set or list
-			// attributes. Might be better to accept the code duplication and
-			// handle those checks outside of this func
 			checkFuncs = append(checkFuncs, resource.TestCheckResourceAttr(resourceName, attr, value))
 		} else {
 			// "" denotes attribute should be unset (null)
