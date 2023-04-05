@@ -1,0 +1,37 @@
+---
+page_title: "BastionZero Provider"
+description: |-
+  The BastionZero provider can be used to manage your BastionZero policies and environments in Terraform.
+---
+
+# BastionZero Provider
+
+The BastionZero provider is used to interact with select APIs supported by
+[BastionZero](https://www.bastionzero.com/). It provides resources to manage
+your BastionZero
+[policies](https://docs.bastionzero.com/docs/admin-guide/authorization#policy-management)
+and environments, and data sources to fetch your users, groups, service
+accounts, and targets in your BastionZero organization. The provider needs to be
+configured with an API secret before it can be used (please see the
+[example](#example-usage) below).
+
+Use the navigation to the left to read about the available resources and data
+sources.
+
+## BastionZero Setup
+
+You need to provision an API key and use its secret to configure the BastionZero
+provider. Manage your API keys at the API key panel found
+[here](https://cloud.bastionzero.com/admin/apikeys). See the [admin
+guide](https://docs.bastionzero.com/docs/admin-guide/authorization#creating-an-api-key)
+for more information.
+
+## Example Usage
+
+{{ tffile "examples/provider/provider.tf" }}
+
+### Configuring using an environment variable
+
+{{ tffile "examples/provider/provider_with_env.tf" }}
+
+{{ .SchemaMarkdown | trimspace }}

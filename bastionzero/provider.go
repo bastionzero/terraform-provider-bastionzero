@@ -58,18 +58,15 @@ func (p *BastionZeroProvider) Metadata(ctx context.Context, req provider.Metadat
 
 func (p *BastionZeroProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "The BastionZero provider is used to interact with select APIs provided by BastionZero. " +
-			"The provider needs to be configured with an API secret before it can be used (please see the example below).\n\n" +
-			"Use the navigation to the left to read about the available resources and data sources.",
 		Description: "Provider for the BastionZero API",
 		Attributes: map[string]schema.Attribute{
 			"api_endpoint": schema.StringAttribute{
-				Description: fmt.Sprintf("This can be used to override the base URL for BastionZero API requests (Defaults to the value of the BASTIONZERO_HOST environment variable or %s if unset)."+
+				Description: fmt.Sprintf("This can be used to override the base URL for BastionZero API requests (Defaults to the value of the `BASTIONZERO_HOST` environment variable or %s if unset). "+
 					"Typical users of this provider should not set this value.", bastionzero.DefaultBaseURL),
 				Optional: true,
 			},
 			"api_secret": schema.StringAttribute{
-				Description: "API secret used to authenticate API requests sent to BastionZero. This can also be specified using the BASTIONZERO_API_SECRET environment variable.",
+				Description: "API secret used to authenticate API requests sent to BastionZero. This can also be specified using the `BASTIONZERO_API_SECRET` environment variable.",
 				Sensitive:   true,
 				Optional:    true,
 			},
