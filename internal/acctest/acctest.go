@@ -522,6 +522,15 @@ func FindNClusterTargetsOrSkipAsPolicyCluster(t *testing.T, clusterTargets ...*p
 	}, nil, clusterTargets...)
 }
 
+// FindNDACTargetsOrSkip lists the DAC targets in the BastionZero organization
+// and sets dacTargets to the first n DAC targets found. If there are less than
+// n DAC targets, then the current test is skipped.
+func FindNDACTargetsOrSkip(t *testing.T, dacTargets ...*targets.DynamicAccessConfiguration) {
+	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]targets.DynamicAccessConfiguration, *http.Response, error) {
+		return client.Targets.ListDynamicAccessConfigurations(ctx)
+	}, identity[targets.DynamicAccessConfiguration], nil, dacTargets...)
+}
+
 // FindNDbTargetsOrSkip lists the Db targets in the BastionZero organization and
 // sets dbTargets to the first n Db targets found. If there are less than n Db
 // targets, then the current test is skipped.
