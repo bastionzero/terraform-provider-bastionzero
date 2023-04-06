@@ -32,7 +32,7 @@ Read-Only:
 - `offline_cleanup_timeout_hours` (Number) The amount of time (in hours) to wait until offline targets are automatically removed by BastionZero (Defaults to 90 days).
 - `organization_id` (String) The environment's organization's ID.
 - `targets` (Attributes Map) Map of targets that belong to this environment. The map is keyed by a target's unique ID. (see [below for nested schema](#nestedatt--environments--targets))
-- `time_created` (String) The time this environment was created in BastionZero formatted as a UTC timestamp string in RFC 3339 format.
+- `time_created` (String) The time this environment was created in BastionZero formatted as a UTC timestamp string in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) format.
 
 <a id="nestedatt--environments--targets"></a>
 ### Nested Schema for `environments.targets`

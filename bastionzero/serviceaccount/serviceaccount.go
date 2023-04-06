@@ -7,6 +7,7 @@ import (
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/serviceaccounts"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/subjecttype"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -86,11 +87,11 @@ func makeServiceAccountDataSourceSchema(withRequiredID bool) map[string]schema.A
 		},
 		"time_created": schema.StringAttribute{
 			Computed:    true,
-			Description: "The time this service account was created in BastionZero formatted as a UTC timestamp string in RFC 3339 format.",
+			Description: fmt.Sprintf("The time this service account was created in BastionZero %s.", internal.PrettyRFC3339Timestamp()),
 		},
 		"last_login": schema.StringAttribute{
 			Computed:    true,
-			Description: "The time this service account last logged into BastionZero formatted as a UTC timestamp string in RFC 3339 format. Null if the service account has never logged in.",
+			Description: fmt.Sprintf("The time this service account last logged into BastionZero %s. Null if the service account has never logged in.", internal.PrettyRFC3339Timestamp()),
 		},
 		"created_by": schema.StringAttribute{
 			Computed:    true,

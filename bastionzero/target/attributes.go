@@ -105,7 +105,7 @@ func BaseTargetDataSourceAttributes(targetType targettype.TargetType, opts *Base
 		},
 		"last_agent_update": schema.StringAttribute{
 			Computed:    true,
-			Description: "The time this target's backing agent last had a transition change in status formatted as a UTC timestamp string in RFC 3339 format. Null if there has not been a single transition change.",
+			Description: fmt.Sprintf("The time this target's backing agent last had a transition change in status %s. Null if there has not been a single transition change.", internal.PrettyRFC3339Timestamp()),
 		},
 		"agent_version": schema.StringAttribute{
 			Computed:    true,
@@ -198,11 +198,11 @@ func ControlChannelSummaryAttribute() schema.Attribute {
 			},
 			"start_time": schema.StringAttribute{
 				Computed:    true,
-				Description: "The time this control channel connected to the connection node formatted as a UTC timestamp string in RFC 3339 format.",
+				Description: fmt.Sprintf("The time this control channel connected to the connection node %s.", internal.PrettyRFC3339Timestamp()),
 			},
 			"end_time": schema.StringAttribute{
 				Computed:    true,
-				Description: "The time this control channel disconnected from the connection node formatted as a UTC timestamp string in RFC 3339 format. Null if the control channel is still active.",
+				Description: fmt.Sprintf("The time this control channel disconnected from the connection node %s. Null if the control channel is still active.", internal.PrettyRFC3339Timestamp()),
 			},
 		},
 	}

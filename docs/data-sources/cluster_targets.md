@@ -30,7 +30,7 @@ Read-Only:
 - `control_channel` (Attributes) Information about the target's backing agent's currently active control channel. Null if the target has no active control channel. (see [below for nested schema](#nestedatt--cluster_targets--control_channel))
 - `environment_id` (String) The target's environment's ID.
 - `id` (String) The target's unique ID.
-- `last_agent_update` (String) The time this target's backing agent last had a transition change in status formatted as a UTC timestamp string in RFC 3339 format. Null if there has not been a single transition change.
+- `last_agent_update` (String) The time this target's backing agent last had a transition change in status formatted as a UTC timestamp string in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) format. Null if there has not been a single transition change.
 - `name` (String) The target's name.
 - `region` (String) The BastionZero region that this target has connected to (follows same naming convention as AWS regions).
 - `status` (String) The target's status (one of "NotActivated", "Offline", "Online", "Terminated", "Error", or "Restarting").
@@ -44,7 +44,7 @@ Read-Only:
 
 - `connection_node_id` (String) The ID of the connection node that this control channel is connected to.
 - `control_channel_id` (String) The control channel's unique ID.
-- `end_time` (String) The time this control channel disconnected from the connection node formatted as a UTC timestamp string in RFC 3339 format. Null if the control channel is still active.
-- `start_time` (String) The time this control channel connected to the connection node formatted as a UTC timestamp string in RFC 3339 format.
+- `end_time` (String) The time this control channel disconnected from the connection node formatted as a UTC timestamp string in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) format. Null if the control channel is still active.
+- `start_time` (String) The time this control channel connected to the connection node formatted as a UTC timestamp string in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) format.
 
 

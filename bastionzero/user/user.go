@@ -7,6 +7,7 @@ import (
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/users"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/subjecttype"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -69,11 +70,11 @@ func makeUserDataSourceSchema(withRequiredID bool) map[string]schema.Attribute {
 		},
 		"time_created": schema.StringAttribute{
 			Computed:    true,
-			Description: "The time this user was created in BastionZero formatted as a UTC timestamp string in RFC 3339 format.",
+			Description: fmt.Sprintf("The time this user was created in BastionZero %s.", internal.PrettyRFC3339Timestamp()),
 		},
 		"last_login": schema.StringAttribute{
 			Computed:    true,
-			Description: "The time this user last logged into BastionZero formatted as a UTC timestamp string in RFC 3339 format. Null if the user has never logged in.",
+			Description: fmt.Sprintf("The time this user last logged into BastionZero %s. Null if the user has never logged in.", internal.PrettyRFC3339Timestamp()),
 		},
 	}
 }

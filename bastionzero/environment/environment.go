@@ -133,7 +133,7 @@ func makeEnvironmentResourceSchema() map[string]schema.Attribute {
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
 			},
-			Description: "The time this environment was created in BastionZero formatted as a UTC timestamp string in RFC 3339 format.",
+			Description: fmt.Sprintf("The time this environment was created in BastionZero %s.", internal.PrettyRFC3339Timestamp()),
 		},
 		"offline_cleanup_timeout_hours": schema.Int64Attribute{
 			Optional:    true,

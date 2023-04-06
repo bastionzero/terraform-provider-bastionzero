@@ -38,7 +38,7 @@ resource "bastionzero_environment" "example" {
 - `is_default` (Boolean) If true, this environment is the default environment. False otherwise.
 - `organization_id` (String) The environment's organization's ID.
 - `targets` (Attributes Map) Map of targets that belong to this environment. The map is keyed by a target's unique ID. (see [below for nested schema](#nestedatt--targets))
-- `time_created` (String) The time this environment was created in BastionZero formatted as a UTC timestamp string in RFC 3339 format.
+- `time_created` (String) The time this environment was created in BastionZero formatted as a UTC timestamp string in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) format.
 
 <a id="nestedatt--targets"></a>
 ### Nested Schema for `targets`
