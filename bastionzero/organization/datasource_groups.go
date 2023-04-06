@@ -40,7 +40,7 @@ func NewGroupsDataSource() datasource.DataSource {
 
 				return
 			},
-			Description: "Get a list of all groups in your BastionZero organization.",
+			MarkdownDescription: "Get a list of all groups in your BastionZero organization. A group is an Identity provider (IdP) group synced to BastionZero.",
 		},
 		ListAPIModels: func(ctx context.Context, client *bastionzero.Client) ([]organization.Group, error) {
 			groups, _, err := client.Organization.ListGroups(ctx)
