@@ -26,7 +26,7 @@ func NewProxyPoliciesDataSource() datasource.DataSource {
 					SetProxyPolicyAttributes(ctx, state, apiObject, true)
 					return
 				},
-				MarkdownDescription: "Get a list of all proxy policies in your BastionZero organization. A proxy policy provides access to DB and Web targets.",
+				MarkdownDescription: "Get a list of all proxy policies in your BastionZero organization. A proxy policy provides access to `Db` and `Web` targets.",
 			},
 			PractitionerParamsRecordSchema: policy.ListPolicyParametersSchema(),
 			ListAPIModels: func(ctx context.Context, listParameters policy.ListPolicyParametersModel, client *bastionzero.Client) ([]policies.ProxyPolicy, error) {

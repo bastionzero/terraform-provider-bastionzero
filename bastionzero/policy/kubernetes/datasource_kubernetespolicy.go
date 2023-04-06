@@ -26,7 +26,7 @@ func NewKubernetesPolicyDataSource() datasource.DataSource {
 					policy, _, err := client.Policies.GetKubernetesPolicy(ctx, tfModel.ID.ValueString())
 					return policy, err
 				},
-				MarkdownDescription: "Get information on a BastionZero Kubernetes policy. A Kubernetes policy provides access to Cluster targets.",
+				MarkdownDescription: "Get information on a BastionZero Kubernetes policy. A Kubernetes policy provides access to `Cluster` targets.",
 			},
 		},
 	)

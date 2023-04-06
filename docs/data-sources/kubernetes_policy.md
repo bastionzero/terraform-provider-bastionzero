@@ -7,7 +7,7 @@ description: |-
 
 # bastionzero_kubernetes_policy (Data Source)
 
-Get information on a BastionZero Kubernetes policy. A Kubernetes policy provides access to Cluster targets.
+Get information on a BastionZero Kubernetes policy. A Kubernetes policy provides access to `Cluster` targets.
 
 This is useful if the policy in question is not managed by Terraform, or
 you need to utilize any of the policy's data.

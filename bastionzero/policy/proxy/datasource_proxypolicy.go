@@ -26,7 +26,7 @@ func NewProxyPolicyDataSource() datasource.DataSource {
 					policy, _, err := client.Policies.GetProxyPolicy(ctx, tfModel.ID.ValueString())
 					return policy, err
 				},
-				MarkdownDescription: "Get information on a BastionZero proxy policy. A proxy policy provides access to DB and Web targets.",
+				MarkdownDescription: "Get information on a BastionZero proxy policy. A proxy policy provides access to `Db` and `Web` targets.",
 			},
 		},
 	)

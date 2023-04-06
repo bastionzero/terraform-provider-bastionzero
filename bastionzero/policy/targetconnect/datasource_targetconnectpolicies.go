@@ -26,7 +26,7 @@ func NewTargetConnectPoliciesDataSource() datasource.DataSource {
 					SetTargetConnectPolicyAttributes(ctx, state, apiObject, true)
 					return
 				},
-				Description: "Get a list of all target connect policies in your BastionZero organization.",
+				MarkdownDescription: "Get a list of all target connect policies in your BastionZero organization. A target connect policy provides access to `Bzero` and `DynamicAccessConfig` targets.",
 			},
 			PractitionerParamsRecordSchema: policy.ListPolicyParametersSchema(),
 			ListAPIModels: func(ctx context.Context, listParameters policy.ListPolicyParametersModel, client *bastionzero.Client) ([]policies.TargetConnectPolicy, error) {

@@ -26,7 +26,7 @@ func NewTargetConnectPolicyDataSource() datasource.DataSource {
 					policy, _, err := client.Policies.GetTargetConnectPolicy(ctx, tfModel.ID.ValueString())
 					return policy, err
 				},
-				Description: "Get information on a BastionZero target connect policy.",
+				MarkdownDescription: "Get information on a BastionZero target connect policy. A target connect policy provides access to `Bzero` and `DynamicAccessConfig` targets.",
 			},
 		},
 	)
