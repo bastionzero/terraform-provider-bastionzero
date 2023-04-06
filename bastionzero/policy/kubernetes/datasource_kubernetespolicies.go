@@ -26,7 +26,7 @@ func NewKubernetesPoliciesDataSource() datasource.DataSource {
 					SetKubernetesPolicyAttributes(ctx, state, apiObject, true)
 					return
 				},
-				Description: "Get a list of all Kubernetes policies in your BastionZero organization.",
+				MarkdownDescription: "Get a list of all Kubernetes policies in your BastionZero organization. A Kubernetes policy provides access to Cluster targets.",
 			},
 			PractitionerParamsRecordSchema: policy.ListPolicyParametersSchema(),
 			ListAPIModels: func(ctx context.Context, listParameters policy.ListPolicyParametersModel, client *bastionzero.Client) ([]policies.KubernetesPolicy, error) {

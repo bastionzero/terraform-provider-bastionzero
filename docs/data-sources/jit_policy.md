@@ -1,6 +1,6 @@
 ---
 page_title: "bastionzero_jit_policy Data Source - terraform-provider-bastionzero"
-subcategory: ""
+subcategory: "policy"
 description: |-
   Get information on a BastionZero JIT policy. A JIT policy provides just in time access to targets.
 ---

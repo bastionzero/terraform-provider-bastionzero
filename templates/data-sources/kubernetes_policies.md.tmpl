@@ -12,11 +12,11 @@ description: |-
 This data source is useful if the policies in question are not managed by
 Terraform, or you need to utilize any of the policies' data.
 
-Note: You can use the [`bastionzero_jit_policy`](jit_policy) data source to
-obtain metadata about a single policy if you already know the `id`.
+Note: You can use the [`bastionzero_kubernetes_policy`](kubernetes_policy) data
+source to obtain metadata about a single policy if you already know the `id`.
 
 ## Example Usage
 
-{{ tffile "examples/data-sources/bastionzero_jit_policies/data-source.tf" }}
+{{ tffile "examples/data-sources/bastionzero_kubernetes_policies/data-source.tf" }}
 
 {{ .SchemaMarkdown | trimspace }}
