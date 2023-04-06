@@ -26,7 +26,7 @@ func NewSessionRecordingPoliciesDataSource() datasource.DataSource {
 					SetSessionRecordingPolicyAttributes(ctx, state, apiObject, true)
 					return
 				},
-				Description: "Get a list of all session recording policies in your BastionZero organization.",
+				MarkdownDescription: "Get a list of all session recording policies in your BastionZero organization. A session recording policy governs whether users' I/O during shell connections are recorded.",
 			},
 			PractitionerParamsRecordSchema: policy.ListPolicyParametersSchema(),
 			ListAPIModels: func(ctx context.Context, listParameters policy.ListPolicyParametersModel, client *bastionzero.Client) ([]policies.SessionRecordingPolicy, error) {

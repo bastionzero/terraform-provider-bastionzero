@@ -26,7 +26,7 @@ func NewSessionRecordingPolicyDataSource() datasource.DataSource {
 					policy, _, err := client.Policies.GetSessionRecordingPolicy(ctx, tfModel.ID.ValueString())
 					return policy, err
 				},
-				Description: "Get information on a BastionZero session recording policy.",
+				MarkdownDescription: "Get information on a BastionZero session recording policy. A session recording policy governs whether users' I/O during shell connections are recorded.",
 			},
 		},
 	)

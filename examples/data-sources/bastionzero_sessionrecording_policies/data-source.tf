@@ -1,0 +1,1 @@
+data "bastionzero_sessionrecording_policies" "example" {}
