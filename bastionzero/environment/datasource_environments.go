@@ -22,7 +22,7 @@ func NewEnvironmentsDataSource() datasource.DataSource {
 				setEnvironmentAttributes(ctx, state, apiObject)
 				return
 			},
-			Description: "Get a list of all environments in your BastionZero organization.",
+			MarkdownDescription: "Get a list of all environments in your BastionZero organization. An environment is a collection of targets.",
 		},
 		ListAPIModels: func(ctx context.Context, client *bastionzero.Client) ([]environments.Environment, error) {
 			environments, _, err := client.Environments.ListEnvironments(ctx)

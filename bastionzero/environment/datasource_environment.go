@@ -26,7 +26,7 @@ func NewEnvironmentDataSource() datasource.DataSource {
 					env, _, err := client.Environments.GetEnvironment(ctx, tfModel.ID.ValueString())
 					return env, err
 				},
-				Description: "Get information on a BastionZero environment.",
+				MarkdownDescription: "Get information on a BastionZero environment. An environment is a collection of targets.",
 			},
 		},
 	)
