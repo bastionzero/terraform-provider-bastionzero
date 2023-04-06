@@ -17,6 +17,8 @@ obtain metadata about a single policy if you already know the `id`.
 
 ## Example Usage
 
+### Basic example
+
 ```terraform
 data "bastionzero_jit_policies" "example" {}
 
@@ -27,6 +29,22 @@ locals {
     for each in data.bastionzero_jit_policies.example.policies
     : each if each.duration > 60
   ]
+}
+```
+
+### Get the policy by name
+
+```terraform
+# Using Terraform >= 1.x syntax
+
+data "bastionzero_jit_policies" "example" {}
+
+# Find policy with specific name. `policy` is null if not found.
+locals {
+  policy = one([
+    for each in data.bastionzero_jit_policies.example.policies
+    : each if each.name == "example-policy"
+  ])
 }
 ```
 

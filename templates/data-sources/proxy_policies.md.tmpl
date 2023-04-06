@@ -17,6 +17,12 @@ source to obtain metadata about a single policy if you already know the `id`.
 
 ## Example Usage
 
+### Basic example
+
 {{ tffile "examples/data-sources/bastionzero_proxy_policies/data-source.tf" }}
+
+### Get the policy by name
+
+{{ tffile "examples/data-sources/bastionzero_proxy_policies/find-with-name.tf" }}
 
 {{ .SchemaMarkdown | trimspace }}

@@ -18,6 +18,12 @@ data source to obtain metadata about a single policy if you already know the
 
 ## Example Usage
 
+### Basic example
+
 {{ tffile "examples/data-sources/bastionzero_targetconnect_policies/data-source.tf" }}
+
+### Get the policy by name
+
+{{ tffile "examples/data-sources/bastionzero_targetconnect_policies/find-with-name.tf" }}
 
 {{ .SchemaMarkdown | trimspace }}
