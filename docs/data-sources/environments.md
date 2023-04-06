@@ -17,15 +17,33 @@ obtain metadata about a single environment if you already know the `id`.
 
 ## Example Usage
 
+### Basic example
+
 ```terraform
 data "bastionzero_environments" "example" {}
 
-# Find all environments whose names contains "test"
+# Find all environments whose names contain "test"
 locals {
   test_envs = [
     for each in data.bastionzero_environments.example.environments
     : each if can(regex("test", each.name))
   ]
+}
+```
+
+### Get the environment by name
+
+```terraform
+# Using Terraform >= 1.x syntax
+
+data "bastionzero_environments" "example" {}
+
+# Find environment with specific name. `environment` is null if not found.
+locals {
+  environment = one([
+    for each in data.bastionzero_environments.example.environments
+    : each if each.name == "example-env"
+  ])
 }
 ```
 

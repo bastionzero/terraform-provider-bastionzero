@@ -17,6 +17,12 @@ obtain metadata about a single environment if you already know the `id`.
 
 ## Example Usage
 
+### Basic example
+
 {{ tffile "examples/data-sources/bastionzero_environments/data-source.tf" }}
+
+### Get the environment by name
+
+{{ tffile "examples/data-sources/bastionzero_environments/find-with-name.tf" }}
 
 {{ .SchemaMarkdown | trimspace }}

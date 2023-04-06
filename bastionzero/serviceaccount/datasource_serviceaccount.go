@@ -25,7 +25,9 @@ func NewServiceAccountDataSource() datasource.DataSource {
 					serviceAccount, _, err := client.ServiceAccounts.GetServiceAccount(ctx, tfModel.ID.ValueString())
 					return serviceAccount, err
 				},
-				Description: "Get information on a service account in your BastionZero organization.",
+				MarkdownDescription: "Get information on a service account in your BastionZero organization. " +
+					"A service account is a Google, Azure, or generic service account that integrates with BastionZero by sharing its " +
+					"JSON Web Key Set (JWKS) URL. The headless authentication closely follows the OpenID Connect (OIDC) protocol.",
 			},
 		},
 	)

@@ -14,9 +14,9 @@ to a dynamic set of users depending on the user's group membership.
 
 Syncing groups from your IdP is configured on the [App
 Integrations](https://cloud.bastionzero.com/admin/integrations) page. See the
-[SSO Management
-guide](https://docs.bastionzero.com/docs/admin-guide/authentication/sso-management)
-for more information.
+[SSO
+Management](https://docs.bastionzero.com/docs/admin-guide/authentication/sso-management)
+guide for more information.
 
 ## Example Usage
 
