@@ -26,7 +26,7 @@ func NewJITPolicyDataSource() datasource.DataSource {
 					policy, _, err := client.Policies.GetJITPolicy(ctx, tfModel.ID.ValueString())
 					return policy, err
 				},
-				Description: "Get information on a BastionZero JIT policy.",
+				MarkdownDescription: "Get information on a BastionZero JIT policy. A JIT policy provides just in time access to targets.",
 			},
 		},
 	)
