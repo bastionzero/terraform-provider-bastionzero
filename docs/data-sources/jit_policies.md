@@ -83,7 +83,7 @@ Read-Only:
 
 - `id` (String) The policy's unique ID.
 - `name` (String) The policy's name.
-- `type` (String) The policy's type (one of "TargetConnect", "Kubernetes", or "Proxy").
+- `type` (String) The policy's type (one of `TargetConnect`, `Kubernetes`, or `Proxy`).
 
 
 <a id="nestedatt--policies--groups"></a>
@@ -101,4 +101,4 @@ Read-Only:
 Read-Only:
 
 - `id` (String) The subject's unique ID.
-- `type` (String) The subject's type (one of "User", "ApiKey", or "ServiceAccount").
+- `type` (String) The subject's type (one of `User`, `ApiKey`, or `ServiceAccount`).

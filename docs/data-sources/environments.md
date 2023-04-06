@@ -75,4 +75,4 @@ Read-Only:
 Read-Only:
 
 - `id` (String) The target's unique ID.
-- `type` (String) The target's type (one of "Bzero", "Cluster", "DynamicAccessConfig", "Web", or "Db").
+- `type` (String) The target's type (one of `Bzero`, `Cluster`, `DynamicAccessConfig`, `Web`, or `Db`).

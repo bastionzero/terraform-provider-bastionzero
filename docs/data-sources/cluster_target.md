@@ -32,7 +32,7 @@ Specify exactly one of `id` or `name`. When specifying a `name`, an error is tri
 - `environment_id` (String) The target's environment's ID.
 - `last_agent_update` (String) The time this target's backing agent last had a transition change in status formatted as a UTC timestamp string in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) format. Null if there has not been a single transition change.
 - `region` (String) The BastionZero region that this target has connected to (follows same naming convention as AWS regions).
-- `status` (String) The target's status (one of "NotActivated", "Offline", "Online", "Terminated", "Error", or "Restarting").
+- `status` (String) The target's status (one of `NotActivated`, `Offline`, `Online`, `Terminated`, `Error`, or `Restarting`).
 - `type` (String) The target's type (constant value "Bzero").
 - `valid_cluster_users` (Set of String) Set of Kubernetes user [subjects](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-subjects) that have been extracted from RoleBindings or ClusterRoleBindings defined in the cluster.
 

@@ -19,7 +19,7 @@ Provides a BastionZero target connect policy. Target connect policies provide ac
 
 - `name` (String) The policy's name.
 - `target_users` (Set of String) Set of Unix usernames that this policy applies to.
-- `verbs` (Set of String) Set of actions allowed by this policy (one of "Shell", "FileTransfer", or "Tunnel").
+- `verbs` (Set of String) Set of actions allowed by this policy (one of `Shell`, `FileTransfer`, or `Tunnel`).
 
 ### Optional
 
@@ -49,7 +49,7 @@ Required:
 Required:
 
 - `id` (String) The subject's unique ID.
-- `type` (String) The subject's type (one of "User", "ApiKey", or "ServiceAccount").
+- `type` (String) The subject's type (one of `User`, `ApiKey`, or `ServiceAccount`).
 
 
 <a id="nestedatt--targets"></a>
@@ -58,6 +58,6 @@ Required:
 Required:
 
 - `id` (String) The target's unique ID.
-- `type` (String) The target's type (one of "Bzero", or "DynamicAccessConfig").
+- `type` (String) The target's type (one of `Bzero`, or `DynamicAccessConfig`).
 
 

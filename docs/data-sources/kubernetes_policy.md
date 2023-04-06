@@ -56,4 +56,4 @@ Read-Only:
 Read-Only:
 
 - `id` (String) The subject's unique ID.
-- `type` (String) The subject's type (one of "User", "ApiKey", or "ServiceAccount").
+- `type` (String) The subject's type (one of `User`, `ApiKey`, or `ServiceAccount`).

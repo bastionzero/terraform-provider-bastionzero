@@ -48,7 +48,7 @@ Required:
 Required:
 
 - `id` (String) The subject's unique ID.
-- `type` (String) The subject's type (one of "User", "ApiKey", or "ServiceAccount").
+- `type` (String) The subject's type (one of `User`, `ApiKey`, or `ServiceAccount`).
 
 
 <a id="nestedatt--targets"></a>
@@ -57,6 +57,6 @@ Required:
 Required:
 
 - `id` (String) The target's unique ID.
-- `type` (String) The target's type (one of "Db", or "Web").
+- `type` (String) The target's type (one of `Db`, or `Web`).
 
 

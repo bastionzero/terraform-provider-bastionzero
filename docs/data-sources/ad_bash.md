@@ -94,7 +94,7 @@ locals {
 ### Required
 
 - `environment_id` (String) The unique environment ID the target should associate with.
-- `target_name_option` (String) The target name schema option to use during autodiscovery (one of "Timestamp", "DigitalOceanMetadata", "AwsEc2Metadata", or "BashHostName").
+- `target_name_option` (String) The target name schema option to use during autodiscovery (one of `Timestamp`, `DigitalOceanMetadata`, `AwsEc2Metadata`, or `BashHostName`).
 
 ### Read-Only
 

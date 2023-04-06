@@ -25,7 +25,7 @@ Get information about a specific dynamic access configuration (DAC) target in yo
 - `health_webhook` (String) URL for the dynamic access provisioning server's webhook that does a health check.
 - `name` (String) The DAC's name.
 - `start_webhook` (String) URL for the dynamic access provisioning server's webhook that starts a new instance.
-- `status` (String) The DAC's status (one of "Offline", or "Online").
+- `status` (String) The DAC's status (one of `Offline`, or `Online`).
 - `stop_webhook` (String) URL for the dynamic access provisioning server's webhook that stops a new instance.
 - `type` (String) The target's type (constant value "DynamicAccessConfig").
 
