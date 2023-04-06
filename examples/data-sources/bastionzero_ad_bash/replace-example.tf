@@ -7,7 +7,7 @@ data "bastionzero_ad_bash" "example" {
 
 locals {
   # This is only an example. We recommend to fetch this secret from your
-  # preferred secrets manager.
+  # preferred secrets manager. Do not expose a .tf file with your secret
   reg_key_secret = sensitive("<your-registration-key-secret>")
 
   # This script can be used during cloud-init (User data) when provisioning your

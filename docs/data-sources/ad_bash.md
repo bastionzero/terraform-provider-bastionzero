@@ -9,8 +9,8 @@ description: |-
 
 Get a bash script that can be used to install the latest production BastionZero agent ([`bzero`](https://github.com/bastionzero/bzero)) on your targets.
 
-~> **Warning** The fetched `script` does not contain the registration secret
-that is required to register your targets with BastionZero. You must replace
+-> **Note** The fetched `script` does not contain the registration secret that
+is required to register your targets with BastionZero. You must replace
 `<REGISTRATION-SECRET-GOES-HERE>` with a valid [registration
 secret](https://docs.bastionzero.com/docs/admin-guide/authorization#registration-api-keys)
 before attempting to execute the script. This can be done by using the
@@ -55,6 +55,14 @@ data "bastionzero_ad_bash" "example" {
 
 ### Replace example
 
+~> **Warning** The registration secret is sensitive data. If a malicious
+attacker obtains this credential, they could register their own instances as
+targets in your BastionZero organization. Once the registration secret is used
+in a Terraform module (e.g. fetched via a data source), it is stored in the
+Terraform state file. Please protect your state files accordingly. See
+HashiCorp's article about managing sensitive data in Terraform state
+[here](https://developer.hashicorp.com/terraform/language/state/sensitive-data).
+
 ```terraform
 # Using Terraform >= 1.x syntax
 
@@ -65,7 +73,7 @@ data "bastionzero_ad_bash" "example" {
 
 locals {
   # This is only an example. We recommend to fetch this secret from your
-  # preferred secrets manager.
+  # preferred secrets manager. Do not expose a .tf file with your secret
   reg_key_secret = sensitive("<your-registration-key-secret>")
 
   # This script can be used during cloud-init (User data) when provisioning your
