@@ -1,0 +1,1 @@
+data "bastionzero_proxy_policies" "example" {}
