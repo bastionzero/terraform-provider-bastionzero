@@ -136,7 +136,7 @@ func BaseVirtualTargetDataSourceAttributes(targetType targettype.TargetType) map
 		"proxy_target_id": schema.StringAttribute{
 			Computed:            true,
 			Description:         "The target's proxy target's ID (ID of a Bzero or Cluster target).",
-			MarkdownDescription: "The target's proxy target's ID (ID of a [Bzero](#bastionzero_bzero_target) or [Cluster](#bastionzero_cluster_target) target).",
+			MarkdownDescription: "The target's proxy target's ID (ID of a [Bzero](#bzero_target) or [Cluster](#cluster_target) target).",
 		},
 		"remote_host": schema.StringAttribute{
 			Computed:    true,

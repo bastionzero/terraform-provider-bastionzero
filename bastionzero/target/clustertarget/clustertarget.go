@@ -49,10 +49,9 @@ func makeClusterTargetDataSourceSchema(opts *target.BaseTargetDataSourceAttribut
 	clusterTargetAttributes := target.BaseTargetDataSourceAttributes(targettype.Bzero, opts)
 	clusterTargetAttributes["control_channel"] = target.ControlChannelSummaryAttribute()
 	clusterTargetAttributes["valid_cluster_users"] = schema.SetAttribute{
-		Computed:            true,
-		Description:         "Set of Kubernetes user subjects that have been extracted from RoleBindings or ClusterRoleBindings defined in the cluster.",
-		MarkdownDescription: "Set of Kubernetes user [subjects](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-subjects) that have been extracted from RoleBindings or ClusterRoleBindings defined in the cluster.",
-		ElementType:         types.StringType,
+		Computed:    true,
+		Description: "Set of Kubernetes user [subjects](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-subjects) that have been extracted from RoleBindings or ClusterRoleBindings defined in the cluster.",
+		ElementType: types.StringType,
 	}
 
 	return clusterTargetAttributes

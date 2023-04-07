@@ -19,14 +19,15 @@ func NewClusterTargetsDataSource() datasource.DataSource {
 					IsIDComputed:   true,
 					IsNameComputed: true,
 				}),
-			ResultAttributeName: "cluster_targets",
+			ResultAttributeName: "targets",
+			MetadataTypeName:    "cluster_targets",
 			PrettyAttributeName: "Cluster targets",
 			FlattenAPIModel: func(ctx context.Context, apiObject *targets.ClusterTarget) (state *clusterTargetModel, diags diag.Diagnostics) {
 				state = new(clusterTargetModel)
 				setClusterTargetAttributes(ctx, state, apiObject)
 				return
 			},
-			Description: "Get a list of all Cluster targets in your BastionZero organization.",
+			MarkdownDescription: "Get a list of all Cluster targets in your BastionZero organization.",
 		},
 		ListAPIModels: func(ctx context.Context, client *bastionzero.Client) ([]targets.ClusterTarget, error) {
 			targets, _, err := client.Targets.ListClusterTargets(ctx)

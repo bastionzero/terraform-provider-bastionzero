@@ -64,9 +64,8 @@ func makeDbTargetDataSourceSchema(opts *target.BaseTargetDataSourceAttributeOpti
 		Description: "If true, this Db target has the split cert feature enabled. False otherwise.",
 	}
 	dbTargetAttributes["database_type"] = schema.StringAttribute{
-		Computed:            true,
-		Description:         "The database's type. Can be null if this Db target does not have the split cert feature enabled.",
-		MarkdownDescription: "The database's type. Can be null if this Db target does not have the split cert feature enabled (see `is_split_cert`).",
+		Computed:    true,
+		Description: "The database's type. Can be null if this Db target does not have the split cert feature enabled (see `is_split_cert`).",
 	}
 
 	return dbTargetAttributes

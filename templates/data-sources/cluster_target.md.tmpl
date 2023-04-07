@@ -1,0 +1,26 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: "target"
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+## Example Usage
+
+### Basic example
+
+Get the Cluster target by ID:
+
+{{ tffile "examples/data-sources/bastionzero_cluster_target/data-source.tf" }}
+
+### Timeout example
+
+Get the Cluster target by name and wait up to 30 seconds before failing if the target does not exist.
+
+{{ tffile "examples/data-sources/bastionzero_cluster_target/timeout.tf" }}
+
+{{ .SchemaMarkdown | trimspace }}

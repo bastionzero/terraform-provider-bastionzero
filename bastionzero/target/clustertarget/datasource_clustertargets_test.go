@@ -60,7 +60,7 @@ func TestAccClusterTargetsDataSource_Basic(t *testing.T) {
 				Config: testAccClusterTargetsDataSourceConfig(),
 				// Check that the Cluster target we queried for is returned in
 				// the list
-				Check: resource.TestCheckTypeSetElemNestedAttrs(dataSourceName, "cluster_targets.*", getValuesCheckMap(clusterTarget)),
+				Check: resource.TestCheckTypeSetElemNestedAttrs(dataSourceName, "targets.*", getValuesCheckMap(clusterTarget)),
 			},
 		},
 	})
