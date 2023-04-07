@@ -21,7 +21,7 @@ func NewUsersDataSource() datasource.DataSource {
 				setUserAttributes(ctx, state, apiObject)
 				return
 			},
-			Description: "Get a list of all users in your BastionZero organization.",
+			MarkdownDescription: "Get a list of all users in your BastionZero organization.",
 		},
 		ListAPIModels: func(ctx context.Context, client *bastionzero.Client) ([]users.User, error) {
 			users, _, err := client.Users.ListUsers(ctx)

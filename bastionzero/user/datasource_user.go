@@ -25,8 +25,10 @@ func NewUserDataSource() datasource.DataSource {
 					user, _, err := client.Users.GetUser(ctx, tfModel.ID.ValueString())
 					return user, err
 				},
-				Description: "Get information on a user in your BastionZero organization. Provide the user's unique ID or email address in the \"id\" field.",
+				MarkdownDescription: "Get information on a user in your BastionZero organization.",
 			},
 		},
 	)
 }
+
+// Provide the user's unique ID or email address in the \"id\" field.
