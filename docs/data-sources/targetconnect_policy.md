@@ -38,7 +38,7 @@ data "bastionzero_targetconnect_policy" "example" {
 - `subjects` (Attributes Set) Set of subjects that this policy applies to. (see [below for nested schema](#nestedatt--subjects))
 - `target_users` (Set of String) Set of Unix usernames that this policy applies to.
 - `targets` (Attributes Set) Set of targets that this policy applies to. (see [below for nested schema](#nestedatt--targets))
-- `type` (String) The policy's type (constant value "TargetConnect").
+- `type` (String) The policy's type (constant value `TargetConnect`).
 - `verbs` (Set of String) Set of actions allowed by this policy (one of `Shell`, `FileTransfer`, or `Tunnel`).
 
 <a id="nestedatt--groups"></a>

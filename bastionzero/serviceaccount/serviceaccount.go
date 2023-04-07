@@ -59,7 +59,7 @@ func makeServiceAccountDataSourceSchema(withRequiredID bool) map[string]schema.A
 		},
 		"type": schema.StringAttribute{
 			Computed:    true,
-			Description: fmt.Sprintf("The subject's type (constant value \"%s\").", subjecttype.ServiceAccount),
+			Description: fmt.Sprintf("The subject's type (constant value `%s`).", subjecttype.ServiceAccount),
 		},
 		"organization_id": schema.StringAttribute{
 			Computed:    true,

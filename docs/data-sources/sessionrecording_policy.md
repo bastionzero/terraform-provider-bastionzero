@@ -36,7 +36,7 @@ data "bastionzero_sessionrecording_policy" "example" {
 - `name` (String) The policy's name.
 - `record_input` (Boolean) If true, then in addition to session output, session input should be recorded. If false, then only session output should be recorded (Defaults to false).
 - `subjects` (Attributes Set) Set of subjects that this policy applies to. (see [below for nested schema](#nestedatt--subjects))
-- `type` (String) The policy's type (constant value "SessionRecording").
+- `type` (String) The policy's type (constant value `SessionRecording`).
 
 <a id="nestedatt--groups"></a>
 ### Nested Schema for `groups`

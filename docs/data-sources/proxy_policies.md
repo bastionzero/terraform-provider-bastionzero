@@ -65,7 +65,7 @@ Read-Only:
 - `subjects` (Attributes Set) Set of subjects that this policy applies to. (see [below for nested schema](#nestedatt--policies--subjects))
 - `target_users` (Set of String) Set of Database usernames that this policy applies to. These usernames only affect policy decisions involving Db targets that have the SplitCert feature enabled.
 - `targets` (Attributes Set) Set of targets that this policy applies to. (see [below for nested schema](#nestedatt--policies--targets))
-- `type` (String) The policy's type (constant value "Proxy").
+- `type` (String) The policy's type (constant value `Proxy`).
 
 <a id="nestedatt--policies--groups"></a>
 ### Nested Schema for `policies.groups`

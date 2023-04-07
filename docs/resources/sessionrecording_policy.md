@@ -29,7 +29,7 @@ Provides a BastionZero session recording policy. Session recording policies gove
 ### Read-Only
 
 - `id` (String) The policy's unique ID.
-- `type` (String) The policy's type (constant value "SessionRecording").
+- `type` (String) The policy's type (constant value `SessionRecording`).
 
 <a id="nestedatt--groups"></a>
 ### Nested Schema for `groups`

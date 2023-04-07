@@ -34,7 +34,7 @@ Provides a BastionZero JIT policy. JIT policies provide just in time access to t
 ### Read-Only
 
 - `id` (String) The policy's unique ID.
-- `type` (String) The policy's type (constant value "JustInTime").
+- `type` (String) The policy's type (constant value `JustInTime`).
 
 <a id="nestedatt--child_policies"></a>
 ### Nested Schema for `child_policies`

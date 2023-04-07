@@ -32,7 +32,7 @@ Provides a BastionZero Kubernetes policy. Kubernetes policies provide access to 
 ### Read-Only
 
 - `id` (String) The policy's unique ID.
-- `type` (String) The policy's type (constant value "Kubernetes").
+- `type` (String) The policy's type (constant value `Kubernetes`).
 
 <a id="nestedatt--groups"></a>
 ### Nested Schema for `groups`

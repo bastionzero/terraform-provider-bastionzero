@@ -58,7 +58,7 @@ func makeDacTargetDataSourceSchema(opts *dacTargetDataSourceAttributeOptions) ma
 		},
 		"type": schema.StringAttribute{
 			Computed:    true,
-			Description: fmt.Sprintf("The target's type (constant value \"%s\").", targettype.DynamicAccessConfig),
+			Description: fmt.Sprintf("The target's type (constant value `%s`).", targettype.DynamicAccessConfig),
 		},
 		"environment_id": schema.StringAttribute{
 			Computed:    true,

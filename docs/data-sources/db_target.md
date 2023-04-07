@@ -34,6 +34,6 @@ Get information about a specific Db target in your BastionZero organization.
 - `remote_host` (String) The target's hostname or IP address.
 - `remote_port` (Number) The port of the Db server accessible via the target.
 - `status` (String) The target's status (one of `NotActivated`, `Offline`, `Online`, `Terminated`, `Error`, or `Restarting`).
-- `type` (String) The target's type (constant value "Db").
+- `type` (String) The target's type (constant value `Db`).
 
 

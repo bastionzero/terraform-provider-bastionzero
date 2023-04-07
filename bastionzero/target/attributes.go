@@ -90,7 +90,7 @@ func BaseTargetDataSourceAttributes(targetType targettype.TargetType, opts *Base
 		},
 		"type": schema.StringAttribute{
 			Computed:    true,
-			Description: fmt.Sprintf("The target's type (constant value \"%s\").", targetType),
+			Description: fmt.Sprintf("The target's type (constant value `%s`).", targetType),
 		},
 		"status": schema.StringAttribute{
 			Computed:    true,

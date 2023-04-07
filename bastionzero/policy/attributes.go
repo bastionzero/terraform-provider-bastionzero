@@ -86,7 +86,7 @@ func BasePolicyResourceAttributes(policyType policytype.PolicyType) map[string]s
 			},
 		},
 		"type": schema.StringAttribute{
-			Description: fmt.Sprintf("The policy's type (constant value \"%s\").", policyType),
+			Description: fmt.Sprintf("The policy's type (constant value `%s`).", policyType),
 			Computed:    true,
 			Default:     stringdefault.StaticString(string(policyType)),
 		},

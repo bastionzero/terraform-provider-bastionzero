@@ -31,7 +31,7 @@ Provides a BastionZero proxy policy. Proxy policies provide access to Db and Web
 ### Read-Only
 
 - `id` (String) The policy's unique ID.
-- `type` (String) The policy's type (constant value "Proxy").
+- `type` (String) The policy's type (constant value `Proxy`).
 
 <a id="nestedatt--groups"></a>
 ### Nested Schema for `groups`

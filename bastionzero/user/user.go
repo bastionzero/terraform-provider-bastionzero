@@ -50,7 +50,7 @@ func makeUserDataSourceSchema(withRequiredID bool) map[string]schema.Attribute {
 		},
 		"type": schema.StringAttribute{
 			Computed:    true,
-			Description: fmt.Sprintf("The subject's type (constant value \"%s\").", subjecttype.User),
+			Description: fmt.Sprintf("The subject's type (constant value `%s`).", subjecttype.User),
 		},
 		"organization_id": schema.StringAttribute{
 			Computed:    true,

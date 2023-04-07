@@ -52,4 +52,4 @@ Read-Only:
 - `last_login` (String) The time this user last logged into BastionZero formatted as a UTC timestamp string in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) format. Null if the user has never logged in.
 - `organization_id` (String) The user's organization's ID.
 - `time_created` (String) The time this user was created in BastionZero formatted as a UTC timestamp string in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) format.
-- `type` (String) The subject's type (constant value "User").
+- `type` (String) The subject's type (constant value `User`).

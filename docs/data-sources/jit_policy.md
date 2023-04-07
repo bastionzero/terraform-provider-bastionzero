@@ -38,7 +38,7 @@ data "bastionzero_jit_policy" "example" {
 - `groups` (Attributes Set) Set of Identity Provider (IdP) groups that this policy applies to. (see [below for nested schema](#nestedatt--groups))
 - `name` (String) The policy's name.
 - `subjects` (Attributes Set) Set of subjects that this policy applies to. (see [below for nested schema](#nestedatt--subjects))
-- `type` (String) The policy's type (constant value "JustInTime").
+- `type` (String) The policy's type (constant value `JustInTime`).
 
 <a id="nestedatt--child_policies"></a>
 ### Nested Schema for `child_policies`

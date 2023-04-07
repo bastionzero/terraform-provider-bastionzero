@@ -33,7 +33,7 @@ Specify exactly one of `id` or `name`. When specifying a `name`, an error is tri
 - `last_agent_update` (String) The time this target's backing agent last had a transition change in status formatted as a UTC timestamp string in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) format. Null if there has not been a single transition change.
 - `region` (String) The BastionZero region that this target has connected to (follows same naming convention as AWS regions).
 - `status` (String) The target's status (one of `NotActivated`, `Offline`, `Online`, `Terminated`, `Error`, or `Restarting`).
-- `type` (String) The target's type (constant value "Bzero").
+- `type` (String) The target's type (constant value `Bzero`).
 
 <a id="nestedatt--timeouts"></a>
 ### Nested Schema for `timeouts`

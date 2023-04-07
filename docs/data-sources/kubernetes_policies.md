@@ -75,7 +75,7 @@ Read-Only:
 - `id` (String) The policy's unique ID.
 - `name` (String) The policy's name.
 - `subjects` (Attributes Set) Set of subjects that this policy applies to. (see [below for nested schema](#nestedatt--policies--subjects))
-- `type` (String) The policy's type (constant value "Kubernetes").
+- `type` (String) The policy's type (constant value `Kubernetes`).
 
 <a id="nestedatt--policies--groups"></a>
 ### Nested Schema for `policies.groups`

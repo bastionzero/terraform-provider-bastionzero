@@ -39,7 +39,7 @@ data "bastionzero_kubernetes_policy" "example" {
 - `groups` (Attributes Set) Set of Identity Provider (IdP) groups that this policy applies to. (see [below for nested schema](#nestedatt--groups))
 - `name` (String) The policy's name.
 - `subjects` (Attributes Set) Set of subjects that this policy applies to. (see [below for nested schema](#nestedatt--subjects))
-- `type` (String) The policy's type (constant value "Kubernetes").
+- `type` (String) The policy's type (constant value `Kubernetes`).
 
 <a id="nestedatt--groups"></a>
 ### Nested Schema for `groups`
