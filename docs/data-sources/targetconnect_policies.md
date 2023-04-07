@@ -24,8 +24,8 @@ data source to obtain metadata about a single policy if you already know the
 data "bastionzero_targetconnect_policies" "example" {}
 
 # Find all target connect policies whose lists of target users contain "root"
-locals {
-  sudo_policies = [
+output "sudo_policies" {
+  value = [
     for each in data.bastionzero_targetconnect_policies.example.policies
     : each if contains(each.target_users, "root")
   ]
@@ -40,8 +40,8 @@ locals {
 data "bastionzero_targetconnect_policies" "example" {}
 
 # Find policy with specific name. `policy` is null if not found.
-locals {
-  policy = one([
+output "policy" {
+  value = one([
     for each in data.bastionzero_targetconnect_policies.example.policies
     : each if each.name == "example-policy"
   ])

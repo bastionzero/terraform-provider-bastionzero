@@ -24,8 +24,8 @@ data "bastionzero_kubernetes_policies" "example" {}
 
 # Find all Kubernetes policies whose lists of cluster groups contain
 # "system:masters"
-locals {
-  sudo_policies = [
+output "sudo_policies" {
+  value = [
     for each in data.bastionzero_kubernetes_policies.example.policies
     : each if contains(each.cluster_groups, "system:masters")
   ]
@@ -40,8 +40,8 @@ locals {
 data "bastionzero_kubernetes_policies" "example" {}
 
 # Find policy with specific name. `policy` is null if not found.
-locals {
-  policy = one([
+output "policy" {
+  value = one([
     for each in data.bastionzero_kubernetes_policies.example.policies
     : each if each.name == "example-policy"
   ])

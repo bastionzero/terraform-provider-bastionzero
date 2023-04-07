@@ -24,8 +24,8 @@ data "bastionzero_jit_policies" "example" {}
 
 # Find all JIT policies whose durations provide just in time access greater than
 # 1 hour.
-locals {
-  large_durations = [
+output "large_durations" {
+  value = [
     for each in data.bastionzero_jit_policies.example.policies
     : each if each.duration > 60
   ]
@@ -40,8 +40,8 @@ locals {
 data "bastionzero_jit_policies" "example" {}
 
 # Find policy with specific name. `policy` is null if not found.
-locals {
-  policy = one([
+output "policy" {
+  value = one([
     for each in data.bastionzero_jit_policies.example.policies
     : each if each.name == "example-policy"
   ])

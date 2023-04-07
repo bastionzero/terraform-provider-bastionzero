@@ -20,8 +20,8 @@ obtain metadata about a single Web target if you already know the `id`.
 data "bastionzero_web_targets" "example" {}
 
 # Find all Web targets with remote port 80
-locals {
-  port_80_targets = [
+output "port_80_targets" {
+  value = [
     for each in data.bastionzero_web_targets.example.targets
     : each if each.remote_port == 80
   ]
@@ -36,8 +36,8 @@ locals {
 data "bastionzero_web_targets" "example" {}
 
 # Find target with specific name. `web_target` is null if not found.
-locals {
-  web_target = one([
+output "web_target" {
+  value = one([
     for each in data.bastionzero_web_targets.example.targets
     : each if each.name == "example-target"
   ])
@@ -50,8 +50,8 @@ locals {
 data "bastionzero_web_targets" "example" {}
 
 # Group Web targets with same base proxy target
-locals {
-  web_targets_by_base = {
+output "web_targets_by_base" {
+  value = {
     for each in data.bastionzero_web_targets.example.targets
     : each.proxy_target_id => { id = each.id, name = each.name }...
   }

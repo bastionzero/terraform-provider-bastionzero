@@ -23,8 +23,8 @@ obtain metadata about a single environment if you already know the `id`.
 data "bastionzero_environments" "example" {}
 
 # Find all environments whose names contain "test"
-locals {
-  test_envs = [
+output "test_envs" {
+  value = [
     for each in data.bastionzero_environments.example.environments
     : each if can(regex("test", each.name))
   ]
@@ -39,8 +39,8 @@ locals {
 data "bastionzero_environments" "example" {}
 
 # Find environment with specific name. `environment` is null if not found.
-locals {
-  environment = one([
+output "environment" {
+  value = one([
     for each in data.bastionzero_environments.example.environments
     : each if each.name == "example-env"
   ])

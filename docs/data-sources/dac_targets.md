@@ -22,8 +22,8 @@ obtain metadata about a single DAC target if you already know the `id`.
 data "bastionzero_dac_targets" "example" {}
 
 # Find all DAC targets whose health endpoints are healthy
-locals {
-  healthy_dacs = [
+output "healthy_dacs" {
+  value = [
     for each in data.bastionzero_dac_targets.example.targets
     : each if each.status == "Online"
   ]
@@ -38,8 +38,8 @@ locals {
 data "bastionzero_dac_targets" "example" {}
 
 # Find target with specific name. `dac_target` is null if not found.
-locals {
-  dac_target = one([
+output "dac_target" {
+  value = one([
     for each in data.bastionzero_dac_targets.example.targets
     : each if each.name == "example-target"
   ])

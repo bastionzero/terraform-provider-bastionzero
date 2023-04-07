@@ -20,8 +20,8 @@ metadata about a single Db target if you already know the `id`.
 data "bastionzero_db_targets" "example" {}
 
 # Find all Db targets with remote port 5432
-locals {
-  psql_targets = [
+output "psql_targets" {
+  value = [
     for each in data.bastionzero_db_targets.example.targets
     : each if each.remote_port == 5432
   ]
@@ -36,8 +36,8 @@ locals {
 data "bastionzero_db_targets" "example" {}
 
 # Find target with specific name. `db_target` is null if not found.
-locals {
-  db_target = one([
+output "db_target" {
+  value = one([
     for each in data.bastionzero_db_targets.example.targets
     : each if each.name == "example-target"
   ])
@@ -50,8 +50,8 @@ locals {
 data "bastionzero_db_targets" "example" {}
 
 # Group Db targets with same base proxy target
-locals {
-  db_targets_by_base = {
+output "db_targets_by_base" {
+  value = {
     for each in data.bastionzero_db_targets.example.targets
     : each.proxy_target_id => { id = each.id, name = each.name }...
   }
