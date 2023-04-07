@@ -56,7 +56,7 @@ func TestAccBzeroTargetsDataSource_Basic(t *testing.T) {
 				Config: testAccBzeroTargetsDataSourceConfig(),
 				// Check that the Bzero target we queried for is returned in the
 				// list
-				Check: resource.TestCheckTypeSetElemNestedAttrs(dataSourceName, "bzero_targets.*", getValuesCheckMap(bzeroTarget)),
+				Check: resource.TestCheckTypeSetElemNestedAttrs(dataSourceName, "targets.*", getValuesCheckMap(bzeroTarget)),
 			},
 		},
 	})

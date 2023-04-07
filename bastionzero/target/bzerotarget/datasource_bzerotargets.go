@@ -19,14 +19,15 @@ func NewBzeroTargetsDataSource() datasource.DataSource {
 					IsIDComputed:   true,
 					IsNameComputed: true,
 				}),
-			ResultAttributeName: "bzero_targets",
+			MetadataTypeName:    "bzero_targets",
+			ResultAttributeName: "targets",
 			PrettyAttributeName: "Bzero targets",
 			FlattenAPIModel: func(ctx context.Context, apiObject *targets.BzeroTarget) (state *bzeroTargetModel, diags diag.Diagnostics) {
 				state = new(bzeroTargetModel)
 				setBzeroTargetAttributes(ctx, state, apiObject)
 				return
 			},
-			Description: "Get a list of all Bzero targets in your BastionZero organization.",
+			MarkdownDescription: "Get a list of all Bzero targets in your BastionZero organization.",
 		},
 		ListAPIModels: func(ctx context.Context, client *bastionzero.Client) ([]targets.BzeroTarget, error) {
 			targets, _, err := client.Targets.ListBzeroTargets(ctx)
