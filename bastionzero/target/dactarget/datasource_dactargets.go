@@ -17,14 +17,15 @@ func NewDacTargetsDataSource() datasource.DataSource {
 				&dacTargetDataSourceAttributeOptions{
 					IsIDComputed: true,
 				}),
-			ResultAttributeName: "dac_targets",
+			MetadataTypeName:    "dac_targets",
+			ResultAttributeName: "targets",
 			PrettyAttributeName: "dynamic access configuration targets",
 			FlattenAPIModel: func(ctx context.Context, apiObject *targets.DynamicAccessConfiguration) (state *dacTargetModel, diags diag.Diagnostics) {
 				state = new(dacTargetModel)
 				setDacTargetAttributes(ctx, state, apiObject)
 				return
 			},
-			Description: "Get a list of all dynamic access configuration (DAC) targets in your BastionZero organization.",
+			MarkdownDescription: "Get a list of all dynamic access configuration (DAC) targets in your BastionZero organization.",
 		},
 		ListAPIModels: func(ctx context.Context, client *bastionzero.Client) ([]targets.DynamicAccessConfiguration, error) {
 			targets, _, err := client.Targets.ListDynamicAccessConfigurations(ctx)

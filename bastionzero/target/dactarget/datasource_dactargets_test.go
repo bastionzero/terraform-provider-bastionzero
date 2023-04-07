@@ -41,7 +41,7 @@ func TestAccDACTargetsDataSource_Basic(t *testing.T) {
 				Config: testAccDACTargetsDataSourceConfig(),
 				// Check that the DAC target we queried for is returned in the
 				// list
-				Check: resource.TestCheckTypeSetElemNestedAttrs(dataSourceName, "dac_targets.*", getValuesCheckMap(dacTarget)),
+				Check: resource.TestCheckTypeSetElemNestedAttrs(dataSourceName, "targets.*", getValuesCheckMap(dacTarget)),
 			},
 		},
 	})

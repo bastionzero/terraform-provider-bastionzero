@@ -28,7 +28,7 @@ func NewDacTargetDataSource() datasource.DataSource {
 					target, _, err := client.Targets.GetDynamicAccessConfiguration(ctx, tfModel.ID.ValueString())
 					return target, err
 				},
-				Description: "Get information about a specific dynamic access configuration (DAC) target in your BastionZero organization.",
+				MarkdownDescription: "Get information about a specific dynamic access configuration (DAC) target in your BastionZero organization.",
 			},
 		},
 	)
