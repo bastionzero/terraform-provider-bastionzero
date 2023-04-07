@@ -70,7 +70,7 @@ func TestAccDbTargetsDataSource_Basic(t *testing.T) {
 				Config: testAccDbTargetsDataSourceConfig(),
 				// Check that the Db target we queried for is returned in the
 				// list
-				Check: resource.TestCheckTypeSetElemNestedAttrs(dataSourceName, "db_targets.*", getValuesCheckMap(dbTarget)),
+				Check: resource.TestCheckTypeSetElemNestedAttrs(dataSourceName, "targets.*", getValuesCheckMap(dbTarget)),
 			},
 		},
 	})

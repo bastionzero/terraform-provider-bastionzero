@@ -30,7 +30,7 @@ func NewDbTargetDataSource() datasource.DataSource {
 					target, _, err := client.Targets.GetDatabaseTarget(ctx, tfModel.ID.ValueString())
 					return target, err
 				},
-				Description: "Get information about a specific Db target in your BastionZero organization.",
+				MarkdownDescription: "Get information about a specific Db target in your BastionZero organization.",
 			},
 		},
 	)
