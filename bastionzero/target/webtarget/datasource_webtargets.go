@@ -19,14 +19,15 @@ func NewWebTargetsDataSource() datasource.DataSource {
 					IsIDComputed:   true,
 					IsNameComputed: true,
 				}),
-			ResultAttributeName: "web_targets",
+			MetadataTypeName:    "web_targets",
+			ResultAttributeName: "targets",
 			PrettyAttributeName: "Web targets",
 			FlattenAPIModel: func(ctx context.Context, apiObject *targets.WebTarget) (state *webTargetModel, diags diag.Diagnostics) {
 				state = new(webTargetModel)
 				setWebTargetAttributes(ctx, state, apiObject)
 				return
 			},
-			Description: "Get a list of all Web targets in your BastionZero organization.",
+			MarkdownDescription: "Get a list of all Web targets in your BastionZero organization.",
 		},
 		ListAPIModels: func(ctx context.Context, client *bastionzero.Client) ([]targets.WebTarget, error) {
 			targets, _, err := client.Targets.ListWebTargets(ctx)

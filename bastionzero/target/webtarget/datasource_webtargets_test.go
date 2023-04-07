@@ -62,7 +62,7 @@ func TestAccWebTargetsDataSource_Basic(t *testing.T) {
 				Config: testAccWebTargetsDataSourceConfig(),
 				// Check that the Web target we queried for is returned in the
 				// list
-				Check: resource.TestCheckTypeSetElemNestedAttrs(dataSourceName, "web_targets.*", getValuesCheckMap(webTarget)),
+				Check: resource.TestCheckTypeSetElemNestedAttrs(dataSourceName, "targets.*", getValuesCheckMap(webTarget)),
 			},
 		},
 	})
