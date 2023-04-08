@@ -62,8 +62,8 @@ func (r *targetConnectPolicyResource) Metadata(_ context.Context, req resource.M
 // Schema defines the schema for the target connect policy resource.
 func (r *targetConnectPolicyResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Provides a BastionZero target connect policy. Target connect policies provide access to Bzero and DynamicAccessConfig targets.",
-		Attributes:  makeTargetConnectPolicyResourceSchema(),
+		MarkdownDescription: "Provides a BastionZero target connect policy. Target connect policies provide access to Bzero and DynamicAccessConfig targets.",
+		Attributes:          makeTargetConnectPolicyResourceSchema(),
 	}
 }
 
