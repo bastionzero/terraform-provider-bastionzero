@@ -62,8 +62,8 @@ func (r *proxyPolicyResource) Metadata(_ context.Context, req resource.MetadataR
 // Schema defines the schema for the proxy policy resource.
 func (r *proxyPolicyResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Provides a BastionZero proxy policy. Proxy policies provide access to Db and Web targets.",
-		Attributes:  makeProxyPolicyResourceSchema(),
+		MarkdownDescription: "Provides a BastionZero proxy policy. Proxy policies provide access to Db and Web targets.",
+		Attributes:          makeProxyPolicyResourceSchema(),
 	}
 }
 
