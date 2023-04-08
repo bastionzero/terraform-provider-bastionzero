@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/apierror"
@@ -61,10 +60,8 @@ func (r *jitPolicyResource) Metadata(_ context.Context, req resource.MetadataReq
 // Schema defines the schema for the JIT policy resource.
 func (r *jitPolicyResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Provides a BastionZero JIT policy. JIT policies provide just in time access to targets." +
-			fmt.Sprintf("\n\n~> **Note on child policies** A JIT policy's `child_policies` can only refer to policies of the following types: %v. If any of the referenced policies ", strings.Join(bastionzero.ToStringSlice(allowedChildPolicyTypes()), ", ")) +
-			"are not of the valid type, then an error is returned when creating/updating the JIT policy.",
-		Attributes: makeJITPolicyResourceSchema(),
+		MarkdownDescription: "Provides a BastionZero just-in-time (JIT) policy. JIT policies provide temporary access to any BastionZero target.",
+		Attributes:          makeJITPolicyResourceSchema(),
 	}
 }
 
