@@ -9,8 +9,8 @@ description: |-
 
 Provides a BastionZero proxy policy. Proxy policies provide access to Db and Web targets.
 
--> **Note** All policies (of any type) must have a unique name. If the
-configured name is not unique, an error is thrown.
+~> **Note on policy name** All policies (of any type) must have a unique name. If the
+configured [`name`](#name) is not unique, an error is thrown.
 
 ## Example Usage
 

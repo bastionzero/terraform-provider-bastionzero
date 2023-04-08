@@ -9,8 +9,8 @@ description: |-
 
 Provides a BastionZero session recording policy. Session recording policies govern whether users' I/O during shell connections are recorded.
 
--> **Note** All policies (of any type) must have a unique name. If the
-configured name is not unique, an error is thrown.
+~> **Note on policy name** All policies (of any type) must have a unique name. If the
+configured [`name`](#name) is not unique, an error is thrown.
 
 ## Example Usage
 

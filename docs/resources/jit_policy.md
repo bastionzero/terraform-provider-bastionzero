@@ -9,8 +9,8 @@ description: |-
 
 Provides a BastionZero just-in-time (JIT) policy. JIT policies provide temporary access to any BastionZero target.
 
--> **Note** All policies (of any type) must have a unique name. If the
-configured name is not unique, an error is thrown.
+~> **Note on policy name** All policies (of any type) must have a unique name.
+If the configured [`name`](#name) is not unique, an error is thrown.
 
 ~> **Note on child policies** A JIT policy's [`child_policies`](#child_policies)
 can only refer to policies of the following types:
