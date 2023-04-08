@@ -60,8 +60,8 @@ func (r *sessionRecordingPolicyResource) Metadata(_ context.Context, req resourc
 // Schema defines the schema for the session recording policy resource.
 func (r *sessionRecordingPolicyResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Provides a BastionZero session recording policy. Session recording policies govern whether users' I/O during shell connections are recorded.",
-		Attributes:  makeSessionRecordingPolicyResourceSchema(),
+		MarkdownDescription: "Provides a BastionZero session recording policy. Session recording policies govern whether users' I/O during shell connections are recorded.",
+		Attributes:          makeSessionRecordingPolicyResourceSchema(),
 	}
 }
 

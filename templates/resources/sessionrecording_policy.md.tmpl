@@ -1,0 +1,27 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: "policy"
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+-> **Note** All policies (of any type) must have a unique name. If the
+configured name is not unique, an error is thrown.
+
+## Example Usage
+
+Enable session recording for all users and service accounts:
+
+{{ tffile "examples/resources/bastionzero_sessionrecording_policy/resource.tf" }}
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Import
+
+Import is supported using the following syntax:
+
+{{ codefile "shell" "examples/resources/bastionzero_sessionrecording_policy/import.sh" }}
