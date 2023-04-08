@@ -9,6 +9,8 @@ description: |-
 
 Provides a BastionZero just-in-time (JIT) policy. JIT policies provide temporary access to any BastionZero target.
 
+Learn more about JIT policies [here](https://docs.bastionzero.com/docs/admin-guide/authorization#just-in-time).
+
 ~> **Note on policy name** All policies (of any type) must have a unique name.
 If the configured [`name`](#name) is not unique, an error is thrown.
 

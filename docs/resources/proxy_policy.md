@@ -9,6 +9,8 @@ description: |-
 
 Provides a BastionZero proxy policy. Proxy policies provide access to Db and Web targets.
 
+Learn more about proxy policies [here](https://docs.bastionzero.com/docs/admin-guide/authorization#proxy).
+
 ~> **Note on policy name** All policies (of any type) must have a unique name. If the
 configured [`name`](#name) is not unique, an error is thrown.
 

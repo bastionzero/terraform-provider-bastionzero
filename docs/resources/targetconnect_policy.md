@@ -9,6 +9,8 @@ description: |-
 
 Provides a BastionZero target connect policy. Target connect policies provide access to Bzero and DynamicAccessConfig targets.
 
+Learn more about target connect policies [here](https://docs.bastionzero.com/docs/admin-guide/authorization#target-access).
+
 ~> **Note on policy name** All policies (of any type) must have a unique name. If the
 configured [`name`](#name) is not unique, an error is thrown.
 

@@ -9,6 +9,8 @@ description: |-
 
 Provides a BastionZero session recording policy. Session recording policies govern whether users' I/O during shell connections are recorded.
 
+Learn more about session recording policies [here](https://docs.bastionzero.com/docs/admin-guide/authorization#session-recording).
+
 ~> **Note on policy name** All policies (of any type) must have a unique name. If the
 configured [`name`](#name) is not unique, an error is thrown.
 
