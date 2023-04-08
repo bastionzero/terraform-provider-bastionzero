@@ -62,8 +62,8 @@ func (r *kubernetesPolicyResource) Metadata(_ context.Context, req resource.Meta
 // Schema defines the schema for the Kubernetes policy resource.
 func (r *kubernetesPolicyResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Provides a BastionZero Kubernetes policy. Kubernetes policies provide access to Cluster targets.",
-		Attributes:  makeKubernetesPolicyResourceSchema(),
+		MarkdownDescription: "Provides a BastionZero Kubernetes policy. Kubernetes policies provide access to Cluster targets.",
+		Attributes:          makeKubernetesPolicyResourceSchema(),
 	}
 }
 
