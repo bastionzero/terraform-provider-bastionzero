@@ -80,7 +80,7 @@ data "bastionzero_groups" "g" {}
 
 locals {
   # Define, by email address, users to add to the policy
-  users = ["alice@example.com", "bob@example.com", "charlie@bastionzero.com"]
+  users = ["alice@example.com", "bob@example.com", "charlie@example.com"]
   # Define, by name, the groups to add to the policy
   groups = ["Engineering"]
 }

@@ -27,7 +27,7 @@ data "bastionzero_environments" "e" {}
 
 locals {
   # Define, by email address, users to add to the policy
-  users = ["alice@example.com", "bob@example.com", "charlie@bastionzero.com"]
+  users = ["alice@example.com", "bob@example.com", "charlie@example.com"]
   # Define, by name, the groups and environments to add to the policy
   groups = ["Engineering", "Product"]
   envs   = ["Default", "Demo-Env"]
