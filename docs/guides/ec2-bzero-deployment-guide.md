@@ -1,5 +1,6 @@
 ---
-page_title: "BastionZero AWS EC2 Deployment Guide"
+page_title: "AWS EC2 Deployment Guide"
+subcategory: ""
 description: |-
 This guide explains how to deploy the BastionZero bzero agent on an AWS EC2 instance and create the policy required in order to connect
 ---
