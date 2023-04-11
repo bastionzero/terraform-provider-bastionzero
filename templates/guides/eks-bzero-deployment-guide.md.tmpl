@@ -2,7 +2,7 @@
 page_title: "AWS EKS Deployment Guide"
 subcategory: ""
 description: |-
-This guide explains how to deploy the BastionZero bzero agent on an AWS EKS cluster and create the policy required in order to connect
+  This guide explains how to deploy the BastionZero bzero agent on an AWS EKS cluster and create the policy required in order to connect
 ---
 
 # AWS EKS Deployment Guide
