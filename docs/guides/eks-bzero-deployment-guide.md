@@ -113,8 +113,7 @@ provider "bastionzero" {}
 
 -> **Note** Version constraints are included for the sake of completeness.
 Please change the version constraints as you see fit. Keep in mind though this
-guide is written assuming the the versions defined in the Terraform snippet
-above.
+guide is written assuming the versions defined in the Terraform snippet above.
 
 For security purposes, we choose to configure the BastionZero provider using an
 environment variable as it's more secure than hardcoding the secret in the
