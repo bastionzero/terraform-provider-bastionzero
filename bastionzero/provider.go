@@ -41,8 +41,6 @@ type BastionZeroProvider struct {
 	// provider is built and ran locally, and "test" when running acceptance
 	// testing.
 	version string
-
-	Client *bastionzero.Client
 }
 
 // bastionzeroProviderModel describes the provider data model.
@@ -155,17 +153,6 @@ func (p *BastionZeroProvider) Configure(ctx context.Context, req provider.Config
 
 	tflog.Debug(ctx, "Creating BastionZero client")
 
-	// f, err := os.OpenFile("foo.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// reqClient := reqc.C()
-	// reqClient.EnableDumpAllTo(f)
-	// reqClient.EnableDebugLog()
-
-	// c := &http.Client{Transport: reqClient.GetTransport()}
-
 	// Create a new BastionZero client using the configuration values
 	client, err := bastionzero.NewFromAPISecret(http.DefaultClient, apiSecret, opts...)
 	if err != nil {
@@ -178,8 +165,6 @@ func (p *BastionZeroProvider) Configure(ctx context.Context, req provider.Config
 		return
 	}
 
-	// Used by the acceptance tests
-	p.Client = client
 	// Make the BastionZero client available during DataSource and Resource type
 	// Configure methods.
 	resp.DataSourceData = client
