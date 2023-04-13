@@ -1,10 +1,16 @@
 name: Generate release pull request
 
-on: [workflow_dispatch]
+on:
+  workflow_dispatch:
+    inputs:
+      versionNumber:
+        description: 'Release version number (v#.#.# or auto)'
+        type: string
+        required: true
 
 jobs:
   generate-pr:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -13,7 +19,7 @@ jobs:
       uses: miniscruff/changie-action@b6d52c80deb236a5b548f8774cd5a18b87da9e9a # v1.0.1
       with:
         version: latest
-        args: batch auto
+        args: batch ${{ inputs.versionNumber }}
 
     - name: Merge changes
       uses: miniscruff/changie-action@b6d52c80deb236a5b548f8774cd5a18b87da9e9a # v1.0.1
@@ -37,7 +43,6 @@ jobs:
         labels: release
         body: |
           TODO:
-          - [ ] Update [bastionzero/bastionzero.go#libraryVersion](https://github.com/bastionzero/bastionzero-sdk-go/blob/master/bastionzero/bastionzero.go) to `"${{ steps.latest.outputs.output }}"` before merging.
           - [ ] Double check the auto-generated files included in this PR look correct, especially `CHANGELOG.md`.
         
           Automated release PR created by [create-pull-request](https://github.com/peter-evans/create-pull-request) GitHub action.
