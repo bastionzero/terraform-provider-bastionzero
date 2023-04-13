@@ -1,0 +1,58 @@
+name: release
+
+on:
+  push:
+    branches: [ master ]
+    paths: [ CHANGELOG.md ]
+
+jobs:
+  changelog-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.latest.outputs.output }}
+    steps:
+    - name: Get the latest version
+      id: latest
+      uses: miniscruff/changie-action@b6d52c80deb236a5b548f8774cd5a18b87da9e9a # v1.0.1
+      with:
+        version: latest
+        args: latest
+  release-tag:
+    needs: [changelog-version]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Push release tag
+      run: |
+        git tag "${{ needs.changelog-version.outputs.version }}"
+        git push origin "${{ needs.changelog-version.outputs.version }}"
+  release-notes:
+    needs: [ changelog-version, release-tag ]
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the tag we just released
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ needs.changelog-version.outputs.version }}
+          fetch-depth: 0
+      - name: Generate Release Notes
+        # sed command removes the version+date header
+        run: |
+          cd .changes
+          sed -e "1{/# /d;}" -e "2{/^$/d;}" ${{ needs.changelog-version.outputs.version }}.md > release-notes.txt
+      - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        with:
+          name: release-notes
+          path: ./.changes/release-notes.txt
+          retention-days: 1
+  terraform-provider-release:
+    name: 'Terraform Provider Release'
+    needs: [release-notes]
+    uses: hashicorp/ghaction-terraform-provider-release/.github/workflows/community.yml@01981baad5d35ce2342924e60ae91cf69fe31fd0 # v2.3.0
+    secrets:
+      gpg-private-key: '${{ secrets.GPG_PRIVATE_KEY }}'
+      gpg-private-key-passphrase: '${{ secrets.GPG_PASSPHRASE }}'
+    with:
+      release-notes: true
+      setup-go-version-file: 'go.mod'
