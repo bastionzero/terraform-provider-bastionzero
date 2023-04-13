@@ -1,0 +1,5 @@
+kind: FEATURES
+body: 'resource/proxy_policy: Add support for managing proxy policies'
+time: 2023-04-13T16:12:23.942896-04:00
+custom:
+  Issues: "1"

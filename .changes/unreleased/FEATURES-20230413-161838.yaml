@@ -1,0 +1,5 @@
+kind: FEATURES
+body: 'data-source/dac_target: Add support for getting dynamic access configuration'
+time: 2023-04-13T16:18:38.48222-04:00
+custom:
+  Issues: "1"

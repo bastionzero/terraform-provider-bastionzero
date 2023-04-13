@@ -1,0 +1,5 @@
+kind: FEATURES
+body: 'data-source/service_account: Add support for getting service account'
+time: 2023-04-13T16:27:59.654554-04:00
+custom:
+  Issues: "1"
