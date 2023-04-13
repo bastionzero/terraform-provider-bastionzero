@@ -6,7 +6,7 @@ versionFormat: '## {{.Version}} ({{.Time.Format "January 02, 2006"}})'
 kindFormat: '{{.Kind}}:'
 changeFormat: |
   {{- $issues := splitList "," .Custom.Issues }}
-  * {{.Body}} ({{- range $i, $issue := $issues }} {{- $trimed := trim $issue }}{{- if $i}}, {{- end}}[#{{$trimed}}](https://github.com/bastionzero/bastionzero-sdk-go/issues/{{$trimed}})
+  * {{.Body}} ({{- range $i, $issue := $issues }} {{- $trimed := trim $issue }}{{- if $i}}, {{- end}}[#{{$trimed}}](https://github.com/bastionzero/terraform-provider-bastionzero/issues/{{$trimed}})
   {{- end}}).
 custom:
   - key: Issues
