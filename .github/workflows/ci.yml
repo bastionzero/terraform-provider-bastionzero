@@ -1,0 +1,44 @@
+name: CI 
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      matrix:
+        go-version: [1.18.x, 1.19.x]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Install Go
+      uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # v4.0.0
+      with:
+        go-version: ${{ matrix.go-version }}
+    # Need terraform to format the examples
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@633666f66e0061ca3b725c73b2ec20cd13a8fdd1 # v2.0.3
+      with:
+        terraform_version: '1.4.*'
+        terraform_wrapper: false
+    - name: Generate
+      run: make generate
+    - name: Confirm no diff
+      run: |
+        git diff --compact-summary --exit-code || \
+          (echo "*** Unexpected differences after code generation. Run 'make generate' and commit."; exit 1)
+    - name: Build
+      run: make build
+  test:
+    # Call a reusable workflow: https://docs.github.com/en/actions/using-workflows/reusing-workflows#calling-a-reusable-workflow
+    uses: ./.github/workflows/acceptance-tests.yml
+    needs: build
+    # Pass all secrets in this workflow to the called workflow:
+    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idsecretsinherit
+    secrets: inherit

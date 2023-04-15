@@ -1,0 +1,13 @@
+name: Sweep Leftover Resources Cron Job
+
+# Sweep leftover resources at night when it is less likely for there to be an
+# in-progress acceptance test
+
+on:
+  schedule:
+    - cron: 0 0 * * MON-FRI # Every night at 00:00 UTC
+
+jobs:
+  sweep-schedule:
+    uses: ./.github/workflows/sweep.yml
+    secrets: inherit

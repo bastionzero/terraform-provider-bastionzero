@@ -1,0 +1,20 @@
+name: Sweep
+
+on:
+  workflow_call:
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install Go
+        uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # v4.0.0
+        with:
+          go-version-file: 'go.mod'
+      - name: Sweep leftover resources
+        run: make sweep
+        env:
+          BASTIONZERO_API_SECRET: ${{ secrets.ACCEPTANCE_TESTS_API_SECRET }}
+          BASTIONZERO_HOST: ${{ secrets.ACCEPTANCE_TESTS_BASTIONZERO_HOST }}
