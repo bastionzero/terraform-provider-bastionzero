@@ -1,7 +1,7 @@
 # BastionZero Terraform Provider
 
 [![terraform-provider-bastionzero release (latest SemVer)](https://img.shields.io/github/v/release/bastionzero/terraform-provider-bastionzero?sort=semver)](https://github.com/bastionzero/terraform-provider-bastionzero/releases)
-[![Test Status](https://github.com/bastionzero/terraform-provider-bastionzero/actions/workflows/acceptance-tests.yml/badge.svg?branch=master)](https://github.com/bastionzero/terraform-provider-bastionzero/actions/workflows/acceptance-tests.yml?query=branch%3Amaster)
+[![Test Status](https://github.com/bastionzero/terraform-provider-bastionzero/actions/workflows/ci.yml/badge.svg?event=schedule)](https://github.com/bastionzero/terraform-provider-bastionzero/actions/workflows/ci.yml?query=event%3Aschedule)
 
 `terraform-provider-bastionzero` is a [Terraform](https://www.terraform.io/)
 provider for [BastionZero](https://www.bastionzero.com/).
