@@ -1,7 +1,13 @@
-name: Sweep
+name: Sweep Leftover Resources
 
 on:
-  workflow_call:
+  # Warning: Be careful not to run this when there are in-progress acceptance
+  # tests
+  workflow_dispatch:
+  # Sweep leftover resources at night when it is less likely for there to be an
+  # in-progress acceptance test
+  schedule:
+    - cron: 0 0 * * MON-FRI # Every night at 00:00 UTC
 
 jobs:
   sweep:
