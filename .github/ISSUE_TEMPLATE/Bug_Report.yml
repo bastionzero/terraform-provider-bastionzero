@@ -15,6 +15,7 @@ body:
       label: Terraform CLI and Provider Versions
       description: What versions of Terraform CLI and the provider?
       placeholder: Output of `terraform version` from configuration directory
+      render: plain text
     validations:
       required: true
   - type: textarea
