@@ -10,6 +10,7 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets/targetstatus"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/targettype"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal/bzvalidator"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal/typesext"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -82,6 +83,9 @@ func BaseTargetDataSourceAttributes(targetType targettype.TargetType, opts *Base
 			Computed:    opts.IsIDComputed,
 			Optional:    opts.IsIDOptional,
 			Description: "The target's unique ID.",
+			Validators: []validator.String{
+				bzvalidator.ValidUUIDV4(),
+			},
 		},
 		"name": schema.StringAttribute{
 			Computed:    opts.IsNameComputed,

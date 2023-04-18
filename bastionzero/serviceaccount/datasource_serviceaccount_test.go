@@ -3,6 +3,7 @@ package serviceaccount_test
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/serviceaccounts"
@@ -27,6 +28,24 @@ func TestAccServiceAccountDataSource_ID(t *testing.T) {
 				// Check the data source attributes look correct based on the
 				// service account we queried for
 				Check: acctest.ExpandValuesCheckMapToSingleCheck(dataSourceName, serviceAccount, getValuesCheckMap),
+			},
+		},
+	})
+}
+
+func TestServiceAccountDataSource_InvalidID(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Empty id not permitted
+				Config:      testAccServiceAccountDataSourceConfigID(""),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+			{
+				// Bad id not permitted
+				Config:      testAccServiceAccountDataSourceConfigID("foo"),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
 			},
 		},
 	})

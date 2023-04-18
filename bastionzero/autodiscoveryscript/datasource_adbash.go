@@ -11,6 +11,7 @@ import (
 
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal/bzdatasource"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal/bzvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -40,7 +41,7 @@ func makeAdBashModelDataSourceSchema() map[string]schema.Attribute {
 			Required:    true,
 			Description: "The unique environment ID the target should associate with.",
 			Validators: []validator.String{
-				stringvalidator.LengthAtLeast(1),
+				bzvalidator.ValidUUIDV4(),
 			},
 		},
 		"script": schema.StringAttribute{

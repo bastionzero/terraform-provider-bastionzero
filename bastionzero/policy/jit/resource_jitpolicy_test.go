@@ -12,9 +12,11 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/apierror"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/policytype"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/subjecttype"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal/acctest"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -557,6 +559,16 @@ func TestJITPolicy_InvalidChildPolicies(t *testing.T) {
 				Config:      testAccJITPolicyConfigBasic("test", []string{}),
 				ExpectError: regexp.MustCompile(`at least 1 elements`),
 			},
+			{
+				// Bad child policy ID not permitted
+				Config:      testAccJITPolicyConfigBasic("test", []string{"foo"}),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+			{
+				// Empty child policy ID not permitted
+				Config:      testAccJITPolicyConfigBasic("test", []string{""}),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
 		},
 	})
 }
@@ -593,7 +605,12 @@ func TestJITPolicy_InvalidSubjects(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Invalid subject type not permitted
-				Config:      testAccJITPolicyConfigSubjects("test", []string{"foo"}, policy.FlattenPolicySubjects(context.Background(), []policies.Subject{{ID: "foo", Type: "foo"}})),
+				Config:      testAccJITPolicyConfigSubjects("test", []string{"foo"}, policy.FlattenPolicySubjects(context.Background(), []policies.Subject{{ID: uuid.New().String(), Type: "foo"}})),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+			{
+				// Invalid ID not permitted
+				Config:      testAccJITPolicyConfigSubjects("test", []string{"foo"}, policy.FlattenPolicySubjects(context.Background(), []policies.Subject{{ID: "foo", Type: subjecttype.User}})),
 				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
 			},
 		},

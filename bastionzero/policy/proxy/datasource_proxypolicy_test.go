@@ -2,6 +2,8 @@ package proxy_test
 
 import (
 	"context"
+	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
@@ -46,10 +48,36 @@ func TestAccProxyPolicyDataSource_ID(t *testing.T) {
 	})
 }
 
+func TestProxyPolicyDataSource_InvalidID(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Empty id not permitted
+				Config:      testAccProxyPolicyDataSourceConfigWithID(""),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+			{
+				// Bad id not permitted
+				Config:      testAccProxyPolicyDataSourceConfigWithID("foo"),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+		},
+	})
+}
+
 func testAccProxyPolicyDataSourceConfigID() string {
 	return `
 data "bastionzero_proxy_policy" "test" {
   id = bastionzero_proxy_policy.test.id
 }
 `
+}
+
+func testAccProxyPolicyDataSourceConfigWithID(id string) string {
+	return fmt.Sprintf(`
+data "bastionzero_proxy_policy" "test" {
+  id = %[1]q
+}
+`, id)
 }

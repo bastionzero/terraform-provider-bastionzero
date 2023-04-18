@@ -11,6 +11,7 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/environments"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/targettype"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal/bzvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -87,6 +88,9 @@ func makeEnvironmentResourceSchema() map[string]schema.Attribute {
 				stringplanmodifier.UseStateForUnknown(),
 			},
 			Description: "The environment's unique ID.",
+			Validators: []validator.String{
+				bzvalidator.ValidUUIDV4(),
+			},
 		},
 		"organization_id": schema.StringAttribute{
 			Computed: true,

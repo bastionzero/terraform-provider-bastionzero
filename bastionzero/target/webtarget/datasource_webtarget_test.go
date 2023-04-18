@@ -3,6 +3,7 @@ package webtarget_test
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets"
@@ -27,6 +28,24 @@ func TestAccWebTargetDataSource_ID(t *testing.T) {
 				// Check the data source attributes look correct based on the
 				// Web target we queried for
 				Check: acctest.ExpandValuesCheckMapToSingleCheck(dataSourceName, webTarget, getValuesCheckMap),
+			},
+		},
+	})
+}
+
+func TestWebTargetDataSource_InvalidID(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Empty id not permitted
+				Config:      testAccWebTargetDataSourceConfigID(""),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+			{
+				// Bad id not permitted
+				Config:      testAccWebTargetDataSourceConfigID("foo"),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
 			},
 		},
 	})

@@ -2,6 +2,8 @@ package environment_test
 
 import (
 	"context"
+	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/environments"
@@ -44,10 +46,36 @@ func TestAccEnvironmentDataSource_ID(t *testing.T) {
 	})
 }
 
+func TestEnvironmentDataSource_InvalidID(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Empty id not permitted
+				Config:      testAccEnvironmentDataSourceConfigWithID(""),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+			{
+				// Bad id not permitted
+				Config:      testAccEnvironmentDataSourceConfigWithID("foo"),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+		},
+	})
+}
+
 func testAccEnvironmentDataSourceConfigID() string {
 	return `
 data "bastionzero_environment" "test" {
   id = bastionzero_environment.test.id
 }
 `
+}
+
+func testAccEnvironmentDataSourceConfigWithID(id string) string {
+	return fmt.Sprintf(`
+data "bastionzero_environment" "test" {
+  id = %[1]q
+}
+`, id)
 }

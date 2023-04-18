@@ -11,8 +11,10 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/apierror"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/policytype"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/subjecttype"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal/acctest"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -404,7 +406,12 @@ func TestSessionRecordingPolicy_InvalidSubjects(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Invalid subject type not permitted
-				Config:      testAccSessionRecordingPolicyConfigSubjects("test", policy.FlattenPolicySubjects(context.Background(), []policies.Subject{{ID: "foo", Type: "foo"}})),
+				Config:      testAccSessionRecordingPolicyConfigSubjects("test", policy.FlattenPolicySubjects(context.Background(), []policies.Subject{{ID: uuid.New().String(), Type: "foo"}})),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+			{
+				// Invalid ID not permitted
+				Config:      testAccSessionRecordingPolicyConfigSubjects("test", policy.FlattenPolicySubjects(context.Background(), []policies.Subject{{ID: "foo", Type: subjecttype.User}})),
 				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
 			},
 		},

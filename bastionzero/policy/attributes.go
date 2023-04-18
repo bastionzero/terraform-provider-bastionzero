@@ -10,6 +10,7 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/subjecttype"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/targettype"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal/bzvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasource_schema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -77,6 +78,9 @@ func BasePolicyResourceAttributes(policyType policytype.PolicyType) map[string]s
 				stringplanmodifier.UseStateForUnknown(),
 			},
 			Description: "The policy's unique ID.",
+			Validators: []validator.String{
+				bzvalidator.ValidUUIDV4(),
+			},
 		},
 		"name": schema.StringAttribute{
 			Required:    true,
@@ -106,6 +110,9 @@ func BasePolicyResourceAttributes(policyType policytype.PolicyType) map[string]s
 					"id": schema.StringAttribute{
 						Required:    true,
 						Description: "The subject's unique ID.",
+						Validators: []validator.String{
+							bzvalidator.ValidUUIDV4(),
+						},
 					},
 					"type": schema.StringAttribute{
 						Required:    true,
@@ -238,6 +245,9 @@ func PolicyTargetsAttribute(allowedTypes []targettype.TargetType) schema.Attribu
 				"id": schema.StringAttribute{
 					Required:    true,
 					Description: "The target's unique ID.",
+					Validators: []validator.String{
+						bzvalidator.ValidUUIDV4(),
+					},
 				},
 				"type": schema.StringAttribute{
 					Required:    true,

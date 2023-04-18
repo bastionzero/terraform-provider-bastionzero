@@ -12,8 +12,11 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/policytype"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/verbtype"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/subjecttype"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/targettype"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal/acctest"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -672,7 +675,12 @@ func TestTargetConnectPolicy_InvalidTargets(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Invalid target type not permitted
-				Config:      testAccTargetConnectPolicyConfigTargets("test", []string{"foo"}, []string{"bar"}, policy.FlattenPolicyTargets(context.Background(), []policies.Target{{ID: "foo", Type: "foo"}})),
+				Config:      testAccTargetConnectPolicyConfigTargets("test", []string{"foo"}, []string{"bar"}, policy.FlattenPolicyTargets(context.Background(), []policies.Target{{ID: uuid.New().String(), Type: "foo"}})),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+			{
+				// Invalid ID not permitted
+				Config:      testAccTargetConnectPolicyConfigTargets("test", []string{"foo"}, []string{"bar"}, policy.FlattenPolicyTargets(context.Background(), []policies.Target{{ID: "foo", Type: targettype.Bzero}})),
 				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
 			},
 		},
@@ -698,7 +706,12 @@ func TestTargetConnectPolicy_InvalidSubjects(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Invalid subject type not permitted
-				Config:      testAccTargetConnectPolicyConfigSubjects("test", []string{"foo"}, []string{"bar"}, policy.FlattenPolicySubjects(context.Background(), []policies.Subject{{ID: "foo", Type: "foo"}})),
+				Config:      testAccTargetConnectPolicyConfigSubjects("test", []string{"foo"}, []string{"bar"}, policy.FlattenPolicySubjects(context.Background(), []policies.Subject{{ID: uuid.New().String(), Type: "foo"}})),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+			{
+				// Invalid ID not permitted
+				Config:      testAccTargetConnectPolicyConfigSubjects("test", []string{"foo"}, []string{"bar"}, policy.FlattenPolicySubjects(context.Background(), []policies.Subject{{ID: "foo", Type: subjecttype.User}})),
 				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
 			},
 		},

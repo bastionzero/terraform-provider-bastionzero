@@ -2,6 +2,8 @@ package sessionrecording_test
 
 import (
 	"context"
+	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
@@ -44,10 +46,36 @@ func TestAccSessionRecordingPolicyDataSource_ID(t *testing.T) {
 	})
 }
 
+func TestSessionRecordingPolicyDataSource_InvalidID(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Empty id not permitted
+				Config:      testAccSessionRecordingPolicyDataSourceConfigWithID(""),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+			{
+				// Bad id not permitted
+				Config:      testAccSessionRecordingPolicyDataSourceConfigWithID("foo"),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+		},
+	})
+}
+
 func testAccSessionRecordingPolicyDataSourceConfigID() string {
 	return `
 data "bastionzero_sessionrecording_policy" "test" {
   id = bastionzero_sessionrecording_policy.test.id
 }
 `
+}
+
+func testAccSessionRecordingPolicyDataSourceConfigWithID(id string) string {
+	return fmt.Sprintf(`
+data "bastionzero_sessionrecording_policy" "test" {
+  id = %[1]q
+}
+`, id)
 }

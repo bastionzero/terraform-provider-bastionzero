@@ -9,6 +9,7 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/policytype"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal/bzvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -114,6 +115,9 @@ func makeJITPolicyResourceSchema() map[string]schema.Attribute {
 				"id": schema.StringAttribute{
 					Required:    true,
 					Description: "The policy's unique ID.",
+					Validators: []validator.String{
+						bzvalidator.ValidUUIDV4(),
+					},
 				},
 				"type": schema.StringAttribute{
 					Computed:    true,

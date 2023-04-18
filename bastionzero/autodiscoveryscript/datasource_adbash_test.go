@@ -46,7 +46,7 @@ func TestADBashDataSource_InvalidEnvironmentID(t *testing.T) {
 			{
 				// Empty environment_id not permitted
 				Config:      testAccADBashDataSourceConfigBasic("", string(targetnameoption.BashHostName)),
-				ExpectError: regexp.MustCompile(`Invalid Attribute Value Length`),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
 			},
 		},
 	})

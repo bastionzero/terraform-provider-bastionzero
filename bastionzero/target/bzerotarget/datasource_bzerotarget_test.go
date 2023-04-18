@@ -3,6 +3,7 @@ package bzerotarget_test
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets"
@@ -27,6 +28,24 @@ func TestAccBzeroTargetDataSource_ID(t *testing.T) {
 				// Check the data source attributes look correct based on the
 				// Bzero target we queried for
 				Check: acctest.ExpandValuesCheckMapToSingleCheck(dataSourceName, bzeroTarget, getValuesCheckMap),
+			},
+		},
+	})
+}
+
+func TestBzeroTargetDataSource_InvalidID(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Empty id not permitted
+				Config:      testAccBzeroTargetDataSourceConfigID(""),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+			{
+				// Bad id not permitted
+				Config:      testAccBzeroTargetDataSourceConfigID("foo"),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
 			},
 		},
 	})

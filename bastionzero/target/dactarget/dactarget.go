@@ -9,6 +9,7 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets/dacstatus"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/targettype"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal/bzvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -51,6 +52,9 @@ func makeDacTargetDataSourceSchema(opts *dacTargetDataSourceAttributeOptions) ma
 			Computed:    opts.IsIDComputed,
 			Required:    opts.IsIDRequired,
 			Description: "The DAC's unique ID.",
+			Validators: []validator.String{
+				bzvalidator.ValidUUIDV4(),
+			},
 		},
 		"name": schema.StringAttribute{
 			Computed:    true,

@@ -3,6 +3,7 @@ package clustertarget_test
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strconv"
 	"testing"
 
@@ -44,6 +45,24 @@ func TestAccClusterTargetDataSource_ID(t *testing.T) {
 					acctest.ExpandValuesCheckMapToSingleCheck(dataSourceName, clusterTarget, getValuesCheckMap),
 					testAccCheckValidClusterUsers(dataSourceName, clusterTarget.ValidClusterUsers),
 				),
+			},
+		},
+	})
+}
+
+func TestClusterTargetDataSource_InvalidID(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Empty id not permitted
+				Config:      testAccClusterTargetDataSourceConfigID(""),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+			{
+				// Bad id not permitted
+				Config:      testAccClusterTargetDataSourceConfigID("foo"),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
 			},
 		},
 	})

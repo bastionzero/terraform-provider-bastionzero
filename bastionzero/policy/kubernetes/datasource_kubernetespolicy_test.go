@@ -2,6 +2,8 @@ package kubernetes_test
 
 import (
 	"context"
+	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
@@ -47,10 +49,36 @@ func TestAccKubernetesPolicyDataSource_ID(t *testing.T) {
 	})
 }
 
+func TestKubernetesPolicyDataSource_InvalidID(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Empty id not permitted
+				Config:      testAccKubernetesPolicyDataSourceConfigWithID(""),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+			{
+				// Bad id not permitted
+				Config:      testAccKubernetesPolicyDataSourceConfigWithID("foo"),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+		},
+	})
+}
+
 func testAccKubernetesPolicyDataSourceConfigID() string {
 	return `
 data "bastionzero_kubernetes_policy" "test" {
   id = bastionzero_kubernetes_policy.test.id
 }
 `
+}
+
+func testAccKubernetesPolicyDataSourceConfigWithID(id string) string {
+	return fmt.Sprintf(`
+data "bastionzero_kubernetes_policy" "test" {
+  id = %[1]q
+}
+`, id)
 }

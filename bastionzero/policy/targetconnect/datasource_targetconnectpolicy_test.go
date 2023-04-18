@@ -2,6 +2,8 @@ package targetconnect_test
 
 import (
 	"context"
+	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
@@ -48,10 +50,36 @@ func TestAccTargetConnectPolicyDataSource_ID(t *testing.T) {
 	})
 }
 
+func TestTargetConnectPolicyDataSource_InvalidID(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Empty id not permitted
+				Config:      testAccTargetConnectPolicyDataSourceConfigWithID(""),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+			{
+				// Bad id not permitted
+				Config:      testAccTargetConnectPolicyDataSourceConfigWithID("foo"),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+		},
+	})
+}
+
 func testAccTargetConnectPolicyDataSourceConfigID() string {
 	return `
 data "bastionzero_targetconnect_policy" "test" {
   id = bastionzero_targetconnect_policy.test.id
 }
 `
+}
+
+func testAccTargetConnectPolicyDataSourceConfigWithID(id string) string {
+	return fmt.Sprintf(`
+data "bastionzero_targetconnect_policy" "test" {
+  id = %[1]q
+}
+`, id)
 }

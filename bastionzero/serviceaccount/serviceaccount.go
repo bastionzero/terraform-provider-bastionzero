@@ -8,7 +8,9 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/serviceaccounts"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/subjecttype"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal/bzvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -56,6 +58,9 @@ func makeServiceAccountDataSourceSchema(withRequiredID bool) map[string]schema.A
 			Computed:    !withRequiredID,
 			Required:    withRequiredID,
 			Description: "The service account's unique ID.",
+			Validators: []validator.String{
+				bzvalidator.ValidUUIDV4(),
+			},
 		},
 		"type": schema.StringAttribute{
 			Computed:    true,
