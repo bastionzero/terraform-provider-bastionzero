@@ -80,10 +80,14 @@ Next, we'll query for an autodiscovery script
 ([`bastionzero_ad_bash`](../data-sources/ad_bash)) to use during the
 provisioning of the EC2 instance.
 
-The fetched script does not embed a registration secret which is required in
-order to register the target successfully. We'll use the registration API key's
-secret that you created in the ["Before you begin"](#before-you-begin) step, and
-the [`replace`](https://www.terraform.io/language/functions/replace) function in
+For this example, we're going to assume that default global registration is not
+enabled in the [API key panel](https://cloud.bastionzero.com/admin/apikeys) and
+a default key has not been selected, so we'll have to embed the registration
+secret ourselves in the script.
+
+We'll use the registration API key's secret that you created in the ["Before you
+begin"](#before-you-begin) step, and the
+[`replace`](https://www.terraform.io/language/functions/replace) function in
 order to complete the script.
 
 {{ tffile "examples/guides/ec2-bzero-deployment-guide/03-fetch-autodiscovery-script.tf" }}

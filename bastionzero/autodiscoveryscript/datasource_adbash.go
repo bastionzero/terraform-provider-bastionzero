@@ -46,6 +46,7 @@ func makeAdBashModelDataSourceSchema() map[string]schema.Attribute {
 		},
 		"script": schema.StringAttribute{
 			Computed:    true,
+			Sensitive:   true,
 			Description: "Bash script that can be used to autodiscover a target.",
 		},
 		// Dummy "id" attribute. Required in order to test this data source.

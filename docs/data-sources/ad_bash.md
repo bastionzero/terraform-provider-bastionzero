@@ -9,8 +9,10 @@ description: |-
 
 Get a bash script that can be used to install the latest production BastionZero agent ([`bzero`](https://github.com/bastionzero/bzero)) on your targets.
 
--> **Note** The fetched `script` does not contain the registration secret that
-is required to register your targets with BastionZero. You must replace
+-> **Note** If you do not have a default global registration key selected at the
+[API key panel](https://cloud.bastionzero.com/admin/apikeys), then the fetched
+`script` does not contain the registration secret that is required to register
+your targets with BastionZero. You must replace
 `<REGISTRATION-SECRET-GOES-HERE>` with a valid [registration
 secret](https://docs.bastionzero.com/docs/admin-guide/authorization#registration-api-keys)
 before attempting to execute the script. This can be done by using the
@@ -99,4 +101,4 @@ locals {
 ### Read-Only
 
 - `id` (String, Deprecated) Deprecated. Do not depend on this attribute. This attribute will be removed in the future.
-- `script` (String) Bash script that can be used to autodiscover a target.
+- `script` (String, Sensitive) Bash script that can be used to autodiscover a target.
