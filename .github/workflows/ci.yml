@@ -73,7 +73,7 @@ jobs:
       env:
         ACCTEST_PARALLELISM: 10
         BASTIONZERO_API_SECRET: ${{ secrets.ACCEPTANCE_TESTS_API_SECRET }}
-        BASTIONZERO_HOST: ${{ secrets.ACCEPTANCE_TESTS_BASTIONZERO_HOST }}
+        BASTIONZERO_HOST: ${{ vars.ACCEPTANCE_TESTS_BASTIONZERO_HOST }}
     - name: Check that no test is skipped
       run: >-
         grep "SKIP" test_result.txt -B 2;

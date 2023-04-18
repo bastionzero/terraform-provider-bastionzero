@@ -23,4 +23,4 @@ jobs:
         run: make sweep
         env:
           BASTIONZERO_API_SECRET: ${{ secrets.ACCEPTANCE_TESTS_API_SECRET }}
-          BASTIONZERO_HOST: ${{ secrets.ACCEPTANCE_TESTS_BASTIONZERO_HOST }}
+          BASTIONZERO_HOST: ${{ vars.ACCEPTANCE_TESTS_BASTIONZERO_HOST }}
