@@ -46,8 +46,8 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          # - macos-latest
-          # - windows-latest
+          - macos-latest
+          - windows-latest
           - ubuntu-latest
         terraform:
           - '1.0.*'
