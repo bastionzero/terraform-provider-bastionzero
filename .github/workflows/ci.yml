@@ -39,22 +39,22 @@ jobs:
       run: make build
   test:
     needs: build
-    name: 'Acceptance Tests (OS: ${{ matrix.os }} / TF: ${{ matrix.terraform }})'
-    runs-on: ${{ matrix.os }}
+    name: 'Acceptance Tests (OS: ${{ matrix.cases.os }} / TF: ${{ matrix.cases.terraform }})'
+    runs-on: ${{ matrix.cases.os }}
     timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - macos-latest
-          - windows-latest
-          - ubuntu-latest
-        terraform:
-          - '1.0.*'
-          - '1.1.*'
-          - '1.2.*'
-          - '1.3.*'
-          - '1.4.*'
+        cases:
+          - { os: ubuntu-latest, terraform: '1.0.*' }
+          - { os: ubuntu-latest, terraform: '1.1.*' }
+          - { os: ubuntu-latest, terraform: '1.2.*' }
+          - { os: ubuntu-latest, terraform: '1.3.*' }
+          - { os: ubuntu-latest, terraform: '1.4.*' }
+          # Two additional cases to test on macos and windows for latest TF
+          # version
+          - { os: macos-latest, terraform: '1.4.*' }
+          - { os: windows-latest, terraform: '1.4.*' }
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -62,10 +62,10 @@ jobs:
       uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # v4.0.0
       with:
         go-version-file: 'go.mod'
-    - name: Setup Terraform ${{ matrix.terraform }}
+    - name: Setup Terraform ${{ matrix.cases.terraform }}
       uses: hashicorp/setup-terraform@633666f66e0061ca3b725c73b2ec20cd13a8fdd1 # v2.0.3
       with:
-        terraform_version: ${{ matrix.terraform }}
+        terraform_version: ${{ matrix.cases.terraform }}
         terraform_wrapper: false
     - name: Run acceptance tests
       run: make testacc | tee test_result.txt
