@@ -3,14 +3,14 @@ page_title: "bastionzero_bzero_target Data Source - terraform-provider-bastionze
 subcategory: "target"
 description: |-
   Get information about a specific Bzero target in your BastionZero organization.
-  Specify exactly one of id or name. When specifying a name, an error is triggered if more than one Bzero target is found. This data source retries with exponential backoff (provide optional timeouts.read duration https://pkg.go.dev/time#ParseDuration to control how long to retry. Defaults to 15 mintues.) until the Bzero target is found. This is useful if there is a chance the target does not exist yet (e.g. the target is in the process of registering to BastionZero).
+  Specify exactly one of id or name. When specifying a name, an error is triggered if more than one Bzero target is found. This data source retries with exponential backoff (provide optional timeouts.read duration https://pkg.go.dev/time#ParseDuration to control how long to retry. Defaults to 15 minutes.) until the Bzero target is found. This is useful if there is a chance the target does not exist yet (e.g. the target is in the process of registering to BastionZero).
 ---
 
 # bastionzero_bzero_target (Data Source)
 
 Get information about a specific Bzero target in your BastionZero organization.
 
-Specify exactly one of `id` or `name`. When specifying a `name`, an error is triggered if more than one Bzero target is found. This data source retries with exponential backoff (provide optional `timeouts.read` [duration](https://pkg.go.dev/time#ParseDuration) to control how long to retry. Defaults to 15 mintues.) until the Bzero target is found. This is useful if there is a chance the target does not exist yet (e.g. the target is in the process of registering to BastionZero).
+Specify exactly one of `id` or `name`. When specifying a `name`, an error is triggered if more than one Bzero target is found. This data source retries with exponential backoff (provide optional `timeouts.read` [duration](https://pkg.go.dev/time#ParseDuration) to control how long to retry. Defaults to 15 minutes.) until the Bzero target is found. This is useful if there is a chance the target does not exist yet (e.g. the target is in the process of registering to BastionZero).
 
 ## Example Usage
 

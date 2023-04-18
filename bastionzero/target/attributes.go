@@ -129,7 +129,7 @@ func BaseTargetDataSourceAttributes(targetType targettype.TargetType, opts *Base
 func TargetDataSourceWithTimeoutMarkdownDescription(baseDescription string, targetType targettype.TargetType) string {
 	return fmt.Sprintf("%v"+
 		"\n\nSpecify exactly one of `id` or `name`. When specifying a `name`, an error is triggered if more than one %v target is found. "+
-		"This data source retries with exponential backoff (provide optional `timeouts.read` [duration](https://pkg.go.dev/time#ParseDuration) to control how long to retry. Defaults to 15 mintues.) until the %v target is found. "+
+		"This data source retries with exponential backoff (provide optional `timeouts.read` [duration](https://pkg.go.dev/time#ParseDuration) to control how long to retry. Defaults to 15 minutes.) until the %v target is found. "+
 		"This is useful if there is a chance the target does not exist yet (e.g. the target is in the process of registering to BastionZero).", baseDescription, targetType, targetType)
 }
 
