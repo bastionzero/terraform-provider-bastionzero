@@ -1,0 +1,26 @@
+name: Sweep Leftover Resources
+
+on:
+  # Warning: Be careful not to run this when there are in-progress acceptance
+  # tests
+  workflow_dispatch:
+  # Sweep leftover resources on Saturday night when it is less likely for there
+  # to be an in-progress acceptance test
+  schedule:
+    - cron: 0 0 * * SAT # Every Saturday at 00:00 UTC
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install Go
+        uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # v4.0.0
+        with:
+          go-version-file: 'go.mod'
+      - name: Sweep leftover resources
+        run: make sweep
+        env:
+          BASTIONZERO_API_SECRET: ${{ secrets.ACCEPTANCE_TESTS_API_SECRET }}
+          BASTIONZERO_HOST: ${{ vars.ACCEPTANCE_TESTS_BASTIONZERO_HOST }}

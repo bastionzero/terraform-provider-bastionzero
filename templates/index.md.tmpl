@@ -20,14 +20,18 @@ sources.
 
 ## BastionZero Setup
 
-TBA
+You need to provision an API key and use its secret to configure the BastionZero
+provider. Manage your API keys at the API key panel found
+[here](https://cloud.bastionzero.com/admin/apikeys). See the [admin
+guide](https://docs.bastionzero.com/docs/admin-guide/authorization#creating-an-api-key)
+for more information.
 
 ## Example Usage
 
-TBA
+{{ tffile "examples/provider/provider.tf" }}
 
 ### Configuring using an environment variable
 
-TBA
+{{ tffile "examples/provider/provider_with_env.tf" }}
 
 {{ .SchemaMarkdown | trimspace }}

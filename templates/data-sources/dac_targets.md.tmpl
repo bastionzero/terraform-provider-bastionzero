@@ -1,0 +1,27 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: "target"
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+Dynamic access configurations configure the provisioning of dynamic access targets (DATs). Learn more about the use cases of DATs and how to configure a DAT provisioning server [here](https://docs.bastionzero.com/docs/deployment/installing-the-agent#dynamic-access-targets). 
+
+Note: You can use the [`bastionzero_dac_target`](dac_target) data source to
+obtain metadata about a single DAC target if you already know the `id`.
+
+## Example Usage
+
+### Basic example
+
+{{ tffile "examples/data-sources/bastionzero_dac_targets/data-source.tf" }}
+
+### Get the target by name
+
+{{ tffile "examples/data-sources/bastionzero_dac_targets/find-with-name.tf" }}
+
+{{ .SchemaMarkdown | trimspace }}

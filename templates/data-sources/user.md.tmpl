@@ -1,0 +1,18 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+Provide the user's unique ID or email address in the `id` field.
+
+## Example Usage
+
+{{ tffile "examples/data-sources/bastionzero_user/data-source.tf" }}
+
+{{ .SchemaMarkdown | trimspace }}

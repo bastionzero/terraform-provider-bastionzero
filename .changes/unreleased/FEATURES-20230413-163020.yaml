@@ -1,0 +1,5 @@
+kind: FEATURES
+body: 'data-source/targetconnect_policy: Add support for getting target connect policy'
+time: 2023-04-13T16:30:20.43731-04:00
+custom:
+  Issues: "1"

@@ -1,0 +1,5 @@
+kind: FEATURES
+body: 'data-source/ad_bash: Add support for getting bash autodiscovery script'
+time: 2023-04-13T16:15:45.573176-04:00
+custom:
+  Issues: "1"

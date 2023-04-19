@@ -1,0 +1,5 @@
+kind: FEATURES
+body: 'resource/kubernetes_policy: Add support for managing Kubernetes policies'
+time: 2023-04-13T16:12:02.925145-04:00
+custom:
+  Issues: "1"

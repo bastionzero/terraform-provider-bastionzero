@@ -1,0 +1,28 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+This data source is useful if the environments in question are not managed by
+Terraform, or you need to utilize any of the environments' data.
+
+Note: You can use the [`bastionzero_environment`](environment) data source to
+obtain metadata about a single environment if you already know the `id`.
+
+## Example Usage
+
+### Basic example
+
+{{ tffile "examples/data-sources/bastionzero_environments/data-source.tf" }}
+
+### Get the environment by name
+
+{{ tffile "examples/data-sources/bastionzero_environments/find-with-name.tf" }}
+
+{{ .SchemaMarkdown | trimspace }}
