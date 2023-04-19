@@ -1,6 +1,6 @@
 ---
 page_title: "bastionzero_dac_target Data Source - terraform-provider-bastionzero"
-subcategory: "target"
+subcategory: "Target"
 description: |-
   Get information about a specific dynamic access configuration (DAC) target in your BastionZero organization.
 ---

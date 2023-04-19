@@ -1,6 +1,6 @@
 ---
 page_title: "bastionzero_service_accounts Data Source - terraform-provider-bastionzero"
-subcategory: ""
+subcategory: "Service Account"
 description: |-
   Get a list of all service accounts in your BastionZero organization. A service account is a Google, Azure, or generic service account that integrates with BastionZero by sharing its JSON Web Key Set (JWKS) URL. The headless authentication closely follows the OpenID Connect (OIDC) protocol.
 ---

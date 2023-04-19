@@ -1,6 +1,6 @@
 ---
 page_title: "bastionzero_bzero_targets Data Source - terraform-provider-bastionzero"
-subcategory: "target"
+subcategory: "Target"
 description: |-
   Get a list of all Bzero targets in your BastionZero organization.
 ---

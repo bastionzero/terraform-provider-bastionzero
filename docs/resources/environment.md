@@ -1,6 +1,6 @@
 ---
 page_title: "bastionzero_environment Resource - terraform-provider-bastionzero"
-subcategory: ""
+subcategory: "Environment"
 description: |-
   Provides a BastionZero environment resource. An environment is a collection of targets.
 ---

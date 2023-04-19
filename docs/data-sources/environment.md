@@ -1,6 +1,6 @@
 ---
 page_title: "bastionzero_environment Data Source - terraform-provider-bastionzero"
-subcategory: ""
+subcategory: "Environment"
 description: |-
   Get information on a BastionZero environment. An environment is a collection of targets.
 ---

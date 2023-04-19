@@ -1,6 +1,6 @@
 ---
 page_title: "bastionzero_user Data Source - terraform-provider-bastionzero"
-subcategory: ""
+subcategory: "User"
 description: |-
   Get information on a user in your BastionZero organization.
 ---

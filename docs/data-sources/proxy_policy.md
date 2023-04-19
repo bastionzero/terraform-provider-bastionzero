@@ -1,6 +1,6 @@
 ---
 page_title: "bastionzero_proxy_policy Data Source - terraform-provider-bastionzero"
-subcategory: "policy"
+subcategory: "Policy"
 description: |-
   Get information on a BastionZero proxy policy. A proxy policy provides access to Db and Web targets.
 ---

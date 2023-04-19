@@ -1,6 +1,6 @@
 ---
 page_title: "bastionzero_jit_policy Resource - terraform-provider-bastionzero"
-subcategory: "policy"
+subcategory: "Policy"
 description: |-
   Provides a BastionZero just-in-time (JIT) policy. JIT policies provide temporary access to any BastionZero target.
 ---

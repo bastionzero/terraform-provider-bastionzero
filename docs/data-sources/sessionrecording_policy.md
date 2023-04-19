@@ -1,6 +1,6 @@
 ---
 page_title: "bastionzero_sessionrecording_policy Data Source - terraform-provider-bastionzero"
-subcategory: "policy"
+subcategory: "Policy"
 description: |-
   Get information on a BastionZero session recording policy. A session recording policy governs whether users' I/O during shell connections are recorded.
 ---

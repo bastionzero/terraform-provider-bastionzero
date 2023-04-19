@@ -1,6 +1,6 @@
 ---
 page_title: "bastionzero_cluster_target Data Source - terraform-provider-bastionzero"
-subcategory: "target"
+subcategory: "Target"
 description: |-
   Get information about a specific Cluster target in your BastionZero organization.
   Specify exactly one of id or name. When specifying a name, an error is triggered if more than one Cluster target is found. This data source retries with exponential backoff (provide optional timeouts.read duration https://pkg.go.dev/time#ParseDuration to control how long to retry. Defaults to 15 minutes.) until the Cluster target is found. This is useful if there is a chance the target does not exist yet (e.g. the target is in the process of registering to BastionZero).

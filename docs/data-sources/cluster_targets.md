@@ -1,6 +1,6 @@
 ---
 page_title: "bastionzero_cluster_targets Data Source - terraform-provider-bastionzero"
-subcategory: "target"
+subcategory: "Target"
 description: |-
   Get a list of all Cluster targets in your BastionZero organization.
 ---
