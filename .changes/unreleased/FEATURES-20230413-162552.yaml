@@ -1,5 +1,0 @@
-kind: FEATURES
-body: 'data-source/kubernetes_policy: Add support for getting Kubernetes policy'
-time: 2023-04-13T16:25:52.518613-04:00
-custom:
-  Issues: "1"
