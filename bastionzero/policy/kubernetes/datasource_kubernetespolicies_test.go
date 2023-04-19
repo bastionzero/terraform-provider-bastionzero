@@ -42,11 +42,52 @@ func TestAccKubernetesPoliciesDataSource_Basic(t *testing.T) {
 	})
 }
 
+func TestAccKubernetesPoliciesDataSource_Many(t *testing.T) {
+	ctx := context.Background()
+	resourceName := "bastionzero_kubernetes_policy.test"
+	dataSourceName := "data.bastionzero_kubernetes_policies.test"
+	rName := acctest.RandomName()
+
+	resourcePolicy := testAccKubernetesPolicyConfigMany(rName, 2)
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckKubernetesPolicyDestroy,
+		Steps: []resource.TestStep{
+			// First create many resources
+			{
+				Config: resourcePolicy,
+			},
+			// Then check that the list data source contains the policies we
+			// created above
+			{
+				Config: acctest.ConfigCompose(resourcePolicy, testAccKubernetesPoliciesDataSourceConfig()),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKubernetesPolicyExists(resourceName+".0", new(policies.KubernetesPolicy)),
+					testAccCheckKubernetesPolicyExists(resourceName+".1", new(policies.KubernetesPolicy)),
+					acctest.CheckListOrSetHasElements(dataSourceName, "policies"),
+					acctest.CheckTypeSetElemNestedAttrsFromResource(resourceName+".0", []string{}, dataSourceName, "policies.*"),
+					acctest.CheckTypeSetElemNestedAttrsFromResource(resourceName+".1", []string{}, dataSourceName, "policies.*"),
+				),
+			},
+		},
+	})
+}
+
 func testAccKubernetesPoliciesDataSourceConfig() string {
 	return `
 data "bastionzero_kubernetes_policies" "test" {
 }
 `
+}
+
+func testAccKubernetesPolicyConfigMany(rName string, count int) string {
+	return fmt.Sprintf(`
+resource "bastionzero_kubernetes_policy" "test" {
+  count = %[2]v
+  name = %[1]q
+}
+`, rName+"-${count.index}", count)
 }
 
 func TestAccKubernetesPoliciesDataSource_FilterSubjects(t *testing.T) {

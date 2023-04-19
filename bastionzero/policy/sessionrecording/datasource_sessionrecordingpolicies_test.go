@@ -42,11 +42,52 @@ func TestAccSessionRecordingPoliciesDataSource_Basic(t *testing.T) {
 	})
 }
 
+func TestAccSessionRecordingPoliciesDataSource_Many(t *testing.T) {
+	ctx := context.Background()
+	resourceName := "bastionzero_sessionrecording_policy.test"
+	dataSourceName := "data.bastionzero_sessionrecording_policies.test"
+	rName := acctest.RandomName()
+
+	resourcePolicy := testAccSessionRecordingPolicyConfigMany(rName, 2)
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckSessionRecordingPolicyDestroy,
+		Steps: []resource.TestStep{
+			// First create many resources
+			{
+				Config: resourcePolicy,
+			},
+			// Then check that the list data source contains the policies we
+			// created above
+			{
+				Config: acctest.ConfigCompose(resourcePolicy, testAccSessionRecordingPoliciesDataSourceConfig()),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSessionRecordingPolicyExists(resourceName+".0", new(policies.SessionRecordingPolicy)),
+					testAccCheckSessionRecordingPolicyExists(resourceName+".1", new(policies.SessionRecordingPolicy)),
+					acctest.CheckListOrSetHasElements(dataSourceName, "policies"),
+					acctest.CheckTypeSetElemNestedAttrsFromResource(resourceName+".0", []string{}, dataSourceName, "policies.*"),
+					acctest.CheckTypeSetElemNestedAttrsFromResource(resourceName+".1", []string{}, dataSourceName, "policies.*"),
+				),
+			},
+		},
+	})
+}
+
 func testAccSessionRecordingPoliciesDataSourceConfig() string {
 	return `
 data "bastionzero_sessionrecording_policies" "test" {
 }
 `
+}
+
+func testAccSessionRecordingPolicyConfigMany(rName string, count int) string {
+	return fmt.Sprintf(`
+resource "bastionzero_sessionrecording_policy" "test" {
+  count = %[2]v
+  name = %[1]q
+}
+`, rName+"-${count.index}", count)
 }
 
 func TestAccSessionRecordingPoliciesDataSource_FilterSubjects(t *testing.T) {

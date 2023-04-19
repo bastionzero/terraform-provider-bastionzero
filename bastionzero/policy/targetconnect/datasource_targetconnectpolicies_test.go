@@ -43,11 +43,54 @@ func TestAccTargetConnectPoliciesDataSource_Basic(t *testing.T) {
 	})
 }
 
+func TestAccTargetConnectPoliciesDataSource_Many(t *testing.T) {
+	ctx := context.Background()
+	resourceName := "bastionzero_targetconnect_policy.test"
+	dataSourceName := "data.bastionzero_targetconnect_policies.test"
+	rName := acctest.RandomName()
+
+	resourcePolicy := testAccTargetConnectPolicyConfigMany(rName, []string{"foo"}, []string{string(verbtype.Shell)}, 2)
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckTargetConnectPolicyDestroy,
+		Steps: []resource.TestStep{
+			// First create many resources
+			{
+				Config: resourcePolicy,
+			},
+			// Then check that the list data source contains the policies we
+			// created above
+			{
+				Config: acctest.ConfigCompose(resourcePolicy, testAccTargetConnectPoliciesDataSourceConfig()),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckTargetConnectPolicyExists(resourceName+".0", new(policies.TargetConnectPolicy)),
+					testAccCheckTargetConnectPolicyExists(resourceName+".1", new(policies.TargetConnectPolicy)),
+					acctest.CheckListOrSetHasElements(dataSourceName, "policies"),
+					acctest.CheckTypeSetElemNestedAttrsFromResource(resourceName+".0", []string{}, dataSourceName, "policies.*"),
+					acctest.CheckTypeSetElemNestedAttrsFromResource(resourceName+".1", []string{}, dataSourceName, "policies.*"),
+				),
+			},
+		},
+	})
+}
+
 func testAccTargetConnectPoliciesDataSourceConfig() string {
 	return `
 data "bastionzero_targetconnect_policies" "test" {
 }
 `
+}
+
+func testAccTargetConnectPolicyConfigMany(rName string, targetUsers []string, verbs []string, count int) string {
+	return fmt.Sprintf(`
+resource "bastionzero_targetconnect_policy" "test" {
+  count = %[4]v
+  name = %[1]q
+  target_users = %[2]s
+  verbs = %[3]s
+}
+`, rName+"-${count.index}", acctest.ToTerraformStringList(targetUsers), acctest.ToTerraformStringList(verbs), count)
 }
 
 func TestAccTargetConnectPoliciesDataSource_FilterSubjects(t *testing.T) {

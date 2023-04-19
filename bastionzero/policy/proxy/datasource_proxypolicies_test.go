@@ -42,11 +42,52 @@ func TestAccProxyPoliciesDataSource_Basic(t *testing.T) {
 	})
 }
 
+func TestAccProxyPoliciesDataSource_Many(t *testing.T) {
+	ctx := context.Background()
+	resourceName := "bastionzero_proxy_policy.test"
+	dataSourceName := "data.bastionzero_proxy_policies.test"
+	rName := acctest.RandomName()
+
+	resourcePolicy := testAccProxyPolicyConfigMany(rName, 2)
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckProxyPolicyDestroy,
+		Steps: []resource.TestStep{
+			// First create many resources
+			{
+				Config: resourcePolicy,
+			},
+			// Then check that the list data source contains the policies we
+			// created above
+			{
+				Config: acctest.ConfigCompose(resourcePolicy, testAccProxyPoliciesDataSourceConfig()),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckProxyPolicyExists(resourceName+".0", new(policies.ProxyPolicy)),
+					testAccCheckProxyPolicyExists(resourceName+".1", new(policies.ProxyPolicy)),
+					acctest.CheckListOrSetHasElements(dataSourceName, "policies"),
+					acctest.CheckTypeSetElemNestedAttrsFromResource(resourceName+".0", []string{}, dataSourceName, "policies.*"),
+					acctest.CheckTypeSetElemNestedAttrsFromResource(resourceName+".1", []string{}, dataSourceName, "policies.*"),
+				),
+			},
+		},
+	})
+}
+
 func testAccProxyPoliciesDataSourceConfig() string {
 	return `
 data "bastionzero_proxy_policies" "test" {
 }
 `
+}
+
+func testAccProxyPolicyConfigMany(rName string, count int) string {
+	return fmt.Sprintf(`
+resource "bastionzero_proxy_policy" "test" {
+  count = %[2]v
+  name = %[1]q
+}
+`, rName+"-${count.index}", count)
 }
 
 func TestAccProxyPoliciesDataSource_FilterSubjects(t *testing.T) {

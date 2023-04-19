@@ -42,11 +42,54 @@ func TestAccJITPoliciesDataSource_Basic(t *testing.T) {
 	})
 }
 
+func TestAccJITPoliciesDataSource_Many(t *testing.T) {
+	ctx := context.Background()
+	resourceName := "bastionzero_jit_policy.test"
+	dataSourceName := "data.bastionzero_jit_policies.test"
+	rName := acctest.RandomName()
+	tcPolicy, kubePolicy, proxyPolicy := getChildPoliciesOrSkip(ctx, t)
+
+	resourcePolicy := testAccJITPolicyConfigMany(rName, []string{tcPolicy.ID, kubePolicy.ID, proxyPolicy.ID}, 2)
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckJITPolicyDestroy,
+		Steps: []resource.TestStep{
+			// First create many resources
+			{
+				Config: resourcePolicy,
+			},
+			// Then check that the list data source contains the policies we
+			// created above
+			{
+				Config: acctest.ConfigCompose(resourcePolicy, testAccJITPoliciesDataSourceConfig()),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckJITPolicyExists(resourceName+".0", new(policies.JITPolicy)),
+					testAccCheckJITPolicyExists(resourceName+".1", new(policies.JITPolicy)),
+					acctest.CheckListOrSetHasElements(dataSourceName, "policies"),
+					acctest.CheckTypeSetElemNestedAttrsFromResource(resourceName+".0", []string{}, dataSourceName, "policies.*"),
+					acctest.CheckTypeSetElemNestedAttrsFromResource(resourceName+".1", []string{}, dataSourceName, "policies.*"),
+				),
+			},
+		},
+	})
+}
+
 func testAccJITPoliciesDataSourceConfig() string {
 	return `
 data "bastionzero_jit_policies" "test" {
 }
 `
+}
+
+func testAccJITPolicyConfigMany(rName string, childPolicyIDs []string, count int) string {
+	return fmt.Sprintf(`
+resource "bastionzero_jit_policy" "test" {
+  count = %[3]v
+  name = %[1]q
+  child_policies = %[2]s
+}
+`, rName+"-${count.index}", toChildPoliciesSet(childPolicyIDs).String(), count)
 }
 
 func TestAccJITPoliciesDataSource_FilterSubjects(t *testing.T) {
