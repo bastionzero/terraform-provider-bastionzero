@@ -12,7 +12,7 @@ Provides a BastionZero Kubernetes policy. Kubernetes policies provide access to 
 Learn more about Kubernetes policies [here](https://docs.bastionzero.com/docs/admin-guide/authorization#kubernetes).
 
 ~> **Note on policy name** All policies (of any type) must have a unique name. If the
-configured [`name`](#name) is not unique, an error is thrown.
+configured [`name`](#required) is not unique, an error is thrown.
 
 ## Example Usage
 
