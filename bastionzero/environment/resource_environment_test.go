@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
-	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/apierror"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/environments"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/environment"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal/acctest"
@@ -325,19 +324,12 @@ func testAccCheckResourceEnvironmentComputedAttr(resourceName string) resource.T
 }
 
 func testAccCheckEnvironmentDestroy(s *terraform.State) error {
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "bastionzero_environment" {
-			continue
-		}
-
-		// Try to find the environment
-		_, _, err := acctest.APIClient.Environments.GetEnvironment(context.Background(), rs.Primary.ID)
-		if err != nil && !apierror.IsAPIErrorStatusCode(err, http.StatusNotFound) {
-			return fmt.Errorf("Error waiting for environment (%s) to be destroyed: %s", rs.Primary.ID, err)
-		}
-	}
-
-	return nil
+	return acctest.CheckAllResourcesWithTypeDestroyed(
+		"bastionzero_environment",
+		func(client *bastionzero.Client, ctx context.Context, id string) (*environments.Environment, *http.Response, error) {
+			return client.Environments.GetEnvironment(ctx, id)
+		},
+	)(s)
 }
 
 func testAccCheckEnvironmentRecreated(t *testing.T, before, after *environments.Environment) resource.TestCheckFunc {

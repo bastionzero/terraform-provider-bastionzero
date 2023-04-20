@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
-	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/apierror"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/policytype"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/subjecttype"
@@ -507,17 +506,10 @@ func testAccCheckResourceSessionRecordingPolicyComputedAttr(resourceName string)
 }
 
 func testAccCheckSessionRecordingPolicyDestroy(s *terraform.State) error {
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "bastionzero_sessionrecording_policy" {
-			continue
-		}
-
-		// Try to find the policy
-		_, _, err := acctest.APIClient.Policies.GetSessionRecordingPolicy(context.Background(), rs.Primary.ID)
-		if err != nil && !apierror.IsAPIErrorStatusCode(err, http.StatusNotFound) {
-			return fmt.Errorf("Error waiting for session recording policy (%s) to be destroyed: %s", rs.Primary.ID, err)
-		}
-	}
-
-	return nil
+	return acctest.CheckAllResourcesWithTypeDestroyed(
+		"bastionzero_sessionrecording_policy",
+		func(client *bastionzero.Client, ctx context.Context, id string) (*policies.SessionRecordingPolicy, *http.Response, error) {
+			return client.Policies.GetSessionRecordingPolicy(ctx, id)
+		},
+	)(s)
 }

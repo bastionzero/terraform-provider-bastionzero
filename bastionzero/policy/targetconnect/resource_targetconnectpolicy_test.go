@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
-	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/apierror"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/policytype"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/verbtype"
@@ -840,17 +839,10 @@ func testAccCheckResourceTargetConnectPolicyComputedAttr(resourceName string) re
 }
 
 func testAccCheckTargetConnectPolicyDestroy(s *terraform.State) error {
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "bastionzero_targetconnect_policy" {
-			continue
-		}
-
-		// Try to find the policy
-		_, _, err := acctest.APIClient.Policies.GetTargetConnectPolicy(context.Background(), rs.Primary.ID)
-		if err != nil && !apierror.IsAPIErrorStatusCode(err, http.StatusNotFound) {
-			return fmt.Errorf("Error waiting for target connect policy (%s) to be destroyed: %s", rs.Primary.ID, err)
-		}
-	}
-
-	return nil
+	return acctest.CheckAllResourcesWithTypeDestroyed(
+		"bastionzero_targetconnect_policy",
+		func(client *bastionzero.Client, ctx context.Context, id string) (*policies.TargetConnectPolicy, *http.Response, error) {
+			return client.Policies.GetTargetConnectPolicy(ctx, id)
+		},
+	)(s)
 }
