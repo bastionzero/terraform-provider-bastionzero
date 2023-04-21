@@ -189,6 +189,32 @@ func TestAccEnvironment_OfflineCleanupTimeoutHours(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "offline_cleanup_timeout_hours", strconv.Itoa(timeout2)),
 				),
 			},
+			// Try setting it to the max value
+			{
+				Config: testAccEnvironmentConfigOfflineCleanupTimeoutHours(rName, strconv.Itoa(environment.MaxOfflineCleanupTimeoutHours)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckEnvironmentExists(resourceName, &env),
+					testAccCheckEnvironmentAttributes(&env, &expectedEnvironment{
+						Name:                       &rName,
+						OfflineCleanupTimeoutHours: bastionzero.PtrTo(environment.MaxOfflineCleanupTimeoutHours),
+					}),
+					testAccCheckResourceEnvironmentComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "offline_cleanup_timeout_hours", strconv.Itoa(environment.MaxOfflineCleanupTimeoutHours)),
+				),
+			},
+			// Try setting it to the min value
+			{
+				Config: testAccEnvironmentConfigOfflineCleanupTimeoutHours(rName, strconv.Itoa(environment.MinOfflineCleanupTimeoutHours)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckEnvironmentExists(resourceName, &env),
+					testAccCheckEnvironmentAttributes(&env, &expectedEnvironment{
+						Name:                       &rName,
+						OfflineCleanupTimeoutHours: bastionzero.PtrTo(environment.MinOfflineCleanupTimeoutHours),
+					}),
+					testAccCheckResourceEnvironmentComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "offline_cleanup_timeout_hours", strconv.Itoa(environment.MinOfflineCleanupTimeoutHours)),
+				),
+			},
 		},
 	})
 }
@@ -244,9 +270,14 @@ func TestEnvironment_InvalidOfflineCleanupTimeoutHours(t *testing.T) {
 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				// Hours cannot be 0
-				Config:      testAccEnvironmentConfigOfflineCleanupTimeoutHours("test", "0"),
-				ExpectError: regexp.MustCompile(`must be at least 1`),
+				// Hours cannot go below the min
+				Config:      testAccEnvironmentConfigOfflineCleanupTimeoutHours("test", strconv.Itoa(environment.MinOfflineCleanupTimeoutHours-1)),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value`),
+			},
+			{
+				// Hours cannot go above the max
+				Config:      testAccEnvironmentConfigOfflineCleanupTimeoutHours("test", strconv.Itoa(environment.MaxOfflineCleanupTimeoutHours+1)),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value`),
 			},
 		},
 	})
