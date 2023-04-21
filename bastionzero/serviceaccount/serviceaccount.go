@@ -88,7 +88,7 @@ func makeServiceAccountDataSourceSchema(withRequiredID bool) map[string]schema.A
 		},
 		"is_admin": schema.BoolAttribute{
 			Computed:    true,
-			Description: "If true, the service account is an administrator. False otherwise.",
+			Description: "If `true`, the service account is an administrator; `false` otherwise.",
 		},
 		"time_created": schema.StringAttribute{
 			Computed:    true,
@@ -104,7 +104,7 @@ func makeServiceAccountDataSourceSchema(withRequiredID bool) map[string]schema.A
 		},
 		"enabled": schema.BoolAttribute{
 			Computed:    true,
-			Description: "If true, the service account is currently enabled. False otherwise.",
+			Description: "If `true`, the service account is currently enabled; `false` otherwise.",
 		},
 	}
 }

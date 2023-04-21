@@ -9,6 +9,10 @@ description: |-
 
 {{ .Description | trimspace }}
 
+~> **Note on offline target cleanup** An environment's
+[`offline_cleanup_timeout_hours`](#offline_cleanup_timeout_hours) cannot exceed
+4320 hours (180 days).
+
 ## Example Usage
 
 Create an environment named `example-env`:

@@ -57,7 +57,7 @@ func makeSessionRecordingPolicyResourceSchema() map[string]schema.Attribute {
 	attributes["record_input"] = schema.BoolAttribute{
 		Optional:    true,
 		Computed:    true,
-		Description: "If true, then in addition to session output, session input should be recorded. If false, then only session output should be recorded (Defaults to false).",
+		Description: "If `true`, then in addition to session output, session input should be recorded. If `false`, then only session output should be recorded (Defaults to `false`).",
 		// Don't allow null value to make it easier when parsing results back
 		// into TF
 		Default: booldefault.StaticBool(false),

@@ -49,11 +49,11 @@ data "bastionzero_cluster_target" "example" {
 
 ### Read-Only
 
-- `agent_public_key` (String) The target's backing agent's public key.
-- `agent_version` (String) The target's backing agent's version.
-- `control_channel` (Attributes) Information about the target's backing agent's currently active control channel. Null if the target has no active control channel. (see [below for nested schema](#nestedatt--control_channel))
+- `agent_public_key` (String) The target's proxy agent's public key.
+- `agent_version` (String) The target's proxy agent's version.
+- `control_channel` (Attributes) Information about the target's proxy agent's currently active control channel. Null if the target has no active control channel. (see [below for nested schema](#nestedatt--control_channel))
 - `environment_id` (String) The target's environment's ID.
-- `last_agent_update` (String) The time this target's backing agent last had a transition change in status formatted as a UTC timestamp string in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) format. Null if there has not been a single transition change.
+- `last_agent_update` (String) The time this target's proxy agent last had a transition change in status formatted as a UTC timestamp string in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) format. Null if there has not been a single transition change.
 - `region` (String) The BastionZero region that this target has connected to (follows same naming convention as AWS regions).
 - `status` (String) The target's status (one of `NotActivated`, `Offline`, `Online`, `Terminated`, `Error`, or `Restarting`).
 - `type` (String) The target's type (constant value `Bzero`).

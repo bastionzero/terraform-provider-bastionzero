@@ -9,9 +9,9 @@ description: |-
 
 Get a list of all Bzero targets in your BastionZero organization.
 
-Note: You can use the [`bastionzero_bzero_target`](bzero_target) data source to
-obtain metadata about a single Bzero target if you already know the `id` or
-`name`.
+-> **Note** You can use the [`bastionzero_bzero_target`](bzero_target) data
+source to obtain metadata about a single Bzero target if you already know the
+`id` or `name`.
 
 ## Example Usage
 
@@ -40,12 +40,12 @@ output "ubuntu_targets" {
 
 Read-Only:
 
-- `agent_public_key` (String) The target's backing agent's public key.
-- `agent_version` (String) The target's backing agent's version.
-- `control_channel` (Attributes) Information about the target's backing agent's currently active control channel. Null if the target has no active control channel. (see [below for nested schema](#nestedatt--targets--control_channel))
+- `agent_public_key` (String) The target's proxy agent's public key.
+- `agent_version` (String) The target's proxy agent's version.
+- `control_channel` (Attributes) Information about the target's proxy agent's currently active control channel. Null if the target has no active control channel. (see [below for nested schema](#nestedatt--targets--control_channel))
 - `environment_id` (String) The target's environment's ID.
 - `id` (String) The target's unique ID.
-- `last_agent_update` (String) The time this target's backing agent last had a transition change in status formatted as a UTC timestamp string in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) format. Null if there has not been a single transition change.
+- `last_agent_update` (String) The time this target's proxy agent last had a transition change in status formatted as a UTC timestamp string in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) format. Null if there has not been a single transition change.
 - `name` (String) The target's name.
 - `region` (String) The BastionZero region that this target has connected to (follows same naming convention as AWS regions).
 - `status` (String) The target's status (one of `NotActivated`, `Offline`, `Online`, `Terminated`, `Error`, or `Restarting`).

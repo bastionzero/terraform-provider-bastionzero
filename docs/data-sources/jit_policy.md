@@ -31,10 +31,10 @@ data "bastionzero_jit_policy" "example" {
 
 ### Read-Only
 
-- `auto_approved` (Boolean) If true, then the policies created by this JIT policy will be automatically approved. If false, then policies will only be created based on request and approval from reviewers (Defaults to false).
+- `auto_approved` (Boolean) If `true`, then the policies created by this JIT policy will be automatically approved. If `false`, then policies will only be created based on request and approval from reviewers (Defaults to `false`).
 - `child_policies` (Attributes Set) Set of policies that a JIT policy applies to. (see [below for nested schema](#nestedatt--child_policies))
 - `description` (String) The policy's description.
-- `duration` (Number) The amount of time (in minutes) after which the access granted by this JIT policy will expire (Defaults to 1 hour).
+- `duration` (Number) The amount of time (in minutes) after which the access granted by this JIT policy will expire (Defaults to `60` minutes).
 - `groups` (Attributes Set) Set of Identity Provider (IdP) groups that this policy applies to. (see [below for nested schema](#nestedatt--groups))
 - `name` (String) The policy's name.
 - `subjects` (Attributes Set) Set of subjects that this policy applies to. (see [below for nested schema](#nestedatt--subjects))

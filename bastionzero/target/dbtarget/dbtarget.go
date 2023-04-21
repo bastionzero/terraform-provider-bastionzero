@@ -61,7 +61,7 @@ func makeDbTargetDataSourceSchema(opts *target.BaseTargetDataSourceAttributeOpti
 	maps.Copy(dbTargetAttributes, target.BaseVirtualTargetDataSourceAttributes(targettype.Db))
 	dbTargetAttributes["is_split_cert"] = schema.BoolAttribute{
 		Computed:    true,
-		Description: "If true, this Db target has the split cert feature enabled. False otherwise.",
+		Description: "If `true`, this Db target has the split cert feature enabled; `false` otherwise.",
 	}
 	dbTargetAttributes["database_type"] = schema.StringAttribute{
 		Computed:    true,

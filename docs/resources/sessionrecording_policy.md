@@ -47,7 +47,7 @@ resource "bastionzero_sessionrecording_policy" "example" {
 
 - `description` (String) The policy's description.
 - `groups` (Attributes Set) Set of Identity Provider (IdP) groups that this policy applies to. (see [below for nested schema](#nestedatt--groups))
-- `record_input` (Boolean) If true, then in addition to session output, session input should be recorded. If false, then only session output should be recorded (Defaults to false).
+- `record_input` (Boolean) If `true`, then in addition to session output, session input should be recorded. If `false`, then only session output should be recorded (Defaults to `false`).
 - `subjects` (Attributes Set) Set of subjects that this policy applies to. (see [below for nested schema](#nestedatt--subjects))
 
 ### Read-Only

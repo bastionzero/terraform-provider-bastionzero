@@ -139,14 +139,14 @@ func makeJITPolicyResourceSchema() map[string]schema.Attribute {
 	attributes["auto_approved"] = schema.BoolAttribute{
 		Optional: true,
 		Computed: true,
-		Description: "If true, then the policies created by this JIT policy will be automatically approved. " +
-			"If false, then policies will only be created based on request and approval from reviewers (Defaults to false).",
+		Description: "If `true`, then the policies created by this JIT policy will be automatically approved. " +
+			"If `false`, then policies will only be created based on request and approval from reviewers (Defaults to `false`).",
 		Default: booldefault.StaticBool(false),
 	}
 	attributes["duration"] = schema.Int64Attribute{
 		Optional:    true,
 		Computed:    true,
-		Description: "The amount of time (in minutes) after which the access granted by this JIT policy will expire (Defaults to 1 hour).",
+		Description: "The amount of time (in minutes) after which the access granted by this JIT policy will expire (Defaults to `60` minutes).",
 		// Same default as the webapp
 		Default: int64default.StaticInt64(60),
 		Validators: []validator.Int64{

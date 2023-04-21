@@ -12,8 +12,8 @@ Get a list of all environments in your BastionZero organization. An environment 
 This data source is useful if the environments in question are not managed by
 Terraform, or you need to utilize any of the environments' data.
 
-Note: You can use the [`bastionzero_environment`](environment) data source to
-obtain metadata about a single environment if you already know the `id`.
+-> **Note** You can use the [`bastionzero_environment`](environment) data source
+to obtain metadata about a single environment if you already know the `id`.
 
 ## Example Usage
 
@@ -62,9 +62,9 @@ Read-Only:
 
 - `description` (String) The environment's description.
 - `id` (String) The environment's unique ID.
-- `is_default` (Boolean) If true, this environment is the default environment. False otherwise.
+- `is_default` (Boolean) If `true`, this environment is the default environment; `false` otherwise.
 - `name` (String) The environment's name.
-- `offline_cleanup_timeout_hours` (Number) The amount of time (in hours) to wait until offline targets are automatically removed by BastionZero (Defaults to 90 days).
+- `offline_cleanup_timeout_hours` (Number) The amount of time (in hours) to wait until offline targets are automatically removed by BastionZero (Defaults to `2160` hours [90 days]).
 - `organization_id` (String) The environment's organization's ID.
 - `targets` (Attributes Map) Map of targets that belong to this environment. The map is keyed by a target's unique ID. (see [below for nested schema](#nestedatt--environments--targets))
 - `time_created` (String) The time this environment was created in BastionZero formatted as a UTC timestamp string in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) format.

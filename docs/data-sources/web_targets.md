@@ -9,8 +9,8 @@ description: |-
 
 Get a list of all Web targets in your BastionZero organization.
 
-Note: You can use the [`bastionzero_web_target`](web_target) data source to
-obtain metadata about a single Web target if you already know the `id`.
+-> **Note** You can use the [`bastionzero_web_target`](web_target) data source
+to obtain metadata about a single Web target if you already know the `id`.
 
 ## Example Usage
 
@@ -44,13 +44,13 @@ output "web_target" {
 }
 ```
 
-### Group Web targets with same base proxy target
+### Group Web targets with same proxy target
 
 ```terraform
 data "bastionzero_web_targets" "example" {}
 
-# Group Web targets with same base proxy target
-output "web_targets_by_base" {
+# Group Web targets with same proxy target
+output "web_targets_by_proxy_target" {
   value = {
     for each in data.bastionzero_web_targets.example.targets
     : each.proxy_target_id => { id = each.id, name = each.name }...
@@ -71,11 +71,11 @@ output "web_targets_by_base" {
 
 Read-Only:
 
-- `agent_public_key` (String) The target's backing agent's public key.
-- `agent_version` (String) The target's backing agent's version.
+- `agent_public_key` (String) The target's proxy agent's public key.
+- `agent_version` (String) The target's proxy agent's version.
 - `environment_id` (String) The target's environment's ID.
 - `id` (String) The target's unique ID.
-- `last_agent_update` (String) The time this target's backing agent last had a transition change in status formatted as a UTC timestamp string in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) format. Null if there has not been a single transition change.
+- `last_agent_update` (String) The time this target's proxy agent last had a transition change in status formatted as a UTC timestamp string in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) format. Null if there has not been a single transition change.
 - `local_port` (Number) The port of the Web daemon's localhost server that is spawned on the user's machine on connect. Null if not configured.
 - `name` (String) The target's name.
 - `proxy_target_id` (String) The target's proxy target's ID (ID of a [Bzero](bzero_target) or [Cluster](cluster_target) target).

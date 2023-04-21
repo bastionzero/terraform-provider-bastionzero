@@ -12,8 +12,9 @@ Get a list of all session recording policies in your BastionZero organization. A
 This data source is useful if the policies in question are not managed by
 Terraform, or you need to utilize any of the policies' data.
 
-Note: You can use the [`bastionzero_sessionrecording_policy`](sessionrecording_policy) data
-source to obtain metadata about a single policy if you already know the `id`.
+-> **Note** You can use the
+[`bastionzero_sessionrecording_policy`](sessionrecording_policy) data source to
+obtain metadata about a single policy if you already know the `id`.
 
 ## Example Usage
 
@@ -61,7 +62,7 @@ Read-Only:
 - `groups` (Attributes Set) Set of Identity Provider (IdP) groups that this policy applies to. (see [below for nested schema](#nestedatt--policies--groups))
 - `id` (String) The policy's unique ID.
 - `name` (String) The policy's name.
-- `record_input` (Boolean) If true, then in addition to session output, session input should be recorded. If false, then only session output should be recorded (Defaults to false).
+- `record_input` (Boolean) If `true`, then in addition to session output, session input should be recorded. If `false`, then only session output should be recorded (Defaults to `false`).
 - `subjects` (Attributes Set) Set of subjects that this policy applies to. (see [below for nested schema](#nestedatt--policies--subjects))
 - `type` (String) The policy's type (constant value `SessionRecording`).
 
