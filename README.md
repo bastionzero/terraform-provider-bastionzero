@@ -103,7 +103,7 @@ Example (on macOS):
 cat docs/guides/ec2-bzero-deployment-guide.md | pbcopy
 ```
 
-See [`.docs-links.txt`](./docs-links.txt) for a list of links to
+See [`.docs-links.txt`](./.docs-links.txt) for a list of links to
 https://docs.bastionzero.com as parsed from the provider docs. This file is
 automatically generated after running `make generate`.
 
