@@ -33,7 +33,7 @@ const (
 	DefaultOfflineCleanupTimeoutHours = 24 * 90
 	// MaxOfflineCleanupTimeoutHours is the max value
 	// offline_cleanup_timeout_hours can be set to
-	MaxOfflineCleanupTimeoutHours = 4320
+	MaxOfflineCleanupTimeoutHours = 24 * 180
 	// MinOfflineCleanupTimeoutHours is the min value
 	// offline_cleanup_timeout_hours can be set to
 	MinOfflineCleanupTimeoutHours = 1
