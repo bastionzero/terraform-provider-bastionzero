@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	bzapi "github.com/bastionzero/bastionzero-sdk-go/bastionzero"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/apierror"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/environments"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/organization"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
@@ -148,6 +149,41 @@ func ConfigCompose(config ...string) string {
 	return str.String()
 }
 
+// FindBastionZeroAPIObjectFunc is a function that finds and returns a
+// BastionZero API object given its ID
+type FindBastionZeroAPIObjectFunc[T any] func(client *bzapi.Client, ctx context.Context, id string) (*T, *http.Response, error)
+
+// CheckAllResourcesWithTypeDestroyed loops through all resources in the
+// Terraform state and verifies that each resource of type resourceType is
+// destroyed (no longer exists at BastionZero). Function f is used to find the
+// API object given the resource's ID (parsed from Terraform state).
+func CheckAllResourcesWithTypeDestroyed[T any](resourceType string, f FindBastionZeroAPIObjectFunc[T]) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != resourceType {
+				continue
+			}
+
+			// Try to find the API object at BastionZero
+			_, _, err := f(APIClient, context.Background(), rs.Primary.ID)
+
+			// Check if we found the object
+			if err == nil {
+				return fmt.Errorf("Resource %s (id=%s) still exists at BastionZero", resourceType, rs.Primary.ID)
+			}
+
+			// We expect a 404 Not Found. If we receive any other error,
+			// something might be wrong so return the error
+			if !apierror.IsAPIErrorStatusCode(err, http.StatusNotFound) {
+				return err
+			}
+		}
+
+		// All resources of specified resourceType are gone
+		return nil
+	}
+}
+
 // CheckExistsAtBastionZero attempts to load a resource/datasource with name
 // namedTFResource from the TF state and find an API object at BastionZero,
 // using f, with the resource's ID.
@@ -155,7 +191,7 @@ func ConfigCompose(config ...string) string {
 // The provided pointer is set if there is no error when calling BastionZero. It
 // can be examined to check that what exists at BastionZero matches what is
 // actually set in the TF config/state.
-func CheckExistsAtBastionZero[T any](namedTFResource string, apiObject *T, f func(client *bzapi.Client, ctx context.Context, id string) (*T, *http.Response, error)) resource.TestCheckFunc {
+func CheckExistsAtBastionZero[T any](namedTFResource string, apiObject *T, f FindBastionZeroAPIObjectFunc[T]) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[namedTFResource]
 		if !ok {

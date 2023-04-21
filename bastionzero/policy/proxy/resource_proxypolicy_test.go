@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
-	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/apierror"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/policytype"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/subjecttype"
@@ -746,17 +745,10 @@ func testAccCheckResourceProxyPolicyComputedAttr(resourceName string) resource.T
 }
 
 func testAccCheckProxyPolicyDestroy(s *terraform.State) error {
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "bastionzero_proxy_policy" {
-			continue
-		}
-
-		// Try to find the policy
-		_, _, err := acctest.APIClient.Policies.GetProxyPolicy(context.Background(), rs.Primary.ID)
-		if err != nil && !apierror.IsAPIErrorStatusCode(err, http.StatusNotFound) {
-			return fmt.Errorf("Error waiting for proxy policy (%s) to be destroyed: %s", rs.Primary.ID, err)
-		}
-	}
-
-	return nil
+	return acctest.CheckAllResourcesWithTypeDestroyed(
+		"bastionzero_proxy_policy",
+		func(client *bastionzero.Client, ctx context.Context, id string) (*policies.ProxyPolicy, *http.Response, error) {
+			return client.Policies.GetProxyPolicy(ctx, id)
+		},
+	)(s)
 }
