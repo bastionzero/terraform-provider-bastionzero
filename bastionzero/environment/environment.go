@@ -36,7 +36,7 @@ const (
 	MaxOfflineCleanupTimeoutHours = 24 * 180
 	// MinOfflineCleanupTimeoutHours is the min value
 	// offline_cleanup_timeout_hours can be set to
-	MinOfflineCleanupTimeoutHours = 1
+	MinOfflineCleanupTimeoutHours = 0
 )
 
 // environmentModel maps the environment schema data.
