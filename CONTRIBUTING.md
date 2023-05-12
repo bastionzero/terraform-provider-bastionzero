@@ -63,8 +63,8 @@ are general _guidelines_ to decide whether a change should have an entry.
   as a `NOTE`. For example, an upgrade of the BastionZero Go SDK dependency
   should be noted since there is new functionality that affects the
   implementation of the Terraform provider. However, an upgrade to a transient
-  dependency or GitHub action that doesn't have direct relation to the provider
-  implementation probably should not be mentioned.
+  dependency or GitHub action that doesn't have a direct relation to the
+  provider implementation probably should not be mentioned.
 
 ##### Changes that should have a `CHANGELOG` entry
 
