@@ -1,6 +1,6 @@
 ---
 page_title: "bastionzero_user Data Source - terraform-provider-bastionzero"
-subcategory: ""
+subcategory: "User"
 description: |-
   Get information on a user in your BastionZero organization.
 ---
@@ -34,7 +34,7 @@ data "bastionzero_user" "example_by_email" {
 
 - `email` (String) The user's email address.
 - `full_name` (String) The user's full name.
-- `is_admin` (Boolean) If true, the user is an administrator. False otherwise.
+- `is_admin` (Boolean) If `true`, the user is an administrator; `false` otherwise.
 - `last_login` (String) The time this user last logged into BastionZero formatted as a UTC timestamp string in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) format. Null if the user has never logged in.
 - `organization_id` (String) The user's organization's ID.
 - `time_created` (String) The time this user was created in BastionZero formatted as a UTC timestamp string in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) format.

@@ -18,6 +18,9 @@ import (
 // Run the docs generation tool
 //go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
 
+// Run the genlinks script to find links to the BastionZero docs website in the provider docs
+//go:generate bash scripts/genlinks.sh
+
 var (
 	// these will be set by the goreleaser configuration
 	// to appropriate values for the compiled binary.

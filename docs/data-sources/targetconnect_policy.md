@@ -1,6 +1,6 @@
 ---
 page_title: "bastionzero_targetconnect_policy Data Source - terraform-provider-bastionzero"
-subcategory: "policy"
+subcategory: "Policy"
 description: |-
   Get information on a BastionZero target connect policy. A target connect policy provides access to Bzero and DynamicAccessConfig targets.
 ---

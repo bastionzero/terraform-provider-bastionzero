@@ -33,15 +33,18 @@ organization.
 * Use Terraform 1.x or higher.
 * You must have an EKS cluster that is already deployed and ready to use.
 
+-> **Note** API keys and registration keys are reusable. There is no need to
+generate a new key if you already have one available.
+
 This guide assumes you have basic knowledge of the AWS Terraform provider, Helm
 Terraform provider, and Kubernetes Terraform provider. All three providers are
 used to install the Bzero agent in your EKS cluster. Please note that
-BastionZero supports other cloud providers as well. Use this guide as a model to
-register your Kubernetes clusters at other cloud providers.
+BastionZero is cloud-agnostic. Use this guide as a model to register your
+Kubernetes clusters at other cloud providers.
 
 ## Setup
 
-First, we setup the BastionZero Terraform provider, the [AWS Terraform
+First, we set up the BastionZero Terraform provider, the [AWS Terraform
 provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#authentication-and-configuration),
 the [Helm Terraform
 provider](https://registry.terraform.io/providers/hashicorp/helm/latest/docs#authentication),
@@ -368,13 +371,12 @@ kubectl get pods -A
 
 Replace `cluster-id` with your EKS cluster ID.
 
-### Setup a JIT policy
+### Set up a Just-in-Time (JIT) policy
 
 Enable the [Slack
 integration](https://docs.bastionzero.com/docs/automation-and-integrations/slack)
-in your BastionZero organization, so that you can write just-in-time (JIT)
-policies to grant temporary access to your BastionZero target subject to
-administrator approval.
+in your BastionZero organization, so that you can write JIT policies to grant
+temporary access to your BastionZero target subject to administrator approval.
 
 Use the [`bastionzero_jit_policy`](../resources/jit_policy) resource to manage
 the policy in Terraform. Learn more about JIT policies

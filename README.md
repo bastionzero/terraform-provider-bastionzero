@@ -77,7 +77,7 @@ Use `make generate` to generate the documentation.
 The provider docs are made up of three components: schema, non-schema, and
 examples.
 
-**Schema:** To update documentation related to the schema attributes of
+**Schema** To update documentation related to the schema attributes of
 resources and data sources, find the schema definition in the `bastionzero/`
 source code folder and modify the `Description` field accordingly.
 
@@ -102,6 +102,10 @@ Example (on macOS):
 ```sh
 cat docs/guides/ec2-bzero-deployment-guide.md | pbcopy
 ```
+
+See [`.docs-links.txt`](./.docs-links.txt) for a list of links to
+https://docs.bastionzero.com as parsed from the provider docs. This file is
+automatically generated after running `make generate`.
 
 ### Using a development build
 

@@ -1,6 +1,6 @@
 ---
 page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
-subcategory: "target"
+subcategory: "Target"
 description: |-
 {{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
 ---
@@ -9,8 +9,8 @@ description: |-
 
 {{ .Description | trimspace }}
 
-Note: You can use the [`bastionzero_web_target`](web_target) data source to
-obtain metadata about a single Web target if you already know the `id`.
+-> **Note** You can use the [`bastionzero_web_target`](web_target) data source
+to obtain metadata about a single Web target if you already know the `id`.
 
 ## Example Usage
 
@@ -22,7 +22,7 @@ obtain metadata about a single Web target if you already know the `id`.
 
 {{ tffile "examples/data-sources/bastionzero_web_targets/find-with-name.tf" }}
 
-### Group Web targets with same base proxy target
+### Group Web targets with same proxy target
 
 {{ tffile "examples/data-sources/bastionzero_web_targets/group-by.tf" }}
 

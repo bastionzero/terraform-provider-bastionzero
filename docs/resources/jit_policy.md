@@ -1,6 +1,6 @@
 ---
 page_title: "bastionzero_jit_policy Resource - terraform-provider-bastionzero"
-subcategory: "policy"
+subcategory: "Policy"
 description: |-
   Provides a BastionZero just-in-time (JIT) policy. JIT policies provide temporary access to any BastionZero target.
 ---
@@ -12,7 +12,7 @@ Provides a BastionZero just-in-time (JIT) policy. JIT policies provide temporary
 Learn more about JIT policies [here](https://docs.bastionzero.com/docs/admin-guide/authorization#just-in-time).
 
 ~> **Note on policy name** All policies (of any type) must have a unique name.
-If the configured [`name`](#name) is not unique, an error is thrown.
+If the configured [`name`](#required) is not unique, an error is thrown.
 
 ~> **Note on child policies** A JIT policy's [`child_policies`](#child_policies)
 can only refer to policies of the following types:
@@ -125,9 +125,9 @@ resource "bastionzero_jit_policy" "example" {
 
 ### Optional
 
-- `auto_approved` (Boolean) If true, then the policies created by this JIT policy will be automatically approved. If false, then policies will only be created based on request and approval from reviewers (Defaults to false).
+- `auto_approved` (Boolean) If `true`, then the policies created by this JIT policy will be automatically approved. If `false`, then policies will only be created based on request and approval from reviewers (Defaults to `false`).
 - `description` (String) The policy's description.
-- `duration` (Number) The amount of time (in minutes) after which the access granted by this JIT policy will expire (Defaults to 1 hour).
+- `duration` (Number) The amount of time (in minutes) after which the access granted by this JIT policy will expire (Defaults to `60` minutes).
 - `groups` (Attributes Set) Set of Identity Provider (IdP) groups that this policy applies to. (see [below for nested schema](#nestedatt--groups))
 - `subjects` (Attributes Set) Set of subjects that this policy applies to. (see [below for nested schema](#nestedatt--subjects))
 

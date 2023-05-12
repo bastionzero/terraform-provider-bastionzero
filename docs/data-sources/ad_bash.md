@@ -1,6 +1,6 @@
 ---
 page_title: "bastionzero_ad_bash Data Source - terraform-provider-bastionzero"
-subcategory: ""
+subcategory: "Autodiscovery Script"
 description: |-
   Get a bash script that can be used to install the latest production BastionZero agent (bzero https://github.com/bastionzero/bzero) on your targets.
 ---

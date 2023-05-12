@@ -1,6 +1,6 @@
 ---
 page_title: "bastionzero_sessionrecording_policy Data Source - terraform-provider-bastionzero"
-subcategory: "policy"
+subcategory: "Policy"
 description: |-
   Get information on a BastionZero session recording policy. A session recording policy governs whether users' I/O during shell connections are recorded.
 ---
@@ -34,7 +34,7 @@ data "bastionzero_sessionrecording_policy" "example" {
 - `description` (String) The policy's description.
 - `groups` (Attributes Set) Set of Identity Provider (IdP) groups that this policy applies to. (see [below for nested schema](#nestedatt--groups))
 - `name` (String) The policy's name.
-- `record_input` (Boolean) If true, then in addition to session output, session input should be recorded. If false, then only session output should be recorded (Defaults to false).
+- `record_input` (Boolean) If `true`, then in addition to session output, session input should be recorded. If `false`, then only session output should be recorded (Defaults to `false`).
 - `subjects` (Attributes Set) Set of subjects that this policy applies to. (see [below for nested schema](#nestedatt--subjects))
 - `type` (String) The policy's type (constant value `SessionRecording`).
 

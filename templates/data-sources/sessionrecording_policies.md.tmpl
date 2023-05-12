@@ -1,6 +1,6 @@
 ---
 page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
-subcategory: "policy"
+subcategory: "Policy"
 description: |-
 {{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
 ---
@@ -12,8 +12,9 @@ description: |-
 This data source is useful if the policies in question are not managed by
 Terraform, or you need to utilize any of the policies' data.
 
-Note: You can use the [`bastionzero_sessionrecording_policy`](sessionrecording_policy) data
-source to obtain metadata about a single policy if you already know the `id`.
+-> **Note** You can use the
+[`bastionzero_sessionrecording_policy`](sessionrecording_policy) data source to
+obtain metadata about a single policy if you already know the `id`.
 
 ## Example Usage
 

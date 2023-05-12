@@ -66,7 +66,7 @@ func makeUserDataSourceSchema(withRequiredID bool) map[string]schema.Attribute {
 		},
 		"is_admin": schema.BoolAttribute{
 			Computed:    true,
-			Description: "If true, the user is an administrator. False otherwise.",
+			Description: "If `true`, the user is an administrator; `false` otherwise.",
 		},
 		"time_created": schema.StringAttribute{
 			Computed:    true,

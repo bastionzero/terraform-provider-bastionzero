@@ -1,6 +1,6 @@
 ---
 page_title: "bastionzero_db_targets Data Source - terraform-provider-bastionzero"
-subcategory: "target"
+subcategory: "Target"
 description: |-
   Get a list of all Db targets in your BastionZero organization.
 ---
@@ -9,8 +9,8 @@ description: |-
 
 Get a list of all Db targets in your BastionZero organization.
 
-Note: You can use the [`bastionzero_db_target`](db_target) data source to obtain
-metadata about a single Db target if you already know the `id`.
+-> **Note** You can use the [`bastionzero_db_target`](db_target) data source to
+obtain metadata about a single Db target if you already know the `id`.
 
 ## Example Usage
 
@@ -44,13 +44,13 @@ output "db_target" {
 }
 ```
 
-### Group Db targets with same base proxy target
+### Group Db targets with same proxy target
 
 ```terraform
 data "bastionzero_db_targets" "example" {}
 
-# Group Db targets with same base proxy target
-output "db_targets_by_base" {
+# Group Db targets with same proxy target
+output "db_targets_by_proxy_target" {
   value = {
     for each in data.bastionzero_db_targets.example.targets
     : each.proxy_target_id => { id = each.id, name = each.name }...
@@ -71,16 +71,16 @@ output "db_targets_by_base" {
 
 Read-Only:
 
-- `agent_public_key` (String) The target's backing agent's public key.
-- `agent_version` (String) The target's backing agent's version.
+- `agent_public_key` (String) The target's proxy agent's public key.
+- `agent_version` (String) The target's proxy agent's version.
 - `database_type` (String) The database's type. Can be null if this Db target does not have the split cert feature enabled (see `is_split_cert`).
 - `environment_id` (String) The target's environment's ID.
 - `id` (String) The target's unique ID.
-- `is_split_cert` (Boolean) If true, this Db target has the split cert feature enabled. False otherwise.
-- `last_agent_update` (String) The time this target's backing agent last had a transition change in status formatted as a UTC timestamp string in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) format. Null if there has not been a single transition change.
+- `is_split_cert` (Boolean) If `true`, this Db target has the split cert feature enabled; `false` otherwise.
+- `last_agent_update` (String) The time this target's proxy agent last had a transition change in status formatted as a UTC timestamp string in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) format. Null if there has not been a single transition change.
 - `local_port` (Number) The port of the Db daemon's localhost server that is spawned on the user's machine on connect. Null if not configured.
 - `name` (String) The target's name.
-- `proxy_target_id` (String) The target's proxy target's ID (ID of a [Bzero](#bzero_target) or [Cluster](#cluster_target) target).
+- `proxy_target_id` (String) The target's proxy target's ID (ID of a [Bzero](bzero_target) or [Cluster](cluster_target) target).
 - `region` (String) The BastionZero region that this target has connected to (follows same naming convention as AWS regions).
 - `remote_host` (String) The target's hostname or IP address.
 - `remote_port` (Number) The port of the Db server accessible via the target.

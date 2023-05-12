@@ -1,6 +1,6 @@
 ---
 page_title: "bastionzero_cluster_target Data Source - terraform-provider-bastionzero"
-subcategory: "target"
+subcategory: "Target"
 description: |-
   Get information about a specific Cluster target in your BastionZero organization.
   Specify exactly one of id or name. When specifying a name, an error is triggered if more than one Cluster target is found. This data source retries with exponential backoff (provide optional timeouts.read duration https://pkg.go.dev/time#ParseDuration to control how long to retry. Defaults to 15 minutes.) until the Cluster target is found. This is useful if there is a chance the target does not exist yet (e.g. the target is in the process of registering to BastionZero).
@@ -49,11 +49,11 @@ data "bastionzero_cluster_target" "example" {
 
 ### Read-Only
 
-- `agent_public_key` (String) The target's backing agent's public key.
-- `agent_version` (String) The target's backing agent's version.
-- `control_channel` (Attributes) Information about the target's backing agent's currently active control channel. Null if the target has no active control channel. (see [below for nested schema](#nestedatt--control_channel))
+- `agent_public_key` (String) The target's proxy agent's public key.
+- `agent_version` (String) The target's proxy agent's version.
+- `control_channel` (Attributes) Information about the target's proxy agent's currently active control channel. Null if the target has no active control channel. (see [below for nested schema](#nestedatt--control_channel))
 - `environment_id` (String) The target's environment's ID.
-- `last_agent_update` (String) The time this target's backing agent last had a transition change in status formatted as a UTC timestamp string in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) format. Null if there has not been a single transition change.
+- `last_agent_update` (String) The time this target's proxy agent last had a transition change in status formatted as a UTC timestamp string in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) format. Null if there has not been a single transition change.
 - `region` (String) The BastionZero region that this target has connected to (follows same naming convention as AWS regions).
 - `status` (String) The target's status (one of `NotActivated`, `Offline`, `Online`, `Terminated`, `Error`, or `Restarting`).
 - `type` (String) The target's type (constant value `Bzero`).

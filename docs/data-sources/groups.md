@@ -1,6 +1,6 @@
 ---
 page_title: "bastionzero_groups Data Source - terraform-provider-bastionzero"
-subcategory: ""
+subcategory: "Group"
 description: |-
   Get a list of all groups in your BastionZero organization. A group is an Identity provider (IdP) group synced to BastionZero.
 ---

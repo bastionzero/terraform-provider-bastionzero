@@ -104,7 +104,7 @@ func makeEnvironmentResourceSchema() map[string]schema.Attribute {
 			PlanModifiers: []planmodifier.Bool{
 				boolplanmodifier.UseStateForUnknown(),
 			},
-			Description: "If true, this environment is the default environment. False otherwise.",
+			Description: "If `true`, this environment is the default environment; `false` otherwise.",
 		},
 		"name": schema.StringAttribute{
 			Required:    true,
@@ -142,7 +142,7 @@ func makeEnvironmentResourceSchema() map[string]schema.Attribute {
 		"offline_cleanup_timeout_hours": schema.Int64Attribute{
 			Optional:    true,
 			Computed:    true,
-			Description: "The amount of time (in hours) to wait until offline targets are automatically removed by BastionZero (Defaults to 90 days).",
+			Description: "The amount of time (in hours) to wait until offline targets are automatically removed by BastionZero (Defaults to `2160` hours [90 days]).",
 			// Default to 90 days like in webapp
 			Default: int64default.StaticInt64(DefaultOfflineCleanupTimeoutHours),
 			Validators: []validator.Int64{

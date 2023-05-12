@@ -1,6 +1,6 @@
 ---
 page_title: "bastionzero_targetconnect_policies Data Source - terraform-provider-bastionzero"
-subcategory: "policy"
+subcategory: "Policy"
 description: |-
   Get a list of all target connect policies in your BastionZero organization. A target connect policy provides access to Bzero and DynamicAccessConfig targets.
 ---
@@ -12,9 +12,9 @@ Get a list of all target connect policies in your BastionZero organization. A ta
 This data source is useful if the policies in question are not managed by
 Terraform, or you need to utilize any of the policies' data.
 
-Note: You can use the [`bastionzero_targetconnect_policy`](targetconnect_policy)
-data source to obtain metadata about a single policy if you already know the
-`id`.
+-> **Note** You can use the
+[`bastionzero_targetconnect_policy`](targetconnect_policy) data source to obtain
+metadata about a single policy if you already know the `id`.
 
 ## Example Usage
 

@@ -1,6 +1,6 @@
 ---
 page_title: "bastionzero_kubernetes_policy Data Source - terraform-provider-bastionzero"
-subcategory: "policy"
+subcategory: "Policy"
 description: |-
   Get information on a BastionZero Kubernetes policy. A Kubernetes policy provides access to Cluster targets.
 ---

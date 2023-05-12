@@ -1,6 +1,6 @@
 ---
 page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
-subcategory: "target"
+subcategory: "Target"
 description: |-
 {{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
 ---
@@ -9,8 +9,8 @@ description: |-
 
 {{ .Description | trimspace }}
 
-Note: You can use the [`bastionzero_db_target`](db_target) data source to obtain
-metadata about a single Db target if you already know the `id`.
+-> **Note** You can use the [`bastionzero_db_target`](db_target) data source to
+obtain metadata about a single Db target if you already know the `id`.
 
 ## Example Usage
 
@@ -22,7 +22,7 @@ metadata about a single Db target if you already know the `id`.
 
 {{ tffile "examples/data-sources/bastionzero_db_targets/find-with-name.tf" }}
 
-### Group Db targets with same base proxy target
+### Group Db targets with same proxy target
 
 {{ tffile "examples/data-sources/bastionzero_db_targets/group-by.tf" }}
 

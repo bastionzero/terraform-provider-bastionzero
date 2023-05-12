@@ -1,6 +1,6 @@
 ---
 page_title: "bastionzero_jit_policies Data Source - terraform-provider-bastionzero"
-subcategory: "policy"
+subcategory: "Policy"
 description: |-
   Get a list of all JIT policies in your BastionZero organization. A JIT policy provides just in time access to targets.
 ---
@@ -12,8 +12,8 @@ Get a list of all JIT policies in your BastionZero organization. A JIT policy pr
 This data source is useful if the policies in question are not managed by
 Terraform, or you need to utilize any of the policies' data.
 
-Note: You can use the [`bastionzero_jit_policy`](jit_policy) data source to
-obtain metadata about a single policy if you already know the `id`.
+-> **Note** You can use the [`bastionzero_jit_policy`](jit_policy) data source
+to obtain metadata about a single policy if you already know the `id`.
 
 ## Example Usage
 
@@ -66,10 +66,10 @@ output "policy" {
 
 Read-Only:
 
-- `auto_approved` (Boolean) If true, then the policies created by this JIT policy will be automatically approved. If false, then policies will only be created based on request and approval from reviewers (Defaults to false).
+- `auto_approved` (Boolean) If `true`, then the policies created by this JIT policy will be automatically approved. If `false`, then policies will only be created based on request and approval from reviewers (Defaults to `false`).
 - `child_policies` (Attributes Set) Set of policies that a JIT policy applies to. (see [below for nested schema](#nestedatt--policies--child_policies))
 - `description` (String) The policy's description.
-- `duration` (Number) The amount of time (in minutes) after which the access granted by this JIT policy will expire (Defaults to 1 hour).
+- `duration` (Number) The amount of time (in minutes) after which the access granted by this JIT policy will expire (Defaults to `60` minutes).
 - `groups` (Attributes Set) Set of Identity Provider (IdP) groups that this policy applies to. (see [below for nested schema](#nestedatt--policies--groups))
 - `id` (String) The policy's unique ID.
 - `name` (String) The policy's name.

@@ -109,11 +109,11 @@ func BaseTargetDataSourceAttributes(targetType targettype.TargetType, opts *Base
 		},
 		"last_agent_update": schema.StringAttribute{
 			Computed:    true,
-			Description: fmt.Sprintf("The time this target's backing agent last had a transition change in status %s. Null if there has not been a single transition change.", internal.PrettyRFC3339Timestamp()),
+			Description: fmt.Sprintf("The time this target's proxy agent last had a transition change in status %s. Null if there has not been a single transition change.", internal.PrettyRFC3339Timestamp()),
 		},
 		"agent_version": schema.StringAttribute{
 			Computed:    true,
-			Description: "The target's backing agent's version.",
+			Description: "The target's proxy agent's version.",
 		},
 		"region": schema.StringAttribute{
 			Computed:    true,
@@ -121,7 +121,7 @@ func BaseTargetDataSourceAttributes(targetType targettype.TargetType, opts *Base
 		},
 		"agent_public_key": schema.StringAttribute{
 			Computed:    true,
-			Description: "The target's backing agent's public key.",
+			Description: "The target's proxy agent's public key.",
 		},
 	}
 }
@@ -140,7 +140,7 @@ func BaseVirtualTargetDataSourceAttributes(targetType targettype.TargetType) map
 		"proxy_target_id": schema.StringAttribute{
 			Computed:            true,
 			Description:         "The target's proxy target's ID (ID of a Bzero or Cluster target).",
-			MarkdownDescription: "The target's proxy target's ID (ID of a [Bzero](#bzero_target) or [Cluster](#cluster_target) target).",
+			MarkdownDescription: "The target's proxy target's ID (ID of a [Bzero](bzero_target) or [Cluster](cluster_target) target).",
 		},
 		"remote_host": schema.StringAttribute{
 			Computed:    true,
@@ -190,7 +190,7 @@ type ControlChannelSummaryModel struct {
 func ControlChannelSummaryAttribute() schema.Attribute {
 	return schema.SingleNestedAttribute{
 		Computed:    true,
-		Description: "Information about the target's backing agent's currently active control channel. Null if the target has no active control channel.",
+		Description: "Information about the target's proxy agent's currently active control channel. Null if the target has no active control channel.",
 		Attributes: map[string]schema.Attribute{
 			"control_channel_id": schema.StringAttribute{
 				Computed:    true,
