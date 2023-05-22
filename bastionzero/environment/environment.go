@@ -149,7 +149,7 @@ func makeEnvironmentResourceSchema() map[string]schema.Attribute {
 			Optional: true,
 			Computed: true,
 			Description: "The amount of time (in hours) to wait until offline targets are automatically removed by BastionZero (Defaults to `2160` hours [90 days])." +
-				" If this value is `0`, then offline target removal is disabled.",
+				" If this value is `0`, then offline target cleanup is disabled.",
 			// Default to 90 days like in webapp
 			Default: int64default.StaticInt64(DefaultOfflineCleanupTimeoutHours),
 			Validators: []validator.Int64{
