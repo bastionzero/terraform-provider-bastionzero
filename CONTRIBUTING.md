@@ -25,9 +25,10 @@ the body in your text editor of choice).
 
 Changie will then prompt for a Github issue or pull request number (note: If
 your change spans across multiple issues or PRs, you can include all of them as
-a comma separated list of numbers). _Repeat_ this process for any additional
-changes. The `.yaml` files created in the `.changes/unreleased` folder should be
-pushed to the repository along with any code changes.
+a comma separated list of numbers). Please do not include a leading `#` when
+specifying the GitHub issue or pull request number. _Repeat_ this process for
+any additional changes. The `.yaml` files created in the `.changes/unreleased`
+folder should be pushed to the repository along with any code changes.
 
 #### Entry (`body`) format
 
@@ -55,6 +56,16 @@ are general _guidelines_ to decide whether a change should have an entry.
 * New tests or changes to existing tests
 * Code refactoring
 
+##### Changes that may have a `CHANGELOG` entry
+
+* Dependency updates: Use your own discretion. If the dependency upgrade
+  directly relates to the provider implementation, mention it in the changelog
+  as a `NOTE`. For example, an upgrade of the BastionZero Go SDK dependency
+  should be noted since there is new functionality that affects the
+  implementation of the Terraform provider. However, an upgrade to a transient
+  dependency or GitHub action that doesn't have a direct relation to the
+  provider implementation probably should not be mentioned.
+
 ##### Changes that should have a `CHANGELOG` entry
 
 * Major features
@@ -62,7 +73,6 @@ are general _guidelines_ to decide whether a change should have an entry.
 * Enhancements
 * Deprecations
 * Breaking changes and removals
-* Dependency updates
 
 ##### **Special case**: Provider documentation updates
 
