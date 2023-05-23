@@ -35,7 +35,7 @@ resource "bastionzero_environment" "example" {
 ### Optional
 
 - `description` (String) The environment's description.
-- `offline_cleanup_timeout_hours` (Number) The amount of time (in hours) to wait until offline targets are automatically removed by BastionZero (Defaults to `2160` hours [90 days]).
+- `offline_cleanup_timeout_hours` (Number) The amount of time (in hours) to wait until offline targets are automatically removed by BastionZero (Defaults to `2160` hours [90 days]). If this value is `0`, then offline target cleanup is disabled.
 
 ### Read-Only
 

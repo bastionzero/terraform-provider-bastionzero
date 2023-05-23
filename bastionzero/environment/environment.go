@@ -31,6 +31,12 @@ const (
 	// DefaultOfflineCleanupTimeoutHours is the default cleanup value to use if
 	// practitioner does not provide one
 	DefaultOfflineCleanupTimeoutHours = 24 * 90
+	// MaxOfflineCleanupTimeoutHours is the max value
+	// offline_cleanup_timeout_hours can be set to
+	MaxOfflineCleanupTimeoutHours = 24 * 180
+	// MinOfflineCleanupTimeoutHours is the min value
+	// offline_cleanup_timeout_hours can be set to
+	MinOfflineCleanupTimeoutHours = 0
 )
 
 // environmentModel maps the environment schema data.
@@ -140,13 +146,14 @@ func makeEnvironmentResourceSchema() map[string]schema.Attribute {
 			Description: fmt.Sprintf("The time this environment was created in BastionZero %s.", internal.PrettyRFC3339Timestamp()),
 		},
 		"offline_cleanup_timeout_hours": schema.Int64Attribute{
-			Optional:    true,
-			Computed:    true,
-			Description: "The amount of time (in hours) to wait until offline targets are automatically removed by BastionZero (Defaults to `2160` hours [90 days]).",
+			Optional: true,
+			Computed: true,
+			Description: "The amount of time (in hours) to wait until offline targets are automatically removed by BastionZero (Defaults to `2160` hours [90 days])." +
+				" If this value is `0`, then offline target cleanup is disabled.",
 			// Default to 90 days like in webapp
 			Default: int64default.StaticInt64(DefaultOfflineCleanupTimeoutHours),
 			Validators: []validator.Int64{
-				int64validator.AtLeast(1),
+				int64validator.Between(MinOfflineCleanupTimeoutHours, MaxOfflineCleanupTimeoutHours),
 			},
 		},
 		"targets": schema.MapNestedAttribute{
