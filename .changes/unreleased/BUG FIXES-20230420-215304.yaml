@@ -1,6 +1,0 @@
-kind: BUG FIXES
-body: 'resource/environment: Fix `offline_cleanup_timeout_hours` validation to match
-  behavior of the BastionZero API'
-time: 2023-04-20T21:53:04.52468-04:00
-custom:
-  Issues: "15"

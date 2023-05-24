@@ -1,3 +1,17 @@
+## v0.1.1 (May 24, 2023)
+
+NOTES:
+
+
+* Upgraded [`bastionzero-sdk-go`](https://github.com/bastionzero/bastionzero-sdk-go) to v0.2.0 ([#17](https://github.com/bastionzero/terraform-provider-bastionzero/issues/17)).
+
+
+BUG FIXES:
+
+
+* resource/environment: Fix `offline_cleanup_timeout_hours` validation to match behavior of the BastionZero API ([#15](https://github.com/bastionzero/terraform-provider-bastionzero/issues/15)).
+
+
 ## v0.1.0 (April 19, 2023)
 
 FEATURES:
