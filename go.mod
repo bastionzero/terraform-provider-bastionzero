@@ -83,5 +83,5 @@ require (
 	google.golang.org/genproto v0.0.0-20200711021454-869866162049 // indirect
 	google.golang.org/grpc v1.51.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
-	pgregory.net/rapid v0.5.7
+	pgregory.net/rapid v0.6.1
 )
