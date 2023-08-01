@@ -115,9 +115,6 @@ func makeEnvironmentResourceSchema() map[string]schema.Attribute {
 		"name": schema.StringAttribute{
 			Required:    true,
 			Description: "The environment's name.",
-			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.RequiresReplace(),
-			},
 			Validators: []validator.String{
 				stringvalidator.LengthAtLeast(1),
 			},

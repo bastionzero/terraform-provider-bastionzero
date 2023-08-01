@@ -93,6 +93,60 @@ func TestAccEnvironment_Disappears(t *testing.T) {
 	})
 }
 
+func TestAccEnvironment_Name(t *testing.T) {
+	ctx := context.Background()
+	rDesc := acctest.RandomName()
+	name1 := "development_environment"
+	name2 := "development"
+	resourceName := "bastionzero_environment.test"
+	var env environments.Environment
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckEnvironmentDestroy,
+		Steps: []resource.TestStep{
+			// Verify create works for a config that sets description
+			{
+				Config: testAccEnvironmentConfigName(name1),
+				Check: resource.ComposeTestCheckFunc(
+					// Check environment exists at BastionZero
+					testAccCheckEnvironmentExists(resourceName, &env),
+					// Check environment stored at BastionZero looks correct
+					testAccCheckEnvironmentAttributes(&env, &expectedEnvironment{
+						Name:        &name1,
+						Description: &rDesc,
+					}),
+					// Check computed values in TF state are correct
+					testAccCheckResourceEnvironmentComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", name1),
+				),
+			},
+			// Verify import
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Verify update description
+			{
+				Config: testAccEnvironmentConfigName(name2),
+				Check: resource.ComposeTestCheckFunc(
+					// Check environment exists at BastionZero
+					testAccCheckEnvironmentExists(resourceName, &env),
+					// Check environment stored at BastionZero looks correct
+					testAccCheckEnvironmentAttributes(&env, &expectedEnvironment{
+						Name:        &name2,
+						Description: &rDesc,
+					}),
+					testAccCheckResourceEnvironmentComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", name2),
+				),
+			},
+		},
+	})
+}
+
 func TestAccEnvironment_Description(t *testing.T) {
 	ctx := context.Background()
 	rName := acctest.RandomName()
