@@ -96,7 +96,7 @@ func TestAccEnvironment_Disappears(t *testing.T) {
 func TestAccEnvironment_Name(t *testing.T) {
 	ctx := context.Background()
 	rName1 := acctest.RandomName()
-    rName2 := acctest.RandomName()
+	rName2 := acctest.RandomName()
 	resourceName := "bastionzero_environment.test"
 	var env environments.Environment
 
