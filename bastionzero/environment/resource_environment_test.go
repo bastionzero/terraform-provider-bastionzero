@@ -113,7 +113,7 @@ func TestAccEnvironment_Name(t *testing.T) {
 					testAccCheckEnvironmentExists(resourceName, &env),
 					// Check environment stored at BastionZero looks correct
 					testAccCheckEnvironmentAttributes(&env, &expectedEnvironment{
-						Name:        &rName1
+						Name: &rName1,
 					}),
 					// Check computed values in TF state are correct
 					testAccCheckResourceEnvironmentComputedAttr(resourceName),
@@ -134,7 +134,7 @@ func TestAccEnvironment_Name(t *testing.T) {
 					testAccCheckEnvironmentExists(resourceName, &env),
 					// Check environment stored at BastionZero looks correct
 					testAccCheckEnvironmentAttributes(&env, &expectedEnvironment{
-						Name:        &rName2
+						Name: &rName2,
 					}),
 					testAccCheckResourceEnvironmentComputedAttr(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", rName2),
