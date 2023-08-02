@@ -10,6 +10,8 @@ build: fmtcheck
 	go install .
 
 generate:
+	rm -rf docs/
+	mkdir docs
 	go generate ./...
 
 test: fmtcheck

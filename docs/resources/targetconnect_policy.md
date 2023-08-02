@@ -99,7 +99,7 @@ resource "bastionzero_targetconnect_policy" "example" {
 
 - `name` (String) The policy's name.
 - `target_users` (Set of String) Set of Unix usernames that this policy applies to.
-- `verbs` (Set of String) Set of actions allowed by this policy (one of `Shell`, `FileTransfer`, or `Tunnel`).
+- `verbs` (Set of String) Set of actions allowed by this policy (one of `Shell`, `FileTransfer`, `Tunnel`, `RDP`, or `SQLServer`).
 
 ### Optional
 
