@@ -1,0 +1,6 @@
+kind: BUG FIXES
+body: 'resource/environment: Remove require replacement behavior when an environment''s
+  name changes since the BastionZero API permits editing an environment''s name'
+time: 2023-08-23T12:40:39.4761-04:00
+custom:
+  Issues: "42"
