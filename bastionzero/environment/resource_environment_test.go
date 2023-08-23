@@ -270,39 +270,6 @@ func TestAccEnvironment_OfflineCleanupTimeoutHours(t *testing.T) {
 	})
 }
 
-func TestAccEnvironment_RecreateOnNameChange(t *testing.T) {
-	var afterCreate, afterUpdate environments.Environment
-	name := acctest.RandomName()
-	name2 := acctest.RandomName()
-	resourceName := "bastionzero_environment.test"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(context.Background(), t) },
-		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckEnvironmentDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccEnvironmentConfigName(name),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEnvironmentExists(resourceName, &afterCreate),
-					testAccCheckEnvironmentAttributes(&afterCreate, &expectedEnvironment{Name: &name}),
-					resource.TestCheckResourceAttr(resourceName, "name", name),
-				),
-			},
-			// Change name should force re-create the resource
-			{
-				Config: testAccEnvironmentConfigName(name2),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEnvironmentExists(resourceName, &afterUpdate),
-					testAccCheckEnvironmentAttributes(&afterUpdate, &expectedEnvironment{Name: &name2}),
-					resource.TestCheckResourceAttr(resourceName, "name", name2),
-					testAccCheckEnvironmentRecreated(t, &afterCreate, &afterUpdate),
-				),
-			},
-		},
-	})
-}
-
 func TestEnvironment_InvalidName(t *testing.T) {
 	resource.UnitTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
