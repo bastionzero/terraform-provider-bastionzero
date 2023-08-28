@@ -93,6 +93,57 @@ func TestAccEnvironment_Disappears(t *testing.T) {
 	})
 }
 
+func TestAccEnvironment_Name(t *testing.T) {
+	ctx := context.Background()
+	rName1 := acctest.RandomName()
+	rName2 := acctest.RandomName()
+	resourceName := "bastionzero_environment.test"
+	var env environments.Environment
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(ctx, t) },
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckEnvironmentDestroy,
+		Steps: []resource.TestStep{
+			// Verify create works for a config that sets name
+			{
+				Config: testAccEnvironmentConfigName(rName1),
+				Check: resource.ComposeTestCheckFunc(
+					// Check environment exists at BastionZero
+					testAccCheckEnvironmentExists(resourceName, &env),
+					// Check environment stored at BastionZero looks correct
+					testAccCheckEnvironmentAttributes(&env, &expectedEnvironment{
+						Name: &rName1,
+					}),
+					// Check computed values in TF state are correct
+					testAccCheckResourceEnvironmentComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", rName1),
+				),
+			},
+			// Verify import
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Verify update name
+			{
+				Config: testAccEnvironmentConfigName(rName2),
+				Check: resource.ComposeTestCheckFunc(
+					// Check environment exists at BastionZero
+					testAccCheckEnvironmentExists(resourceName, &env),
+					// Check environment stored at BastionZero looks correct
+					testAccCheckEnvironmentAttributes(&env, &expectedEnvironment{
+						Name: &rName2,
+					}),
+					testAccCheckResourceEnvironmentComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", rName2),
+				),
+			},
+		},
+	})
+}
+
 func TestAccEnvironment_Description(t *testing.T) {
 	ctx := context.Background()
 	rName := acctest.RandomName()
@@ -213,39 +264,6 @@ func TestAccEnvironment_OfflineCleanupTimeoutHours(t *testing.T) {
 					}),
 					testAccCheckResourceEnvironmentComputedAttr(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "offline_cleanup_timeout_hours", strconv.Itoa(environment.MinOfflineCleanupTimeoutHours)),
-				),
-			},
-		},
-	})
-}
-
-func TestAccEnvironment_RecreateOnNameChange(t *testing.T) {
-	var afterCreate, afterUpdate environments.Environment
-	name := acctest.RandomName()
-	name2 := acctest.RandomName()
-	resourceName := "bastionzero_environment.test"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(context.Background(), t) },
-		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckEnvironmentDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccEnvironmentConfigName(name),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEnvironmentExists(resourceName, &afterCreate),
-					testAccCheckEnvironmentAttributes(&afterCreate, &expectedEnvironment{Name: &name}),
-					resource.TestCheckResourceAttr(resourceName, "name", name),
-				),
-			},
-			// Change name should force re-create the resource
-			{
-				Config: testAccEnvironmentConfigName(name2),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEnvironmentExists(resourceName, &afterUpdate),
-					testAccCheckEnvironmentAttributes(&afterUpdate, &expectedEnvironment{Name: &name2}),
-					resource.TestCheckResourceAttr(resourceName, "name", name2),
-					testAccCheckEnvironmentRecreated(t, &afterCreate, &afterUpdate),
 				),
 			},
 		},

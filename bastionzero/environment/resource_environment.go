@@ -155,6 +155,9 @@ func (r *environmentResource) Update(ctx context.Context, req resource.UpdateReq
 	// Generate API request body from plan. Only include things in request that
 	// have changed between plan and current state
 	modifyReq := new(environments.ModifyEnvironmentRequest)
+	if !plan.Name.Equal(state.Name) {
+		modifyReq.Name = bastionzero.PtrTo(plan.Name.ValueString())
+	}
 	if !plan.Description.Equal(state.Description) {
 		modifyReq.Description = bastionzero.PtrTo(plan.Description.ValueString())
 	}
