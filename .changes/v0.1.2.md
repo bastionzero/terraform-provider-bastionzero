@@ -9,7 +9,7 @@ NOTES:
 BUG FIXES:
 
 
-* resource/targetconnect_policy: Fix `verbs` validation to match behavior of the BastionZero API; `RDP` and `SQLServer` are permitted by the remote API. ([#36](https://github.com/bastionzero/terraform-provider-bastionzero/issues/36)).
+* resource/targetconnect_policy: Fix `verbs` validation to match behavior of the BastionZero API; `RDP` and `SQLServer` are permitted by the remote API ([#36](https://github.com/bastionzero/terraform-provider-bastionzero/issues/36)).
 
 
 * resource/environment: Remove require replacement behavior when an environment's `name` changes since the BastionZero API permits editing an environment's name after creation ([#35](https://github.com/bastionzero/terraform-provider-bastionzero/issues/35)).
