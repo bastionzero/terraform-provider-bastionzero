@@ -1,3 +1,20 @@
+## v0.1.2 (August 30, 2023)
+
+NOTES:
+
+
+* Upgraded [`bastionzero-sdk-go`](https://github.com/bastionzero/bastionzero-sdk-go) to v0.6.0 ([#43](https://github.com/bastionzero/terraform-provider-bastionzero/issues/43)).
+
+
+BUG FIXES:
+
+
+* resource/targetconnect_policy: Fix `verbs` validation to match behavior of the BastionZero API; `RDP` and `SQLServer` are permitted by the remote API. ([#36](https://github.com/bastionzero/terraform-provider-bastionzero/issues/36)).
+
+
+* resource/environment: Remove require replacement behavior when an environment's `name` changes since the BastionZero API permits editing an environment's name after creation ([#35](https://github.com/bastionzero/terraform-provider-bastionzero/issues/35)).
+
+
 ## v0.1.1 (May 24, 2023)
 
 NOTES:
