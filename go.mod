@@ -3,7 +3,7 @@ module github.com/bastionzero/terraform-provider-bastionzero
 go 1.18
 
 require (
-	github.com/bastionzero/bastionzero-sdk-go v0.6.0
+	github.com/bastionzero/bastionzero-sdk-go v0.7.0
 	github.com/cenkalti/backoff/v4 v4.2.1
 	github.com/hashicorp/terraform-plugin-docs v0.16.0
 	github.com/hashicorp/terraform-plugin-framework v1.3.5
