@@ -7,6 +7,7 @@ import (
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets/dbauthconfig"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets/targetstatus"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/targettype"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal"
@@ -232,4 +233,47 @@ func FlattenControlChannelSummary(ctx context.Context, apiObject *targets.Contro
 			"end_time":           endTime,
 		})
 	}
+}
+
+type DatabaseAuthenticationConfig struct {
+	AuthenticationType   types.String `tfsdk:"authentication_type"`
+	CloudServiceProvider types.String `tfsdk:"cloud_service_provider"`
+	Database             types.String `tfsdk:"database"`
+	Label                types.String `tfsdk:"label"`
+}
+
+func DatabaseAuthenticationConfigAttribute() schema.Attribute {
+	return schema.SingleNestedAttribute{
+		Computed:    true,
+		Description: "Information about the db target's database authentication configuration.",
+		Attributes: map[string]schema.Attribute{
+			"authentication_type": schema.StringAttribute{
+				Computed:    true,
+				Description: "The type of authentication used when connecting to the database.",
+			},
+			"cloud_service_provider": schema.StringAttribute{
+				Computed:    true,
+				Description: "Cloud service provider hosting the database. Only used for certain types of authentication, such as ServiceAccountInjection.",
+			},
+			"database": schema.StringAttribute{
+				Computed:    true,
+				Description: "The type of database running on the target.",
+			},
+			"label": schema.StringAttribute{
+				Computed:    true,
+				Description: "User-friendly label for this database authentication configuration.",
+			},
+		},
+	}
+}
+
+func FlattenDatabaseAuthenticationConfig(ctx context.Context, apiObject dbauthconfig.DatabaseAuthenticationConfig) types.Object {
+	attributeTypes, _ := internal.AttributeTypes[ControlChannelSummaryModel](ctx)
+
+	return types.ObjectValueMust(attributeTypes, map[string]attr.Value{
+		"authentication_type":    types.StringPointerValue(apiObject.AuthenticationType),
+		"cloud_service_provider": types.StringPointerValue(apiObject.CloudServiceProvider),
+		"database":               types.StringPointerValue(apiObject.Database),
+		"label":                  types.StringPointerValue(apiObject.Label),
+	})
 }

@@ -23,12 +23,13 @@ type dbTargetModel struct {
 	Region          types.String `tfsdk:"region"`
 	AgentPublicKey  types.String `tfsdk:"agent_public_key"`
 
-	ProxyTargetID types.String `tfsdk:"proxy_target_id"`
-	RemoteHost    types.String `tfsdk:"remote_host"`
-	RemotePort    types.Int64  `tfsdk:"remote_port"`
-	LocalPort     types.Int64  `tfsdk:"local_port"`
-	IsSplitCert   types.Bool   `tfsdk:"is_split_cert"`
-	DatabaseType  types.String `tfsdk:"database_type"`
+	ProxyTargetID                types.String `tfsdk:"proxy_target_id"`
+	RemoteHost                   types.String `tfsdk:"remote_host"`
+	RemotePort                   types.Int64  `tfsdk:"remote_port"`
+	LocalPort                    types.Int64  `tfsdk:"local_port"`
+	IsSplitCert                  types.Bool   `tfsdk:"is_split_cert"`
+	DatabaseType                 types.String `tfsdk:"database_type"`
+	DatabaseAuthenticationConfig types.Object `tfsdk:"database_authentication_config"`
 }
 
 func (t *dbTargetModel) SetID(value types.String)              { t.ID = value }
@@ -54,18 +55,21 @@ func setDbTargetAttributes(ctx context.Context, schema *dbTargetModel, dbTarget 
 
 	schema.IsSplitCert = types.BoolValue(dbTarget.IsSplitCert)
 	schema.DatabaseType = types.StringPointerValue(dbTarget.DatabaseType)
+	schema.DatabaseAuthenticationConfig = target.FlattenDatabaseAuthenticationConfig(ctx, dbTarget.DatabaseAuthenticationConfig)
 }
 
 func makeDbTargetDataSourceSchema(opts *target.BaseTargetDataSourceAttributeOptions) map[string]schema.Attribute {
 	dbTargetAttributes := target.BaseTargetDataSourceAttributes(targettype.Db, opts)
 	maps.Copy(dbTargetAttributes, target.BaseVirtualTargetDataSourceAttributes(targettype.Db))
 	dbTargetAttributes["is_split_cert"] = schema.BoolAttribute{
-		Computed:    true,
-		Description: "If `true`, this Db target has the split cert feature enabled; `false` otherwise.",
+		Computed:           true,
+		Description:        "Deprecated. If `true`, this Db target has the split cert feature enabled; `false` otherwise.",
+		DeprecationMessage: "Do not depend on this attribute. This attribute will be removed in the future.",
 	}
 	dbTargetAttributes["database_type"] = schema.StringAttribute{
-		Computed:    true,
-		Description: "The database's type. Can be null if this Db target does not have the split cert feature enabled (see `is_split_cert`).",
+		Computed:           true,
+		Description:        "Deprecated. The database's type. Can be null if this Db target does not have the split cert feature enabled (see `is_split_cert`).",
+		DeprecationMessage: "Do not depend on this attribute. This attribute will be removed in the future.",
 	}
 
 	return dbTargetAttributes
