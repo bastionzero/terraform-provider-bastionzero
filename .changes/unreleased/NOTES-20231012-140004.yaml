@@ -1,6 +1,0 @@
-kind: NOTES
-body: 'data-source/db_target, data-source/db_targets: Deprecate `database_type` and
-  `is_split_cert` attributes; use `database_authentication_config.database` and `database_authentication_config.authentication_type == "SplitCert"` instead'
-time: 2023-10-12T14:00:04.860882-04:00
-custom:
-  Issues: "58"
