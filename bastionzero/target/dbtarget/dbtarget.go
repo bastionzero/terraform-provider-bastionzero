@@ -4,8 +4,11 @@ import (
 	"context"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets/dbauthconfig"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/targettype"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/target"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"golang.org/x/exp/maps"
@@ -23,12 +26,13 @@ type dbTargetModel struct {
 	Region          types.String `tfsdk:"region"`
 	AgentPublicKey  types.String `tfsdk:"agent_public_key"`
 
-	ProxyTargetID types.String `tfsdk:"proxy_target_id"`
-	RemoteHost    types.String `tfsdk:"remote_host"`
-	RemotePort    types.Int64  `tfsdk:"remote_port"`
-	LocalPort     types.Int64  `tfsdk:"local_port"`
-	IsSplitCert   types.Bool   `tfsdk:"is_split_cert"`
-	DatabaseType  types.String `tfsdk:"database_type"`
+	ProxyTargetID                types.String `tfsdk:"proxy_target_id"`
+	RemoteHost                   types.String `tfsdk:"remote_host"`
+	RemotePort                   types.Int64  `tfsdk:"remote_port"`
+	LocalPort                    types.Int64  `tfsdk:"local_port"`
+	IsSplitCert                  types.Bool   `tfsdk:"is_split_cert"`
+	DatabaseType                 types.String `tfsdk:"database_type"`
+	DatabaseAuthenticationConfig types.Object `tfsdk:"database_authentication_config"`
 }
 
 func (t *dbTargetModel) SetID(value types.String)              { t.ID = value }
@@ -54,19 +58,66 @@ func setDbTargetAttributes(ctx context.Context, schema *dbTargetModel, dbTarget 
 
 	schema.IsSplitCert = types.BoolValue(dbTarget.IsSplitCert)
 	schema.DatabaseType = types.StringPointerValue(dbTarget.DatabaseType)
+	schema.DatabaseAuthenticationConfig = FlattenDatabaseAuthenticationConfig(ctx, dbTarget.DatabaseAuthenticationConfig)
 }
 
 func makeDbTargetDataSourceSchema(opts *target.BaseTargetDataSourceAttributeOptions) map[string]schema.Attribute {
 	dbTargetAttributes := target.BaseTargetDataSourceAttributes(targettype.Db, opts)
 	maps.Copy(dbTargetAttributes, target.BaseVirtualTargetDataSourceAttributes(targettype.Db))
+	dbTargetAttributes["database_authentication_config"] = DatabaseAuthenticationConfigAttribute()
 	dbTargetAttributes["is_split_cert"] = schema.BoolAttribute{
-		Computed:    true,
-		Description: "If `true`, this Db target has the split cert feature enabled; `false` otherwise.",
+		Computed:           true,
+		Description:        "Deprecated. If `true`, this Db target has the split cert feature enabled; `false` otherwise.",
+		DeprecationMessage: "Do not depend on this attribute. This attribute will be removed in the future.",
 	}
 	dbTargetAttributes["database_type"] = schema.StringAttribute{
-		Computed:    true,
-		Description: "The database's type. Can be null if this Db target does not have the split cert feature enabled (see `is_split_cert`).",
+		Computed:           true,
+		Description:        "Deprecated. The database's type. Can be null if this Db target does not have the split cert feature enabled (see `is_split_cert`).",
+		DeprecationMessage: "Do not depend on this attribute. This attribute will be removed in the future.",
 	}
 
 	return dbTargetAttributes
+}
+
+type DatabaseAuthenticationConfigModel struct {
+	AuthenticationType   types.String `tfsdk:"authentication_type"`
+	CloudServiceProvider types.String `tfsdk:"cloud_service_provider"`
+	Database             types.String `tfsdk:"database"`
+	Label                types.String `tfsdk:"label"`
+}
+
+func DatabaseAuthenticationConfigAttribute() schema.Attribute {
+	return schema.SingleNestedAttribute{
+		Computed:    true,
+		Description: "Information about the db target's database authentication configuration.",
+		Attributes: map[string]schema.Attribute{
+			"authentication_type": schema.StringAttribute{
+				Computed:    true,
+				Description: "The type of authentication used when connecting to the database.",
+			},
+			"cloud_service_provider": schema.StringAttribute{
+				Computed:    true,
+				Description: "Cloud service provider hosting the database. Only used for certain types of authentication, such as `ServiceAccountInjection`.",
+			},
+			"database": schema.StringAttribute{
+				Computed:    true,
+				Description: "The type of database running on the target.",
+			},
+			"label": schema.StringAttribute{
+				Computed:    true,
+				Description: "User-friendly label for this database authentication configuration.",
+			},
+		},
+	}
+}
+
+func FlattenDatabaseAuthenticationConfig(ctx context.Context, apiObject dbauthconfig.DatabaseAuthenticationConfig) types.Object {
+	attributeTypes, _ := internal.AttributeTypes[DatabaseAuthenticationConfigModel](ctx)
+
+	return types.ObjectValueMust(attributeTypes, map[string]attr.Value{
+		"authentication_type":    types.StringPointerValue(apiObject.AuthenticationType),
+		"cloud_service_provider": types.StringPointerValue(apiObject.CloudServiceProvider),
+		"database":               types.StringPointerValue(apiObject.Database),
+		"label":                  types.StringPointerValue(apiObject.Label),
+	})
 }

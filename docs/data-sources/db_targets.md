@@ -73,10 +73,11 @@ Read-Only:
 
 - `agent_public_key` (String) The target's proxy agent's public key.
 - `agent_version` (String) The target's proxy agent's version.
-- `database_type` (String) The database's type. Can be null if this Db target does not have the split cert feature enabled (see `is_split_cert`).
+- `database_authentication_config` (Attributes) Information about the db target's database authentication configuration. (see [below for nested schema](#nestedatt--targets--database_authentication_config))
+- `database_type` (String, Deprecated) Deprecated. The database's type. Can be null if this Db target does not have the split cert feature enabled (see `is_split_cert`).
 - `environment_id` (String) The target's environment's ID.
 - `id` (String) The target's unique ID.
-- `is_split_cert` (Boolean) If `true`, this Db target has the split cert feature enabled; `false` otherwise.
+- `is_split_cert` (Boolean, Deprecated) Deprecated. If `true`, this Db target has the split cert feature enabled; `false` otherwise.
 - `last_agent_update` (String) The time this target's proxy agent last had a transition change in status formatted as a UTC timestamp string in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) format. Null if there has not been a single transition change.
 - `local_port` (Number) The port of the Db daemon's localhost server that is spawned on the user's machine on connect. Null if not configured.
 - `name` (String) The target's name.
@@ -86,3 +87,13 @@ Read-Only:
 - `remote_port` (Number) The port of the Db server accessible via the target.
 - `status` (String) The target's status (one of `NotActivated`, `Offline`, `Online`, `Terminated`, `Error`, or `Restarting`).
 - `type` (String) The target's type (constant value `Db`).
+
+<a id="nestedatt--targets--database_authentication_config"></a>
+### Nested Schema for `targets.database_authentication_config`
+
+Read-Only:
+
+- `authentication_type` (String) The type of authentication used when connecting to the database.
+- `cloud_service_provider` (String) Cloud service provider hosting the database. Only used for certain types of authentication, such as `ServiceAccountInjection`.
+- `database` (String) The type of database running on the target.
+- `label` (String) User-friendly label for this database authentication configuration.

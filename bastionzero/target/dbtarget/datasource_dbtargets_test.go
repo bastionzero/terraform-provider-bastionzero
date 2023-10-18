@@ -51,6 +51,27 @@ func getValuesCheckMap(dbTarget *targets.DatabaseTarget) map[string]string {
 		valuesCheckMap["database_type"] = ""
 	}
 
+	if dbTarget.DatabaseAuthenticationConfig.AuthenticationType != nil {
+		valuesCheckMap["database_authentication_config.authentication_type"] = *dbTarget.DatabaseAuthenticationConfig.AuthenticationType
+	} else {
+		valuesCheckMap["database_authentication_config.authentication_type"] = ""
+	}
+	if dbTarget.DatabaseAuthenticationConfig.CloudServiceProvider != nil {
+		valuesCheckMap["database_authentication_config.cloud_service_provider"] = *dbTarget.DatabaseAuthenticationConfig.CloudServiceProvider
+	} else {
+		valuesCheckMap["database_authentication_config.cloud_service_provider"] = ""
+	}
+	if dbTarget.DatabaseAuthenticationConfig.Database != nil {
+		valuesCheckMap["database_authentication_config.database"] = *dbTarget.DatabaseAuthenticationConfig.Database
+	} else {
+		valuesCheckMap["database_authentication_config.database"] = ""
+	}
+	if dbTarget.DatabaseAuthenticationConfig.Label != nil {
+		valuesCheckMap["database_authentication_config.label"] = *dbTarget.DatabaseAuthenticationConfig.Label
+	} else {
+		valuesCheckMap["database_authentication_config.label"] = ""
+	}
+
 	return valuesCheckMap
 }
 
