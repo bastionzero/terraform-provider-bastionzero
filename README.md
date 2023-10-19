@@ -12,7 +12,7 @@ on the Terraform registry to learn more.
 
 ## Requirements
 - [Terraform](https://www.terraform.io/downloads.html) v1.x
-- [Go](https://golang.org/doc/install) 1.18 (to build the provider plugin)
+- [Go](https://golang.org/doc/install) 1.20 (to build the provider plugin)
 - [GNU Make](https://www.gnu.org/software/make/) (to run the `GNUmakefile`)
 - Bash (to run certain scripts referenced by the `GNUmakefile`)
 
