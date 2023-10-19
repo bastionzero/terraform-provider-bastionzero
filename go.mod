@@ -1,6 +1,6 @@
 module github.com/bastionzero/terraform-provider-bastionzero
 
-go 1.18
+go 1.20
 
 require (
 	github.com/bastionzero/bastionzero-sdk-go v0.9.0
