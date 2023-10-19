@@ -1,0 +1,5 @@
+kind: NOTES
+body: "Update to Go 1.20 and require it to build and run this provider; this is the last Go release that runs on macOS 10.13 High Sierra, macOS 10.14 Mojave, Windows 7, Windows 8, Windows Server 2008, and Windows Server 2012. A future release of this provider will update to Go 1.21, and these platforms will no longer be supported"
+time: 2023-10-18T20:23:20.867877-04:00
+custom:
+  Issues: "62"
