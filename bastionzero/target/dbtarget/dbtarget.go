@@ -60,7 +60,7 @@ func setDbTargetAttributes(ctx context.Context, schema *dbTargetModel, dbTarget 
 
 	schema.IsSplitCert = types.BoolValue(dbTarget.IsSplitCert)
 	schema.DatabaseType = types.StringPointerValue(dbTarget.DatabaseType)
-	schema.DatabaseAuthenticationConfig = FlattenDatabaseAuthenticationConfig(ctx, dbTarget.DatabaseAuthenticationConfig)
+	schema.DatabaseAuthenticationConfig = FlattenDatabaseAuthenticationConfig(ctx, &dbTarget.DatabaseAuthenticationConfig)
 }
 
 func makeDbTargetDataSourceSchema(opts *target.BaseTargetDataSourceAttributeOptions) map[string]schema.Attribute {
@@ -113,7 +113,18 @@ func DatabaseAuthenticationConfigAttribute() schema.Attribute {
 	}
 }
 
-func FlattenDatabaseAuthenticationConfig(ctx context.Context, apiObject dbauthconfig.DatabaseAuthenticationConfig) types.Object {
+func ExpandDatabaseAuthenticationConfig(ctx context.Context, tfObject types.Object) *dbauthconfig.DatabaseAuthenticationConfig {
+	return internal.ExpandFrameworkObject(ctx, tfObject, func(m DatabaseAuthenticationConfigModel) *dbauthconfig.DatabaseAuthenticationConfig {
+		return &dbauthconfig.DatabaseAuthenticationConfig{
+			AuthenticationType:   m.AuthenticationType.ValueStringPointer(),
+			CloudServiceProvider: m.CloudServiceProvider.ValueStringPointer(),
+			Database:             m.Database.ValueStringPointer(),
+			Label:                m.Label.ValueStringPointer(),
+		}
+	})
+}
+
+func FlattenDatabaseAuthenticationConfig(ctx context.Context, apiObject *dbauthconfig.DatabaseAuthenticationConfig) types.Object {
 	attributeTypes, _ := internal.AttributeTypes[DatabaseAuthenticationConfigModel](ctx)
 
 	return types.ObjectValueMust(attributeTypes, map[string]attr.Value{
