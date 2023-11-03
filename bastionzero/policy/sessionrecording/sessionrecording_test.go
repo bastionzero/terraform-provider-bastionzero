@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/sessionrecording"
-	"github.com/bastionzero/terraform-provider-bastionzero/internal/testgen/bzpolicygen"
-	"github.com/bastionzero/terraform-provider-bastionzero/internal/testgen/tfpolicygen"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal/testgen/bzgen/bzpolicygen"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal/testgen/tfgen/tfpolicygen"
 	"github.com/stretchr/testify/require"
 
 	"pgregory.net/rapid"

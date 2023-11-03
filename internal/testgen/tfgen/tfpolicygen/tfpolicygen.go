@@ -1,3 +1,5 @@
+// Package tfpolicygen provides property based test (PBT) generators for
+// BastionZero Terraform Provider policy schema model types
 package tfpolicygen
 
 import (
@@ -6,7 +8,7 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/policytype"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal/acctest"
-	"github.com/bastionzero/terraform-provider-bastionzero/internal/testgen/bzpolicygen"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal/testgen/bzgen/bzpolicygen"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"pgregory.net/rapid"
 )

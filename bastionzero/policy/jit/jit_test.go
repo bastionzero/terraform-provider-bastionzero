@@ -6,8 +6,8 @@ import (
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/jit"
-	"github.com/bastionzero/terraform-provider-bastionzero/internal/testgen/bzpolicygen"
-	"github.com/bastionzero/terraform-provider-bastionzero/internal/testgen/tfpolicygen"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal/testgen/bzgen/bzpolicygen"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal/testgen/tfgen/tfpolicygen"
 	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
 )
