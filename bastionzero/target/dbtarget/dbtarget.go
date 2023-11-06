@@ -14,8 +14,8 @@ import (
 	"golang.org/x/exp/maps"
 )
 
-// dbTargetModel maps the db target schema data.
-type dbTargetModel struct {
+// dbTargetDataSourceModel maps the db target data source schema data.
+type dbTargetDataSourceModel struct {
 	ID              types.String `tfsdk:"id"`
 	Name            types.String `tfsdk:"name"`
 	Type            types.String `tfsdk:"type"`
@@ -36,25 +36,27 @@ type dbTargetModel struct {
 	DatabaseAuthenticationConfig types.Object `tfsdk:"database_authentication_config"`
 }
 
-func (t *dbTargetModel) SetID(value types.String)              { t.ID = value }
-func (t *dbTargetModel) SetName(value types.String)            { t.Name = value }
-func (t *dbTargetModel) SetType(value types.String)            { t.Type = value }
-func (t *dbTargetModel) SetStatus(value types.String)          { t.Status = value }
-func (t *dbTargetModel) SetEnvironmentID(value types.String)   { t.EnvironmentID = value }
-func (t *dbTargetModel) SetLastAgentUpdate(value types.String) { t.LastAgentUpdate = value }
-func (t *dbTargetModel) SetAgentVersion(value types.String)    { t.AgentVersion = value }
-func (t *dbTargetModel) SetRegion(value types.String)          { t.Region = value }
-func (t *dbTargetModel) SetAgentPublicKey(value types.String)  { t.AgentPublicKey = value }
+func (t *dbTargetDataSourceModel) SetID(value types.String)              { t.ID = value }
+func (t *dbTargetDataSourceModel) SetName(value types.String)            { t.Name = value }
+func (t *dbTargetDataSourceModel) SetType(value types.String)            { t.Type = value }
+func (t *dbTargetDataSourceModel) SetStatus(value types.String)          { t.Status = value }
+func (t *dbTargetDataSourceModel) SetEnvironmentID(value types.String)   { t.EnvironmentID = value }
+func (t *dbTargetDataSourceModel) SetLastAgentUpdate(value types.String) { t.LastAgentUpdate = value }
+func (t *dbTargetDataSourceModel) SetAgentVersion(value types.String)    { t.AgentVersion = value }
+func (t *dbTargetDataSourceModel) SetRegion(value types.String)          { t.Region = value }
+func (t *dbTargetDataSourceModel) SetAgentPublicKey(value types.String)  { t.AgentPublicKey = value }
 
-func (t *dbTargetModel) SetProxyTargetID(value types.String)      { t.ProxyTargetID = value }
-func (t *dbTargetModel) SetProxyEnvironmentID(value types.String) { t.ProxyEnvironmentID = value }
-func (t *dbTargetModel) SetRemoteHost(value types.String)         { t.RemoteHost = value }
-func (t *dbTargetModel) SetRemotePort(value types.Int64)          { t.RemotePort = value }
-func (t *dbTargetModel) SetLocalPort(value types.Int64)           { t.LocalPort = value }
+func (t *dbTargetDataSourceModel) SetProxyTargetID(value types.String) { t.ProxyTargetID = value }
+func (t *dbTargetDataSourceModel) SetProxyEnvironmentID(value types.String) {
+	t.ProxyEnvironmentID = value
+}
+func (t *dbTargetDataSourceModel) SetRemoteHost(value types.String) { t.RemoteHost = value }
+func (t *dbTargetDataSourceModel) SetRemotePort(value types.Int64)  { t.RemotePort = value }
+func (t *dbTargetDataSourceModel) SetLocalPort(value types.Int64)   { t.LocalPort = value }
 
-// setDbTargetAttributes populates the TF schema data from a db target API
-// object.
-func setDbTargetAttributes(ctx context.Context, schema *dbTargetModel, dbTarget *targets.DatabaseTarget) {
+// setDbTargetDataSourceAttributes populates the TF schema data from a db target
+// API object.
+func setDbTargetDataSourceAttributes(ctx context.Context, schema *dbTargetDataSourceModel, dbTarget *targets.DatabaseTarget) {
 	target.SetBaseTargetAttributes(ctx, schema, dbTarget)
 	target.SetBaseVirtualTargetAttributes(ctx, schema, dbTarget)
 
