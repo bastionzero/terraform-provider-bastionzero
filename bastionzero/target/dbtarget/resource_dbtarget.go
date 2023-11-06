@@ -58,10 +58,10 @@ func (r *dbTargetResource) Metadata(_ context.Context, req resource.MetadataRequ
 }
 
 // Schema defines the schema for the db target resource.
-func (r *dbTargetResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *dbTargetResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Provides a BastionZero database target. Database targets configure remote access to database servers running on [Bzero](bzero_target) targets or [Cluster](cluster_target) targets.",
-		Attributes:          makeDbTargetResourceSchema(),
+		Attributes:          makeDbTargetResourceSchema(ctx),
 	}
 }
 

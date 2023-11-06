@@ -19,6 +19,7 @@ import (
 	datasource_schema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	resource_schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -166,7 +167,7 @@ func setDbTargetResourceAttributes(ctx context.Context, schema *dbTargetResource
 	schema.DatabaseAuthenticationConfig = FlattenDatabaseAuthenticationConfig(ctx, &dbTarget.DatabaseAuthenticationConfig)
 }
 
-func makeDbTargetResourceSchema() map[string]resource_schema.Attribute {
+func makeDbTargetResourceSchema(ctx context.Context) map[string]resource_schema.Attribute {
 	// Valid constants for fields in `database_authentication_config`. These are
 	// the only values the BastionZero backend currently accepts
 	validAuthenticationTypes := []string{
@@ -253,8 +254,20 @@ func makeDbTargetResourceSchema() map[string]resource_schema.Attribute {
 			Description: fmt.Sprintf("The port of the %v daemon's localhost server that is spawned on the user's machine on connect. If this attribute is left unconfigured, an available port will be chosen when the target is connected to.", targettype.Db),
 		},
 		"database_authentication_config": resource_schema.SingleNestedAttribute{
-			Optional:    true,
-			Computed:    true,
+			Optional: true,
+			Computed: true,
+			// Important to set this default, even though backend sets it for us
+			// when unspecified, because it makes it easier to keep the TF state
+			// and TF config in sync with the backend. Removing this code will
+			// make it so terraform thinks any TF config that does not set
+			// db_auth_config require an update to the remote state when it
+			// really does not
+			Default: objectdefault.StaticValue(FlattenDatabaseAuthenticationConfig(ctx,
+				&dbauthconfig.DatabaseAuthenticationConfig{
+					AuthenticationType: bastionzero.PtrTo("Default"),
+					Label:              bastionzero.PtrTo("None"),
+				}),
+			),
 			Description: "Information about the db target's database authentication configuration. If this attribute is left unconfigured, BastionZero will set this value to the default configuration which implies a non-passwordless database setup.",
 			Attributes: map[string]resource_schema.Attribute{
 				"authentication_type": resource_schema.StringAttribute{
