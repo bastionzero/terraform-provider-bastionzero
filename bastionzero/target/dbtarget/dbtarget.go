@@ -264,7 +264,7 @@ func makeDbTargetResourceSchema(ctx context.Context) map[string]resource_schema.
 			// really does not
 			Default: objectdefault.StaticValue(FlattenDatabaseAuthenticationConfig(ctx,
 				&dbauthconfig.DatabaseAuthenticationConfig{
-					AuthenticationType: bastionzero.PtrTo("Default"),
+					AuthenticationType: bastionzero.PtrTo(dbauthconfig.Default),
 					Label:              bastionzero.PtrTo("None"),
 				}),
 			),
