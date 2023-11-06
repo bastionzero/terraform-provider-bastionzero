@@ -60,7 +60,7 @@ func (r *environmentResource) Metadata(_ context.Context, req resource.MetadataR
 // Schema defines the schema for the environment resource.
 func (r *environmentResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Provides a BastionZero environment resource. An environment is a collection of targets.",
+		MarkdownDescription: "Provides a BastionZero environment. An environment is a collection of targets.",
 		Attributes:          makeEnvironmentResourceSchema(),
 	}
 }
