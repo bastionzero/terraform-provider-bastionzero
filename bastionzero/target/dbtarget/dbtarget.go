@@ -19,6 +19,8 @@ import (
 	datasource_schema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	resource_schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -188,6 +190,9 @@ func makeDbTargetResourceSchema() map[string]resource_schema.Attribute {
 		"id": resource_schema.StringAttribute{
 			Computed:    true,
 			Description: "The target's unique ID.",
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 			Validators: []validator.String{
 				bzvalidator.ValidUUIDV4(),
 			},
@@ -199,6 +204,9 @@ func makeDbTargetResourceSchema() map[string]resource_schema.Attribute {
 		"type": resource_schema.StringAttribute{
 			Computed:    true,
 			Description: fmt.Sprintf("The target's type (constant value `%s`).", targettype.Db),
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"status": resource_schema.StringAttribute{
 			Computed:    true,
