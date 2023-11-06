@@ -268,7 +268,7 @@ func makeDbTargetResourceSchema(ctx context.Context) map[string]resource_schema.
 					Label:              bastionzero.PtrTo("None"),
 				}),
 			),
-			Description: "Information about the db target's database authentication configuration. If this attribute is left unconfigured, BastionZero will set this value to the default configuration which implies a non-passwordless database setup.",
+			Description: "Information about the db target's database authentication configuration. If this attribute is left unconfigured, the target is configured with the default, non-passwordless database configuration.",
 			Attributes: map[string]resource_schema.Attribute{
 				"authentication_type": resource_schema.StringAttribute{
 					Required:    true,

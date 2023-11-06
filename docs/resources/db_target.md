@@ -25,7 +25,7 @@ Provides a BastionZero database target. Database targets configure remote access
 
 ### Optional
 
-- `database_authentication_config` (Attributes) Information about the db target's database authentication configuration. If this attribute is left unconfigured, BastionZero will set this value to the default configuration which implies a non-passwordless database setup. (see [below for nested schema](#nestedatt--database_authentication_config))
+- `database_authentication_config` (Attributes) Information about the db target's database authentication configuration. If this attribute is left unconfigured, the target is configured with the default, non-passwordless database configuration. (see [below for nested schema](#nestedatt--database_authentication_config))
 - `local_port` (Number) The port of the Db daemon's localhost server that is spawned on the user's machine on connect. If this attribute is left unconfigured, an available port will be chosen when the target is connected to.
 
 ### Read-Only
