@@ -181,6 +181,7 @@ func (p *BastionZeroProvider) Resources(ctx context.Context) []func() resource.R
 		proxy.NewProxyPolicyResource,
 		sessionrecording.NewSessionRecordingPolicyResource,
 		jit.NewJITPolicyResource,
+		dbtarget.NewDbTargetResource,
 	}
 }
 

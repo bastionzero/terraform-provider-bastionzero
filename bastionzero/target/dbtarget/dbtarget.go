@@ -3,8 +3,10 @@ package dbtarget
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/apierror"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets/dbauthconfig"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets/targetstatus"
@@ -15,9 +17,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasource_schema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	resource_schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"golang.org/x/exp/maps"
 )
 
@@ -302,4 +306,31 @@ func FlattenDatabaseAuthenticationConfig(ctx context.Context, apiObject *dbauthc
 		"database":               types.StringPointerValue(apiObject.Database),
 		"label":                  types.StringPointerValue(apiObject.Label),
 	})
+}
+
+func readDbTarget(ctx context.Context, schema *dbTargetResourceModel, client *bastionzero.Client) (found bool, diags diag.Diagnostics) {
+	if schema.ID.IsUnknown() || schema.ID.IsNull() {
+		diags.AddError(
+			"Unexpected null ID in schema",
+			"Expected ID to be set. Please report this issue to the provider developers.",
+		)
+		return false, diags
+	}
+
+	// Get refreshed db target value from BastionZero
+	tflog.Debug(ctx, "Querying for db target")
+	dbTarget, _, err := client.Targets.GetDatabaseTarget(ctx, schema.ID.ValueString())
+	// TODO-Yuval: Fix this on backend
+	if apierror.IsAPIErrorStatusCode(err, http.StatusNotFound) {
+		return false, diags
+	} else if err != nil {
+		diags.AddError(
+			"Error reading db target",
+			"Could not read db target, unexpected error: "+err.Error())
+		return false, diags
+	}
+	tflog.Debug(ctx, "Queried for db target")
+
+	setDbTargetResourceAttributes(ctx, schema, dbTarget)
+	return true, diags
 }
