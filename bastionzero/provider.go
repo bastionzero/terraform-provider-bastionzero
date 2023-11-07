@@ -200,6 +200,7 @@ func (p *BastionZeroProvider) DataSources(ctx context.Context) []func() datasour
 		clustertarget.NewClusterTargetsDataSource,
 		dbtarget.NewDbTargetDataSource,
 		dbtarget.NewDbTargetsDataSource,
+		dbtarget.NewSupportedDatabaseConfigsDataSource,
 		webtarget.NewWebTargetDataSource,
 		webtarget.NewWebTargetsDataSource,
 		dactarget.NewDacTargetDataSource,
