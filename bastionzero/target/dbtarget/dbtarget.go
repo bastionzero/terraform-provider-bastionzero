@@ -345,7 +345,6 @@ func readDbTarget(ctx context.Context, schema *dbTargetResourceModel, client *ba
 	// Get refreshed db target value from BastionZero
 	tflog.Debug(ctx, "Querying for db target")
 	dbTarget, _, err := client.Targets.GetDatabaseTarget(ctx, schema.ID.ValueString())
-	// TODO-Yuval: Fix this on backend
 	if apierror.IsAPIErrorStatusCode(err, http.StatusNotFound) {
 		return false, diags
 	} else if err != nil {

@@ -49,8 +49,7 @@ func TestAccDbTarget_Basic(t *testing.T) {
 						RemoteHost:         bastionzero.PtrTo("localhost"),
 						RemotePort:         bastionzero.PtrTo(5432),
 						DatabaseAuthConfig: &dbauthconfig.DatabaseAuthenticationConfig{AuthenticationType: bastionzero.PtrTo(dbauthconfig.Default), Label: bastionzero.PtrTo("None")},
-						// TODO-Yuval: Check LocalPort is set to null on
-						// BastionZero
+						LocalPort:          nil,
 					}),
 					testAccCheckResourceDbTargetComputedAttr(resourceName),
 					// Check the state value we explicitly configured in this
@@ -147,14 +146,14 @@ func testAccCheckDbTargetAttributes(t *testing.T, target *targets.DatabaseTarget
 		if expected.RemoteHost != nil && *expected.RemoteHost != target.RemoteHost {
 			return fmt.Errorf("Bad remote_host, expected \"%s\", got: %#v", *expected.RemoteHost, target.RemoteHost)
 		}
-		if expected.RemotePort != nil && !assert.EqualValues(t, *expected.RemotePort, target.RemotePort.Value) {
-			return fmt.Errorf("Bad remote_port, expected \"%d\", got: %#v", *expected.RemotePort, target.RemotePort.Value)
+		if expected.RemotePort != nil && !assert.Equal(t, expected.RemotePort, target.RemotePort.Value) {
+			return fmt.Errorf("Bad remote_port, expected \"%s\", got: %s", acctest.SafePrettyInt(expected.RemotePort), acctest.SafePrettyInt(target.RemotePort.Value))
 		}
 		if expected.DatabaseAuthConfig != nil && !assert.Equal(t, *expected.DatabaseAuthConfig, target.DatabaseAuthenticationConfig) {
 			return fmt.Errorf("Bad database_authentication_config, expected \"%#v\", got: %#v", *expected.DatabaseAuthConfig, target.DatabaseAuthenticationConfig)
 		}
-		if expected.LocalPort != nil && !assert.EqualValues(t, *expected.LocalPort, target.LocalPort.Value) {
-			return fmt.Errorf("Bad local_port, expected \"%d\", got: %#v", *expected.LocalPort, target.LocalPort.Value)
+		if !assert.Equal(t, expected.LocalPort, target.LocalPort.Value) {
+			return fmt.Errorf("Bad local_port, expected \"%s\", got: %s", acctest.SafePrettyInt(expected.LocalPort), acctest.SafePrettyInt(target.LocalPort.Value))
 		}
 
 		return nil

@@ -702,3 +702,11 @@ func ExpandValuesCheckMapToSingleCheck[T any](resourceName string, apiObject *T,
 
 	return resource.ComposeTestCheckFunc(checkFuncs...)
 }
+
+func SafePrettyInt(value *int) string {
+	if value == nil {
+		return "<nil>"
+	} else {
+		return strconv.Itoa(*value)
+	}
+}

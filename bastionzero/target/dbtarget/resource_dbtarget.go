@@ -219,7 +219,6 @@ func (r *dbTargetResource) Delete(ctx context.Context, req resource.DeleteReques
 	tflog.Debug(ctx, "Deleting db target")
 	_, err := r.client.Targets.DeleteDatabaseTarget(ctx, state.ID.ValueString())
 
-	// TODO-Yuval: Fix this on backend
 	if apierror.IsAPIErrorStatusCode(err, http.StatusNotFound) {
 		// Return early without error if db target is already deleted
 		return
