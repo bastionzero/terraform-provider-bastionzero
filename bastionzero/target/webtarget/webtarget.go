@@ -23,10 +23,11 @@ type webTargetModel struct {
 	Region          types.String `tfsdk:"region"`
 	AgentPublicKey  types.String `tfsdk:"agent_public_key"`
 
-	ProxyTargetID types.String `tfsdk:"proxy_target_id"`
-	RemoteHost    types.String `tfsdk:"remote_host"`
-	RemotePort    types.Int64  `tfsdk:"remote_port"`
-	LocalPort     types.Int64  `tfsdk:"local_port"`
+	ProxyTargetID      types.String `tfsdk:"proxy_target_id"`
+	ProxyEnvironmentID types.String `tfsdk:"proxy_environment_id"`
+	RemoteHost         types.String `tfsdk:"remote_host"`
+	RemotePort         types.Int64  `tfsdk:"remote_port"`
+	LocalPort          types.Int64  `tfsdk:"local_port"`
 }
 
 func (t *webTargetModel) SetID(value types.String)              { t.ID = value }
@@ -39,10 +40,11 @@ func (t *webTargetModel) SetAgentVersion(value types.String)    { t.AgentVersion
 func (t *webTargetModel) SetRegion(value types.String)          { t.Region = value }
 func (t *webTargetModel) SetAgentPublicKey(value types.String)  { t.AgentPublicKey = value }
 
-func (t *webTargetModel) SetProxyTargetID(value types.String) { t.ProxyTargetID = value }
-func (t *webTargetModel) SetRemoteHost(value types.String)    { t.RemoteHost = value }
-func (t *webTargetModel) SetRemotePort(value types.Int64)     { t.RemotePort = value }
-func (t *webTargetModel) SetLocalPort(value types.Int64)      { t.LocalPort = value }
+func (t *webTargetModel) SetProxyTargetID(value types.String)      { t.ProxyTargetID = value }
+func (t *webTargetModel) SetProxyEnvironmentID(value types.String) { t.ProxyEnvironmentID = value }
+func (t *webTargetModel) SetRemoteHost(value types.String)         { t.RemoteHost = value }
+func (t *webTargetModel) SetRemotePort(value types.Int64)          { t.RemotePort = value }
+func (t *webTargetModel) SetLocalPort(value types.Int64)           { t.LocalPort = value }
 
 // setWebTargetAttributes populates the TF schema data from a web target API
 // object
