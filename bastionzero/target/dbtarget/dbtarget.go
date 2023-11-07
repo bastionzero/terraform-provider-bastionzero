@@ -86,24 +86,7 @@ func makeDbTargetDataSourceSchema(opts *target.BaseTargetDataSourceAttributeOpti
 	dbTargetAttributes["database_authentication_config"] = datasource_schema.SingleNestedAttribute{
 		Computed:    true,
 		Description: "Information about the db target's database authentication configuration.",
-		Attributes: map[string]datasource_schema.Attribute{
-			"authentication_type": datasource_schema.StringAttribute{
-				Computed:    true,
-				Description: "The type of authentication used when connecting to the database.",
-			},
-			"cloud_service_provider": datasource_schema.StringAttribute{
-				Computed:    true,
-				Description: "Cloud service provider hosting the database. Only used for certain types of authentication, such as `ServiceAccountInjection`.",
-			},
-			"database": datasource_schema.StringAttribute{
-				Computed:    true,
-				Description: "The type of database running on the target.",
-			},
-			"label": datasource_schema.StringAttribute{
-				Computed:    true,
-				Description: "User-friendly label for this database authentication configuration.",
-			},
-		},
+		Attributes:  DatabaseAuthenticationConfigAttributes(),
 	}
 	dbTargetAttributes["is_split_cert"] = datasource_schema.BoolAttribute{
 		Computed:           true,
@@ -305,6 +288,27 @@ type DatabaseAuthenticationConfigModel struct {
 	CloudServiceProvider types.String `tfsdk:"cloud_service_provider"`
 	Database             types.String `tfsdk:"database"`
 	Label                types.String `tfsdk:"label"`
+}
+
+func DatabaseAuthenticationConfigAttributes() map[string]datasource_schema.Attribute {
+	return map[string]datasource_schema.Attribute{
+		"authentication_type": datasource_schema.StringAttribute{
+			Computed:    true,
+			Description: "The type of authentication used when connecting to the database.",
+		},
+		"cloud_service_provider": datasource_schema.StringAttribute{
+			Computed:    true,
+			Description: "Cloud service provider hosting the database. Only used for certain types of authentication, such as `ServiceAccountInjection`.",
+		},
+		"database": datasource_schema.StringAttribute{
+			Computed:    true,
+			Description: "The type of database running on the target.",
+		},
+		"label": datasource_schema.StringAttribute{
+			Computed:    true,
+			Description: "User-friendly label for this database authentication configuration.",
+		},
+	}
 }
 
 func ExpandDatabaseAuthenticationConfig(ctx context.Context, tfObject types.Object) *dbauthconfig.DatabaseAuthenticationConfig {
