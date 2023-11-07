@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/apierror"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets"
+	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets/dbauthconfig"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -20,6 +22,7 @@ var (
 	_ resource.Resource                = &dbTargetResource{}
 	_ resource.ResourceWithConfigure   = &dbTargetResource{}
 	_ resource.ResourceWithImportState = &dbTargetResource{}
+	_ resource.ResourceWithModifyPlan  = &dbTargetResource{}
 )
 
 func NewDbTargetResource() resource.Resource {
@@ -237,4 +240,82 @@ func (r *dbTargetResource) Delete(ctx context.Context, req resource.DeleteReques
 func (r *dbTargetResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func (r *dbTargetResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	// Check if the resource is being destroyed
+	if req.Plan.Raw.IsNull() {
+		// Return early as the following checks don't matter during destruction.
+		// They only matter during creation and update
+		return
+	}
+
+	// Get `database_authentication_config` and `remote_host` values from the
+	// plan
+	var tfDbAuthConfig types.Object
+	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("database_authentication_config"), &tfDbAuthConfig)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	var tfRemoteHost types.String
+	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("remote_host"), &tfRemoteHost)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// The checks below don't make sense if these values are unknown. Return
+	// early and wait for the apply phase when unknown values are filled in and
+	// ModifyPlan() is called once more.
+	if tfDbAuthConfig.IsUnknown() || tfRemoteHost.IsUnknown() {
+		return
+	}
+
+	dbAuthConfig := ExpandDatabaseAuthenticationConfig(ctx, tfDbAuthConfig)
+	// Sanity check. This should never be nil since we already returned early if
+	// resource is being destroyed, `database_authentication_config` has a
+	// default value if not set, and we've already returned early if any of
+	// these values are unknown
+	if dbAuthConfig == nil {
+		resp.Diagnostics.AddError(
+			"Unexpected nil pointer",
+			"Expected *dbauthconfig.DatabaseAuthenticationConfig not to be nil but got nil. Please report this issue to the provider developers.",
+		)
+		return
+	}
+
+	// Return error if plan contains invalid `remote_host` based on
+	// `database_authentication_config.cloud_service_provider`
+	if dbAuthConfig.CloudServiceProvider != nil {
+		// GCP check
+		if *dbAuthConfig.CloudServiceProvider == dbauthconfig.GCP && !strings.HasPrefix(tfRemoteHost.ValueString(), "gcp://") {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("remote_host"),
+				"Invalid remote host",
+				fmt.Sprintf("If `database_authentication_config.cloud_service_provider` is equal to \"%v\", then the `remote_host` must begin with a \"%v\" prefix to be considered a valid database target.", dbauthconfig.GCP, "gcp://"),
+			)
+			return
+		}
+		// AWS checks are further restricted by the `database` field
+		if dbAuthConfig.Database != nil && *dbAuthConfig.CloudServiceProvider == dbauthconfig.AWS {
+			errMsg := func(database string, expectedProtocol string) string {
+				return fmt.Sprintf("If `database_authentication_config.cloud_service_provider` is equal to \"%v\" and `database_authentication_config.database` is equal to \"%v\", then the `remote_host` must begin with a \"%v\" prefix to be considered a valid database target.", dbauthconfig.AWS, database, expectedProtocol)
+			}
+			if *dbAuthConfig.Database == dbauthconfig.MySQL && !strings.HasPrefix(tfRemoteHost.ValueString(), "rdsmysql://") {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("remote_host"),
+					"Invalid remote host",
+					errMsg(dbauthconfig.MySQL, "rdsmysql://"),
+				)
+				return
+			}
+			if *dbAuthConfig.Database == dbauthconfig.Postgres && !strings.HasPrefix(tfRemoteHost.ValueString(), "rds://") {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("remote_host"),
+					"Invalid remote host",
+					errMsg(dbauthconfig.Postgres, "rds://"),
+				)
+				return
+			}
+		}
+	}
 }
