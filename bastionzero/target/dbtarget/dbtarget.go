@@ -230,7 +230,7 @@ func makeDbTargetResourceSchema(ctx context.Context) map[string]resource_schema.
 		},
 		"remote_port": resource_schema.Int64Attribute{
 			Required:    true,
-			Description: fmt.Sprintf("The port of the %v server accessible via the target. This field is required for all databases; however, if `database_authentication_config.cloud_service_provider` is equal to `GCP`, then the value will be ignored when connecting to the database.", targettype.Db),
+			Description: fmt.Sprintf("The port of the %v server accessible via the target. This field is required for all databases; however, if `database_authentication_config.cloud_service_provider` is equal to `%v`, then the value will be ignored when connecting to the database.", targettype.Db, dbauthconfig.GCP),
 		},
 		"local_port": resource_schema.Int64Attribute{
 			Optional:    true,

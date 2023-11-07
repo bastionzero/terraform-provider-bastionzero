@@ -82,8 +82,6 @@ func (r *dbTargetResource) Create(ctx context.Context, req resource.CreateReques
 	createReq.TargetName = plan.Name.ValueString()
 	createReq.ProxyTargetID = plan.ProxyTargetID.ValueString()
 	createReq.RemoteHost = plan.RemoteHost.ValueString()
-	// TODO-Yuval: Come back to this. Potential improvement to not include this
-	// if its GCP
 	createReq.RemotePort = targets.Port{Value: bastionzero.PtrTo(int(plan.RemotePort.ValueInt64()))}
 	if !plan.LocalPort.IsNull() {
 		createReq.LocalPort = &targets.Port{Value: bastionzero.PtrTo(int(plan.LocalPort.ValueInt64()))}
@@ -172,8 +170,6 @@ func (r *dbTargetResource) Update(ctx context.Context, req resource.UpdateReques
 		modifyReq.RemoteHost = bastionzero.PtrTo(plan.RemoteHost.ValueString())
 	}
 	if !plan.RemotePort.Equal(state.RemotePort) {
-		// TODO-Yuval: Come back to this. Potential improvement to not include
-		// this if its GCP
 		modifyReq.RemotePort = &targets.Port{Value: bastionzero.PtrTo(int(plan.RemotePort.ValueInt64()))}
 	}
 	if !plan.LocalPort.Equal(state.LocalPort) {
