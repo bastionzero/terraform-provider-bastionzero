@@ -180,8 +180,19 @@ type VirtualTargetModelInterface interface {
 // SetBaseVirtualTargetAttributes populates base virtual target attributes in
 // the TF schema from a virtual target
 func SetBaseVirtualTargetAttributes(ctx context.Context, schema VirtualTargetModelInterface, virtualTarget targets.VirtualTargetInterface) {
-	schema.SetProxyTargetID(types.StringValue(virtualTarget.GetProxyTargetID()))
-	schema.SetProxyEnvironmentID(types.StringValue(virtualTarget.GetProxyEnvironmentID()))
+	// ProxyTargetID and ProxyEnvironmentID are returned as the empty strings
+	// when they're not specified. Save these as null when they're empty
+	if virtualTarget.GetProxyTargetID() == "" {
+		schema.SetProxyTargetID(types.StringNull())
+	} else {
+		schema.SetProxyTargetID(types.StringValue(virtualTarget.GetProxyTargetID()))
+	}
+	if virtualTarget.GetProxyEnvironmentID() == "" {
+		schema.SetProxyEnvironmentID(types.StringNull())
+	} else {
+		schema.SetProxyEnvironmentID(types.StringValue(virtualTarget.GetProxyEnvironmentID()))
+	}
+
 	schema.SetRemoteHost(types.StringValue(virtualTarget.GetRemoteHost()))
 	schema.SetRemotePort(typesext.Int64PointerValue(virtualTarget.GetRemotePort().Value))
 	schema.SetLocalPort(typesext.Int64PointerValue(virtualTarget.GetLocalPort().Value))
