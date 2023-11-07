@@ -355,7 +355,7 @@ func TestAccProxyPolicy_Environments(t *testing.T) {
 
 	acctest.SkipIfNotInAcceptanceTestMode(t)
 	acctest.PreCheck(ctx, t)
-	acctest.FindNEnvironmentsOrSkip(t, env1, env2)
+	acctest.FindNEnvironmentsOrSkipAsPolicyEnvironment(t, env1, env2)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(ctx, t) },

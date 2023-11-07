@@ -19,7 +19,7 @@ func TestAccADBashDataSource_Basic(t *testing.T) {
 
 	acctest.SkipIfNotInAcceptanceTestMode(t)
 	acctest.PreCheck(ctx, t)
-	acctest.FindNEnvironmentsOrSkip(t, env)
+	acctest.FindNEnvironmentsOrSkipAsPolicyEnvironment(t, env)
 
 	makeTestStep := func(targetNameOption targetnameoption.TargetNameOption) resource.TestStep {
 		return resource.TestStep{
