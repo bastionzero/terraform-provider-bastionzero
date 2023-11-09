@@ -233,6 +233,66 @@ func TestAccDbTarget_Name(t *testing.T) {
 	})
 }
 
+func TestAccDbTarget_ProxyTargetID(t *testing.T) {
+	ctx := context.Background()
+	rName := acctest.RandomName()
+	resourceName := "bastionzero_db_target.test"
+	var target targets.DatabaseTarget
+
+	acctest.SkipIfNotInAcceptanceTestMode(t)
+	acctest.PreCheck(ctx, t)
+
+	env := new(environments.Environment)
+	bzeroTarget1 := new(targets.BzeroTarget)
+	bzeroTarget2 := new(targets.BzeroTarget)
+	acctest.FindNEnvironmentsOrSkip(t, env)
+	acctest.FindNBzeroTargetsOrSkip(t, bzeroTarget1, bzeroTarget2)
+
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckDbTargetDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDbTargetConfigBasic(rName, env.ID, bzeroTarget1.ID, "localhost", "5432"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDbTargetExists(resourceName, &target),
+					testAccCheckDbTargetAttributes(t, &target, &expectedDbTarget{
+						EnvironmentID: &env.ID,
+						Name:          &rName,
+						ProxyTargetID: &bzeroTarget1.ID,
+						RemoteHost:    bastionzero.PtrTo("localhost"),
+						RemotePort:    bastionzero.PtrTo(5432),
+					}),
+					testAccCheckResourceDbTargetComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "proxy_target_id", bzeroTarget1.ID),
+				),
+			},
+			// Verify import works
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Verify update proxy target ID
+			{
+				Config: testAccDbTargetConfigBasic(rName, env.ID, bzeroTarget2.ID, "localhost", "5432"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDbTargetExists(resourceName, &target),
+					testAccCheckDbTargetAttributes(t, &target, &expectedDbTarget{
+						EnvironmentID: &env.ID,
+						Name:          &rName,
+						ProxyTargetID: &bzeroTarget2.ID,
+						RemoteHost:    bastionzero.PtrTo("localhost"),
+						RemotePort:    bastionzero.PtrTo(5432),
+					}),
+					testAccCheckResourceDbTargetComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "proxy_target_id", bzeroTarget2.ID),
+				),
+			},
+		},
+	})
+}
+
 func TestAccDbTarget_DatabaseAuthConfig(t *testing.T) {
 	ctx := context.Background()
 	rName := acctest.RandomName()
