@@ -9,6 +9,7 @@ import (
 	_ "github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/proxy"
 	_ "github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/sessionrecording"
 	_ "github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/targetconnect"
+	_ "github.com/bastionzero/terraform-provider-bastionzero/bastionzero/target/dbtarget"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
