@@ -614,6 +614,114 @@ func TestAccDbTarget_LocalPort(t *testing.T) {
 	})
 }
 
+func TestAccDbTarget_AllSupportedDatabaseAuthConfig(t *testing.T) {
+	// Test creating a db_target resource for each supported database
+	// authentication config returned by BastionZero.
+	//
+	// This test should fail if we add a new supported auth config and forget to
+	// update the Terraform provider's validation checks accordingly
+
+	ctx := context.Background()
+	rName := acctest.RandomName()
+	resourceName := "bastionzero_db_target.test"
+
+	acctest.SkipIfNotInAcceptanceTestMode(t)
+	acctest.PreCheck(ctx, t)
+
+	env := new(environments.Environment)
+	bzeroTarget := new(targets.BzeroTarget)
+	acctest.FindNEnvironmentsOrSkip(t, env)
+	acctest.FindNBzeroTargetsOrSkip(t, bzeroTarget)
+
+	// Get all currently supported db auth configs
+	supportedDbConfigs, _, err := acctest.APIClient.Targets.ListDatabaseAuthenticationConfigs(ctx)
+	if err != nil {
+		t.Fatalf("failed to list supported database auth configs: %s", err)
+	}
+
+	// Get valid remote_host based on database_authentication_config
+	validRemoteHost := func(authConfig *dbauthconfig.DatabaseAuthenticationConfig) string {
+		if authConfig.CloudServiceProvider != nil && *authConfig.CloudServiceProvider == dbauthconfig.GCP {
+			return "gcp://localhost"
+		} else if authConfig.CloudServiceProvider != nil && *authConfig.CloudServiceProvider == dbauthconfig.AWS && authConfig.Database != nil && *authConfig.Database == dbauthconfig.MySQL {
+			return "rdsmysql://localhost"
+		} else if authConfig.CloudServiceProvider != nil && *authConfig.CloudServiceProvider == dbauthconfig.AWS && authConfig.Database != nil && *authConfig.Database == dbauthconfig.Postgres {
+			return "rds://localhost"
+		} else {
+			return "localhost"
+		}
+	}
+
+	// Create TF config per db_auth_config. First step creates the resource with
+	// the first returned supported db_auth_config. Then each subsequent step
+	// updates the TF resource to the next supported db_auth_config, changing
+	// the remote_host if needed
+	steps := []resource.TestStep{}
+	for _, supportedConfig := range supportedDbConfigs {
+		var target targets.DatabaseTarget
+
+		// Why? See: https://go.dev/doc/faq#closures_and_goroutines
+		//
+		// Go language issue not fixed until Go 1.22: "This is because each
+		// iteration of the loop uses the same instance of the variable v, so
+		// each closure shares that single variable."
+		supportedConfig := supportedConfig // create a new 'supportedConfig' to bind in closure below.
+		steps = append(steps, func() resource.TestStep {
+			remoteHost := validRemoteHost(&supportedConfig)
+
+			// Build TF resource attr checks based on whether the value is set
+			// or not per field
+			tfResourceAttrChecks := []resource.TestCheckFunc{}
+			if supportedConfig.AuthenticationType != nil {
+				tfResourceAttrChecks = append(tfResourceAttrChecks, resource.TestCheckResourceAttr(resourceName, "database_authentication_config.authentication_type", *supportedConfig.AuthenticationType))
+			} else {
+				tfResourceAttrChecks = append(tfResourceAttrChecks, resource.TestCheckNoResourceAttr(resourceName, "database_authentication_config.authentication_type"))
+			}
+			if supportedConfig.CloudServiceProvider != nil {
+				tfResourceAttrChecks = append(tfResourceAttrChecks, resource.TestCheckResourceAttr(resourceName, "database_authentication_config.cloud_service_provider", *supportedConfig.CloudServiceProvider))
+			} else {
+				tfResourceAttrChecks = append(tfResourceAttrChecks, resource.TestCheckNoResourceAttr(resourceName, "database_authentication_config.cloud_service_provider"))
+			}
+			if supportedConfig.Database != nil {
+				tfResourceAttrChecks = append(tfResourceAttrChecks, resource.TestCheckResourceAttr(resourceName, "database_authentication_config.database", *supportedConfig.Database))
+			} else {
+				tfResourceAttrChecks = append(tfResourceAttrChecks, resource.TestCheckNoResourceAttr(resourceName, "database_authentication_config.database"))
+			}
+			if supportedConfig.Label != nil {
+				tfResourceAttrChecks = append(tfResourceAttrChecks, resource.TestCheckResourceAttr(resourceName, "database_authentication_config.label", *supportedConfig.Label))
+			} else {
+				tfResourceAttrChecks = append(tfResourceAttrChecks, resource.TestCheckNoResourceAttr(resourceName, "database_authentication_config.label"))
+			}
+			// json, _ := json.Marshal(supportedConfig)
+			// t.Log(fmt.Sprintf("%v: %v", i, string(json)))
+
+			return resource.TestStep{
+				Config: testAccDbTargetConfigDbAuthConfig(rName, env.ID, bzeroTarget.ID, remoteHost, "5432", dbtarget.FlattenDatabaseAuthenticationConfig(ctx, &supportedConfig)),
+				Check: resource.ComposeTestCheckFunc(
+					append([]resource.TestCheckFunc{
+						testAccCheckDbTargetExists(resourceName, &target),
+						testAccCheckDbTargetAttributes(t, &target, &expectedDbTarget{
+							EnvironmentID:      &env.ID,
+							Name:               &rName,
+							ProxyTargetID:      &bzeroTarget.ID,
+							RemoteHost:         &remoteHost,
+							RemotePort:         bastionzero.PtrTo(5432),
+							DatabaseAuthConfig: &supportedConfig,
+						}),
+						testAccCheckResourceDbTargetComputedAttr(resourceName)},
+						tfResourceAttrChecks...)...,
+				),
+			}
+		}())
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckDbTargetDestroy,
+		Steps:                    steps,
+	})
+}
+
 func TestDbTarget_InvalidName(t *testing.T) {
 	resource.UnitTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
