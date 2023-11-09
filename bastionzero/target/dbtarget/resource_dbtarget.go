@@ -173,7 +173,6 @@ func (r *dbTargetResource) Update(ctx context.Context, req resource.UpdateReques
 		modifyReq.RemotePort = &targets.Port{Value: bastionzero.PtrTo(int(plan.RemotePort.ValueInt64()))}
 	}
 	if !plan.LocalPort.Equal(state.LocalPort) {
-		// TODO-Yuval: The system test needs to check both of these paths
 		if !plan.LocalPort.IsNull() {
 			modifyReq.LocalPort = &targets.Port{Value: bastionzero.PtrTo(int(plan.LocalPort.ValueInt64()))}
 		} else {
