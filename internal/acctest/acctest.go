@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -19,9 +20,11 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/users"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
@@ -709,4 +712,48 @@ func SafePrettyInt(value *int) string {
 	} else {
 		return strconv.Itoa(*value)
 	}
+}
+
+// TerraformObjectToString returns a human-readable representation of the Object
+// value that can be used in Terraform configurations. This function is
+// equivalent to basetypes.Object.String() except that null object attributes
+// are omitted from the final string.
+func TerraformObjectToString(o types.Object) string {
+	// Source:
+	// https://github.com/hashicorp/terraform-plugin-framework/blob/3b275fbb481bd598b3e020f2560cddc70b885098/types/basetypes/object_value.go#L364-L395
+	//
+	// This function is equivalent to basetypes.Object.String() except that null
+	// object fields are omitted
+
+	if o.IsUnknown() {
+		return attr.UnknownValueString
+	}
+
+	if o.IsNull() {
+		return attr.NullValueString
+	}
+
+	// We want the output to be consistent, so we sort the output by key
+	keys := make([]string, 0, len(o.Attributes()))
+	for k := range o.Attributes() {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	var res strings.Builder
+
+	res.WriteString("{")
+	for i, k := range keys {
+		// Omit null attributes from final string representation
+		if o.Attributes()[k].IsNull() {
+			continue
+		}
+		if i != 0 {
+			res.WriteString(",")
+		}
+		res.WriteString(fmt.Sprintf(`"%s":%s`, k, o.Attributes()[k].String()))
+	}
+	res.WriteString("}")
+
+	return res.String()
 }

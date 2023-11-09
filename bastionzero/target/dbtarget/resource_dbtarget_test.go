@@ -13,7 +13,9 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets/dbauthconfig"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets/targetstatus"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/targettype"
+	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/target/dbtarget"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal/acctest"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/stretchr/testify/assert"
@@ -110,6 +112,84 @@ func TestAccDbTarget_Disappears(t *testing.T) {
 	})
 }
 
+func TestAccDbTarget_DatabaseAuthConfig(t *testing.T) {
+	ctx := context.Background()
+	rName := acctest.RandomName()
+	resourceName := "bastionzero_db_target.test"
+	var target targets.DatabaseTarget
+
+	acctest.SkipIfNotInAcceptanceTestMode(t)
+	acctest.PreCheck(ctx, t)
+
+	env := new(environments.Environment)
+	bzeroTarget := new(targets.BzeroTarget)
+	acctest.FindNEnvironmentsOrSkip(t, env)
+	acctest.FindNBzeroTargetsOrSkip(t, bzeroTarget)
+
+	dbAuthConfig1 := &dbauthconfig.DatabaseAuthenticationConfig{
+		AuthenticationType: bastionzero.PtrTo(dbauthconfig.Default),
+		Database:           bastionzero.PtrTo(dbauthconfig.Postgres),
+		Label:              bastionzero.PtrTo("Postgres"),
+	}
+	dbAuthConfig2 := &dbauthconfig.DatabaseAuthenticationConfig{
+		AuthenticationType: bastionzero.PtrTo(dbauthconfig.SplitCert),
+		Database:           bastionzero.PtrTo(dbauthconfig.MongoDB),
+		Label:              bastionzero.PtrTo("MongoDB"),
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckDbTargetDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDbTargetConfigDbAuthConfig(rName, env.ID, bzeroTarget.ID, "localhost", "5432", dbtarget.FlattenDatabaseAuthenticationConfig(ctx, dbAuthConfig1)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDbTargetExists(resourceName, &target),
+					testAccCheckDbTargetAttributes(t, &target, &expectedDbTarget{
+						EnvironmentID:      &env.ID,
+						Name:               &rName,
+						ProxyTargetID:      &bzeroTarget.ID,
+						RemoteHost:         bastionzero.PtrTo("localhost"),
+						RemotePort:         bastionzero.PtrTo(5432),
+						DatabaseAuthConfig: dbAuthConfig1,
+					}),
+					testAccCheckResourceDbTargetComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "database_authentication_config.authentication_type", *dbAuthConfig1.AuthenticationType),
+					resource.TestCheckResourceAttr(resourceName, "database_authentication_config.database", *dbAuthConfig1.Database),
+					resource.TestCheckResourceAttr(resourceName, "database_authentication_config.label", *dbAuthConfig1.Label),
+					resource.TestCheckNoResourceAttr(resourceName, "database_authentication_config.cloud_service_provider"),
+				),
+			},
+			// Verify import works
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Verify update db auth config
+			{
+				Config: testAccDbTargetConfigDbAuthConfig(rName, env.ID, bzeroTarget.ID, "localhost", "5432", dbtarget.FlattenDatabaseAuthenticationConfig(ctx, dbAuthConfig2)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDbTargetExists(resourceName, &target),
+					testAccCheckDbTargetAttributes(t, &target, &expectedDbTarget{
+						EnvironmentID:      &env.ID,
+						Name:               &rName,
+						ProxyTargetID:      &bzeroTarget.ID,
+						RemoteHost:         bastionzero.PtrTo("localhost"),
+						RemotePort:         bastionzero.PtrTo(5432),
+						DatabaseAuthConfig: dbAuthConfig2,
+					}),
+					testAccCheckResourceDbTargetComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "database_authentication_config.authentication_type", *dbAuthConfig2.AuthenticationType),
+					resource.TestCheckResourceAttr(resourceName, "database_authentication_config.database", *dbAuthConfig2.Database),
+					resource.TestCheckResourceAttr(resourceName, "database_authentication_config.label", *dbAuthConfig2.Label),
+					resource.TestCheckNoResourceAttr(resourceName, "database_authentication_config.cloud_service_provider"),
+				),
+			},
+		},
+	})
+}
+
 func testAccDbTargetConfigBasic(name string, envID string, proxyTargetID string, remoteHost string, remotePort string) string {
 	return fmt.Sprintf(`
 resource "bastionzero_db_target" "test" {
@@ -120,6 +200,19 @@ resource "bastionzero_db_target" "test" {
   remote_port = %[5]q
 }
 `, name, envID, proxyTargetID, remoteHost, remotePort)
+}
+
+func testAccDbTargetConfigDbAuthConfig(name string, envID string, proxyTargetID string, remoteHost string, remotePort string, dbAuthConfig types.Object) string {
+	return fmt.Sprintf(`
+resource "bastionzero_db_target" "test" {
+  environment_id = %[2]q
+  name = %[1]q
+  proxy_target_id = %[3]q
+  remote_host = %[4]q
+  remote_port = %[5]q
+  database_authentication_config = %[6]s
+}
+`, name, envID, proxyTargetID, remoteHost, remotePort, acctest.TerraformObjectToString(dbAuthConfig))
 }
 
 type expectedDbTarget struct {
