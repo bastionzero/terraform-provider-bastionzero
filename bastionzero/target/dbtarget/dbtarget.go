@@ -21,6 +21,7 @@ import (
 	resource_schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -177,17 +178,18 @@ func makeDbTargetResourceSchema(ctx context.Context) map[string]resource_schema.
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
 			},
-			Validators: []validator.String{
-				bzvalidator.ValidUUIDV4(),
-			},
 		},
 		"name": resource_schema.StringAttribute{
 			Required:    true,
 			Description: "The target's name.",
+			Validators: []validator.String{
+				stringvalidator.LengthAtLeast(1),
+			},
 		},
 		"type": resource_schema.StringAttribute{
 			Computed:    true,
 			Description: fmt.Sprintf("The target's type (constant value `%s`).", targettype.Db),
+			Default:     stringdefault.StaticString(string(targettype.Db)),
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
 			},
@@ -202,6 +204,9 @@ func makeDbTargetResourceSchema(ctx context.Context) map[string]resource_schema.
 		"environment_id": resource_schema.StringAttribute{
 			Required:    true,
 			Description: "The target's environment's ID.",
+			Validators: []validator.String{
+				bzvalidator.ValidUUIDV4(),
+			},
 		},
 		"last_agent_update": resource_schema.StringAttribute{
 			Computed:    true,
@@ -223,10 +228,16 @@ func makeDbTargetResourceSchema(ctx context.Context) map[string]resource_schema.
 			Required:            true,
 			Description:         "The target's proxy target's ID (ID of a Bzero or Cluster target).",
 			MarkdownDescription: "The target's proxy target's ID (ID of a [Bzero](bzero_target) or [Cluster](cluster_target) target).",
+			Validators: []validator.String{
+				bzvalidator.ValidUUIDV4(),
+			},
 		},
 		"remote_host": resource_schema.StringAttribute{
 			Required:    true,
 			Description: "The target's hostname or IP address.",
+			Validators: []validator.String{
+				stringvalidator.LengthAtLeast(1),
+			},
 		},
 		"remote_port": resource_schema.Int64Attribute{
 			Required:    true,
@@ -277,6 +288,9 @@ func makeDbTargetResourceSchema(ctx context.Context) map[string]resource_schema.
 				"label": resource_schema.StringAttribute{
 					Optional:    true,
 					Description: "User-friendly label for this database authentication configuration.",
+					Validators: []validator.String{
+						stringvalidator.LengthAtLeast(1),
+					},
 				},
 			},
 		},

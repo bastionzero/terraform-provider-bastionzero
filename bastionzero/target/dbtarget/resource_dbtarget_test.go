@@ -16,6 +16,7 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/types/targettype"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/target/dbtarget"
 	"github.com/bastionzero/terraform-provider-bastionzero/internal/acctest"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -608,6 +609,125 @@ func TestAccDbTarget_LocalPort(t *testing.T) {
 					testAccCheckResourceDbTargetComputedAttr(resourceName),
 					resource.TestCheckNoResourceAttr(resourceName, "local_port"),
 				),
+			},
+		},
+	})
+}
+
+func TestDbTarget_InvalidName(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Empty name not permitted
+				Config:      testAccDbTargetConfigBasic("", uuid.New().String(), uuid.New().String(), "localhost", "5432"),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Length`),
+			},
+		},
+	})
+}
+
+func TestDbTarget_InvalidEnvironmentID(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Invalid ID not permitted
+				Config:      testAccDbTargetConfigBasic("foo", "bad-id", uuid.New().String(), "localhost", "5432"),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+		},
+	})
+}
+
+func TestDbTarget_InvalidProxyTargetID(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Invalid ID not permitted
+				Config:      testAccDbTargetConfigBasic("foo", uuid.New().String(), "", "localhost", "5432"),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+		},
+	})
+}
+
+func TestDbTarget_InvalidRemoteHost(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Empty remote host not permitted
+				Config:      testAccDbTargetConfigBasic("foo", uuid.New().String(), uuid.New().String(), "", "5432"),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Length`),
+			},
+		},
+	})
+}
+
+func TestDbTarget_InvalidAuthConfigAuthType(t *testing.T) {
+	dbAuthConfig := &dbauthconfig.DatabaseAuthenticationConfig{
+		AuthenticationType: bastionzero.PtrTo("foobar"),
+	}
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Bad auth type not permitted
+				Config:      testAccDbTargetConfigDbAuthConfig("foo", uuid.New().String(), uuid.New().String(), "localhost", "5432", dbtarget.FlattenDatabaseAuthenticationConfig(context.Background(), dbAuthConfig)),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+		},
+	})
+}
+
+func TestDbTarget_InvalidAuthConfigCloudServiceProvider(t *testing.T) {
+	dbAuthConfig := &dbauthconfig.DatabaseAuthenticationConfig{
+		AuthenticationType:   bastionzero.PtrTo(dbauthconfig.Default),
+		CloudServiceProvider: bastionzero.PtrTo("foobar"),
+	}
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Bad cloud service provider not permitted
+				Config:      testAccDbTargetConfigDbAuthConfig("foo", uuid.New().String(), uuid.New().String(), "localhost", "5432", dbtarget.FlattenDatabaseAuthenticationConfig(context.Background(), dbAuthConfig)),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+		},
+	})
+}
+
+func TestDbTarget_InvalidAuthConfigDatabase(t *testing.T) {
+	dbAuthConfig := &dbauthconfig.DatabaseAuthenticationConfig{
+		AuthenticationType: bastionzero.PtrTo(dbauthconfig.Default),
+		Database:           bastionzero.PtrTo("foobar"),
+	}
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Bad database not permitted
+				Config:      testAccDbTargetConfigDbAuthConfig("foo", uuid.New().String(), uuid.New().String(), "localhost", "5432", dbtarget.FlattenDatabaseAuthenticationConfig(context.Background(), dbAuthConfig)),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+		},
+	})
+}
+
+func TestDbTarget_InvalidAuthConfigLabel(t *testing.T) {
+	dbAuthConfig := &dbauthconfig.DatabaseAuthenticationConfig{
+		AuthenticationType: bastionzero.PtrTo(dbauthconfig.Default),
+		Label:              bastionzero.PtrTo(""),
+	}
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Empty label not permitted
+				Config:      testAccDbTargetConfigDbAuthConfig("foo", uuid.New().String(), uuid.New().String(), "localhost", "5432", dbtarget.FlattenDatabaseAuthenticationConfig(context.Background(), dbAuthConfig)),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Length`),
 			},
 		},
 	})
