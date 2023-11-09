@@ -352,6 +352,108 @@ func TestAccDbTarget_RemoteHost(t *testing.T) {
 	})
 }
 
+func TestAccDbTarget_RemotePort(t *testing.T) {
+	ctx := context.Background()
+	rName := acctest.RandomName()
+	resourceName := "bastionzero_db_target.test"
+	var target targets.DatabaseTarget
+
+	acctest.SkipIfNotInAcceptanceTestMode(t)
+	acctest.PreCheck(ctx, t)
+
+	env := new(environments.Environment)
+	bzeroTarget := new(targets.BzeroTarget)
+	acctest.FindNEnvironmentsOrSkip(t, env)
+	acctest.FindNBzeroTargetsOrSkip(t, bzeroTarget)
+
+	remotePort1 := 3000
+	remotePort2 := 4000
+
+	dbAuthConfig := &dbauthconfig.DatabaseAuthenticationConfig{
+		AuthenticationType:   bastionzero.PtrTo(dbauthconfig.ServiceAccountInjection),
+		Database:             bastionzero.PtrTo(dbauthconfig.Postgres),
+		Label:                bastionzero.PtrTo("GCP Postgres"),
+		CloudServiceProvider: bastionzero.PtrTo(dbauthconfig.GCP),
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckDbTargetDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDbTargetConfigBasic(rName, env.ID, bzeroTarget.ID, "localhost", strconv.Itoa(remotePort1)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDbTargetExists(resourceName, &target),
+					testAccCheckDbTargetAttributes(t, &target, &expectedDbTarget{
+						EnvironmentID: &env.ID,
+						Name:          &rName,
+						ProxyTargetID: &bzeroTarget.ID,
+						RemoteHost:    bastionzero.PtrTo("localhost"),
+						RemotePort:    &remotePort1,
+					}),
+					testAccCheckResourceDbTargetComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "remote_port", strconv.Itoa(remotePort1)),
+				),
+			},
+			// Verify import works
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Verify update remote port
+			{
+				Config: testAccDbTargetConfigBasic(rName, env.ID, bzeroTarget.ID, "localhost", strconv.Itoa(remotePort2)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDbTargetExists(resourceName, &target),
+					testAccCheckDbTargetAttributes(t, &target, &expectedDbTarget{
+						EnvironmentID: &env.ID,
+						Name:          &rName,
+						ProxyTargetID: &bzeroTarget.ID,
+						RemoteHost:    bastionzero.PtrTo("localhost"),
+						RemotePort:    &remotePort2,
+					}),
+					testAccCheckResourceDbTargetComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "remote_port", strconv.Itoa(remotePort2)),
+				),
+			},
+			// Verify setting remote port even when target is GCP
+			{
+				Config: testAccDbTargetConfigDbAuthConfig(rName, env.ID, bzeroTarget.ID, "gcp://localhost", strconv.Itoa(remotePort2), dbtarget.FlattenDatabaseAuthenticationConfig(ctx, dbAuthConfig)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDbTargetExists(resourceName, &target),
+					testAccCheckDbTargetAttributes(t, &target, &expectedDbTarget{
+						EnvironmentID: &env.ID,
+						Name:          &rName,
+						ProxyTargetID: &bzeroTarget.ID,
+						RemoteHost:    bastionzero.PtrTo("gcp://localhost"),
+						RemotePort:    &remotePort2,
+					}),
+					testAccCheckResourceDbTargetComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "remote_port", strconv.Itoa(remotePort2)),
+				),
+			},
+			// Also check that it works with 0 (the recommended way of
+			// configuring remote_port for GCP DB target)
+			{
+				Config: testAccDbTargetConfigDbAuthConfig(rName, env.ID, bzeroTarget.ID, "gcp://localhost", strconv.Itoa(0), dbtarget.FlattenDatabaseAuthenticationConfig(ctx, dbAuthConfig)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDbTargetExists(resourceName, &target),
+					testAccCheckDbTargetAttributes(t, &target, &expectedDbTarget{
+						EnvironmentID: &env.ID,
+						Name:          &rName,
+						ProxyTargetID: &bzeroTarget.ID,
+						RemoteHost:    bastionzero.PtrTo("gcp://localhost"),
+						RemotePort:    bastionzero.PtrTo(0),
+					}),
+					testAccCheckResourceDbTargetComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "remote_port", "0"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccDbTarget_DatabaseAuthConfig(t *testing.T) {
 	ctx := context.Background()
 	rName := acctest.RandomName()
