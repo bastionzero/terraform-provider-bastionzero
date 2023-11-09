@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+	"strconv"
 	"testing"
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
@@ -190,6 +191,87 @@ func TestAccDbTarget_DatabaseAuthConfig(t *testing.T) {
 	})
 }
 
+func TestAccDbTarget_LocalPort(t *testing.T) {
+	ctx := context.Background()
+	rName := acctest.RandomName()
+	resourceName := "bastionzero_db_target.test"
+	var target targets.DatabaseTarget
+
+	acctest.SkipIfNotInAcceptanceTestMode(t)
+	acctest.PreCheck(ctx, t)
+
+	env := new(environments.Environment)
+	bzeroTarget := new(targets.BzeroTarget)
+	acctest.FindNEnvironmentsOrSkip(t, env)
+	acctest.FindNBzeroTargetsOrSkip(t, bzeroTarget)
+
+	localPort1 := 3000
+	localPort2 := 4000
+
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckDbTargetDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDbTargetConfigLocalPort(rName, env.ID, bzeroTarget.ID, "localhost", "5432", strconv.Itoa(localPort1)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDbTargetExists(resourceName, &target),
+					testAccCheckDbTargetAttributes(t, &target, &expectedDbTarget{
+						EnvironmentID: &env.ID,
+						Name:          &rName,
+						ProxyTargetID: &bzeroTarget.ID,
+						RemoteHost:    bastionzero.PtrTo("localhost"),
+						RemotePort:    bastionzero.PtrTo(5432),
+						LocalPort:     &localPort1,
+					}),
+					testAccCheckResourceDbTargetComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "local_port", strconv.Itoa(localPort1)),
+				),
+			},
+			// Verify import works
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Verify update local port
+			{
+				Config: testAccDbTargetConfigLocalPort(rName, env.ID, bzeroTarget.ID, "localhost", "5432", strconv.Itoa(localPort2)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDbTargetExists(resourceName, &target),
+					testAccCheckDbTargetAttributes(t, &target, &expectedDbTarget{
+						EnvironmentID: &env.ID,
+						Name:          &rName,
+						ProxyTargetID: &bzeroTarget.ID,
+						RemoteHost:    bastionzero.PtrTo("localhost"),
+						RemotePort:    bastionzero.PtrTo(5432),
+						LocalPort:     &localPort2,
+					}),
+					testAccCheckResourceDbTargetComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "local_port", strconv.Itoa(localPort2)),
+				),
+			},
+			// Verify setting to null clears it
+			{
+				Config: testAccDbTargetConfigBasic(rName, env.ID, bzeroTarget.ID, "localhost", "5432"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDbTargetExists(resourceName, &target),
+					testAccCheckDbTargetAttributes(t, &target, &expectedDbTarget{
+						EnvironmentID: &env.ID,
+						Name:          &rName,
+						ProxyTargetID: &bzeroTarget.ID,
+						RemoteHost:    bastionzero.PtrTo("localhost"),
+						RemotePort:    bastionzero.PtrTo(5432),
+						LocalPort:     nil,
+					}),
+					testAccCheckResourceDbTargetComputedAttr(resourceName),
+					resource.TestCheckNoResourceAttr(resourceName, "local_port"),
+				),
+			},
+		},
+	})
+}
+
 func testAccDbTargetConfigBasic(name string, envID string, proxyTargetID string, remoteHost string, remotePort string) string {
 	return fmt.Sprintf(`
 resource "bastionzero_db_target" "test" {
@@ -213,6 +295,19 @@ resource "bastionzero_db_target" "test" {
   database_authentication_config = %[6]s
 }
 `, name, envID, proxyTargetID, remoteHost, remotePort, acctest.TerraformObjectToString(dbAuthConfig))
+}
+
+func testAccDbTargetConfigLocalPort(name string, envID string, proxyTargetID string, remoteHost string, remotePort string, localPort string) string {
+	return fmt.Sprintf(`
+resource "bastionzero_db_target" "test" {
+  environment_id = %[2]q
+  name = %[1]q
+  proxy_target_id = %[3]q
+  remote_host = %[4]q
+  remote_port = %[5]q
+  local_port = %[6]q
+}
+`, name, envID, proxyTargetID, remoteHost, remotePort, localPort)
 }
 
 type expectedDbTarget struct {
