@@ -173,6 +173,66 @@ func TestAccDbTarget_EnvironmentID(t *testing.T) {
 	})
 }
 
+func TestAccDbTarget_Name(t *testing.T) {
+	ctx := context.Background()
+	rName1 := acctest.RandomName()
+	rName2 := acctest.RandomName()
+	resourceName := "bastionzero_db_target.test"
+	var target targets.DatabaseTarget
+
+	acctest.SkipIfNotInAcceptanceTestMode(t)
+	acctest.PreCheck(ctx, t)
+
+	env := new(environments.Environment)
+	bzeroTarget := new(targets.BzeroTarget)
+	acctest.FindNEnvironmentsOrSkip(t, env)
+	acctest.FindNBzeroTargetsOrSkip(t, bzeroTarget)
+
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckDbTargetDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDbTargetConfigBasic(rName1, env.ID, bzeroTarget.ID, "localhost", "5432"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDbTargetExists(resourceName, &target),
+					testAccCheckDbTargetAttributes(t, &target, &expectedDbTarget{
+						EnvironmentID: &env.ID,
+						Name:          &rName1,
+						ProxyTargetID: &bzeroTarget.ID,
+						RemoteHost:    bastionzero.PtrTo("localhost"),
+						RemotePort:    bastionzero.PtrTo(5432),
+					}),
+					testAccCheckResourceDbTargetComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", rName1),
+				),
+			},
+			// Verify import works
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Verify update name
+			{
+				Config: testAccDbTargetConfigBasic(rName2, env.ID, bzeroTarget.ID, "localhost", "5432"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDbTargetExists(resourceName, &target),
+					testAccCheckDbTargetAttributes(t, &target, &expectedDbTarget{
+						EnvironmentID: &env.ID,
+						Name:          &rName2,
+						ProxyTargetID: &bzeroTarget.ID,
+						RemoteHost:    bastionzero.PtrTo("localhost"),
+						RemotePort:    bastionzero.PtrTo(5432),
+					}),
+					testAccCheckResourceDbTargetComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", rName2),
+				),
+			},
+		},
+	})
+}
+
 func TestAccDbTarget_DatabaseAuthConfig(t *testing.T) {
 	ctx := context.Background()
 	rName := acctest.RandomName()
