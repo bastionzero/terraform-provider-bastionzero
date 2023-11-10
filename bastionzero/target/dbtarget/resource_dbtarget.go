@@ -10,6 +10,7 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/apierror"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets/dbauthconfig"
+	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -19,10 +20,11 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.Resource                = &dbTargetResource{}
-	_ resource.ResourceWithConfigure   = &dbTargetResource{}
-	_ resource.ResourceWithImportState = &dbTargetResource{}
-	_ resource.ResourceWithModifyPlan  = &dbTargetResource{}
+	_ resource.Resource                     = &dbTargetResource{}
+	_ resource.ResourceWithConfigure        = &dbTargetResource{}
+	_ resource.ResourceWithImportState      = &dbTargetResource{}
+	_ resource.ResourceWithModifyPlan       = &dbTargetResource{}
+	_ resource.ResourceWithConfigValidators = &dbTargetResource{}
 )
 
 func NewDbTargetResource() resource.Resource {
@@ -80,7 +82,12 @@ func (r *dbTargetResource) Create(ctx context.Context, req resource.CreateReques
 	// Generate API request body from plan
 	createReq := new(targets.CreateDatabaseTargetRequest)
 	createReq.TargetName = plan.Name.ValueString()
-	createReq.ProxyTargetID = plan.ProxyTargetID.ValueString()
+	if !plan.ProxyTargetID.IsNull() {
+		createReq.ProxyTargetID = plan.ProxyTargetID.ValueString()
+	}
+	if !plan.ProxyEnvironmentID.IsNull() {
+		createReq.ProxyEnvironmentID = plan.ProxyEnvironmentID.ValueString()
+	}
 	createReq.RemoteHost = plan.RemoteHost.ValueString()
 	createReq.RemotePort = targets.Port{Value: bastionzero.PtrTo(int(plan.RemotePort.ValueInt64()))}
 	if !plan.LocalPort.IsNull() {
@@ -164,7 +171,10 @@ func (r *dbTargetResource) Update(ctx context.Context, req resource.UpdateReques
 		modifyReq.TargetName = bastionzero.PtrTo(plan.Name.ValueString())
 	}
 	if !plan.ProxyTargetID.Equal(state.ProxyTargetID) {
-		modifyReq.ProxyTargetID = bastionzero.PtrTo(plan.ProxyTargetID.ValueString())
+		modifyReq.ProxyTargetID = plan.ProxyTargetID.ValueStringPointer()
+	}
+	if !plan.ProxyEnvironmentID.Equal(state.ProxyEnvironmentID) {
+		modifyReq.ProxyEnvironmentID = plan.ProxyEnvironmentID.ValueStringPointer()
 	}
 	if !plan.RemoteHost.Equal(state.RemoteHost) {
 		modifyReq.RemoteHost = bastionzero.PtrTo(plan.RemoteHost.ValueString())
@@ -311,5 +321,22 @@ func (r *dbTargetResource) ModifyPlan(ctx context.Context, req resource.ModifyPl
 				return
 			}
 		}
+	}
+}
+
+func (r *dbTargetResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
+	return []resource.ConfigValidator{
+		// Validate that db_target is not configured with both proxy_target_id
+		// and proxy_environment_id (known, non-null values).
+		resourcevalidator.Conflicting(
+			path.MatchRoot("proxy_target_id"),
+			path.MatchRoot("proxy_environment_id"),
+		),
+		// Validate at least one of the schema defined attributes named
+		// proxy_target_id and proxy_environment_id has a known, non-null value.
+		resourcevalidator.AtLeastOneOf(
+			path.MatchRoot("proxy_target_id"),
+			path.MatchRoot("proxy_environment_id"),
+		),
 	}
 }

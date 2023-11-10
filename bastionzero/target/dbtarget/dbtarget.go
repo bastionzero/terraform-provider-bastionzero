@@ -225,9 +225,16 @@ func makeDbTargetResourceSchema(ctx context.Context) map[string]resource_schema.
 			Description: "The target's proxy agent's public key.",
 		},
 		"proxy_target_id": resource_schema.StringAttribute{
-			Required:            true,
+			Optional:            true,
 			Description:         "The target's proxy target's ID (ID of a Bzero or Cluster target).",
 			MarkdownDescription: "The target's proxy target's ID (ID of a [Bzero](bzero_target) or [Cluster](cluster_target) target).",
+			Validators: []validator.String{
+				bzvalidator.ValidUUIDV4(),
+			},
+		},
+		"proxy_environment_id": resource_schema.StringAttribute{
+			Optional:    true,
+			Description: "The target's proxy environment's ID (ID of the backing proxy environment).",
 			Validators: []validator.String{
 				bzvalidator.ValidUUIDV4(),
 			},
