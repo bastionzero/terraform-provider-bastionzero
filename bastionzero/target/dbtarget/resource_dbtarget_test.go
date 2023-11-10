@@ -722,6 +722,49 @@ func TestAccDbTarget_AllSupportedDatabaseAuthConfig(t *testing.T) {
 	})
 }
 
+func TestDbTarget_MutualExclProxyTargetEnv(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Cannot specify both proxy target id and proxy environment id
+				Config: `
+				resource "bastionzero_db_target" "test" {
+			      name = "foo"
+				  proxy_target_id = "b6d841ca-39ae-414f-ab5b-14be29e5573a"
+				  proxy_environment_id = "b6d841ca-39ae-414f-ab5b-14be29e5573a"
+				  environment_id = "b6d841ca-39ae-414f-ab5b-14be29e5573a"
+				  remote_host = "localhost"
+				  remote_port = 5432
+				}
+				`,
+				ExpectError: regexp.MustCompile(`cannot be configured together`),
+			},
+		},
+	})
+}
+
+func TestDbTarget_AtLeastOneProxyTargetEnv(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// At least one of proxy_target_id or proxy_environment_id must
+				// be specified
+				Config: `
+				resource "bastionzero_db_target" "test" {
+			      name = "foo"
+				  environment_id = "b6d841ca-39ae-414f-ab5b-14be29e5573a"
+				  remote_host = "localhost"
+				  remote_port = 5432
+				}
+				`,
+				ExpectError: regexp.MustCompile(`At least one of these attributes must be configured`),
+			},
+		},
+	})
+}
+
 func TestDbTarget_InvalidName(t *testing.T) {
 	resource.UnitTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
