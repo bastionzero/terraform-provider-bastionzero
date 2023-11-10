@@ -294,6 +294,102 @@ func TestAccDbTarget_ProxyTargetID(t *testing.T) {
 	})
 }
 
+func TestAccDbTarget_ProxyEnvironmentID(t *testing.T) {
+	ctx := context.Background()
+	rName := acctest.RandomName()
+	resourceName := "bastionzero_db_target.test"
+	var target targets.DatabaseTarget
+
+	acctest.SkipIfNotInAcceptanceTestMode(t)
+	acctest.PreCheck(ctx, t)
+
+	env1 := new(environments.Environment)
+	env2 := new(environments.Environment)
+	bzeroTarget := new(targets.BzeroTarget)
+	acctest.FindNEnvironmentsOrSkip(t, env1, env2)
+	acctest.FindNBzeroTargetsOrSkip(t, bzeroTarget)
+
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckDbTargetDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDbTargetConfigProxyEnvID(rName, env1.ID, env1.ID, "localhost", "5432"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDbTargetExists(resourceName, &target),
+					testAccCheckDbTargetAttributes(t, &target, &expectedDbTarget{
+						EnvironmentID:      &env1.ID,
+						Name:               &rName,
+						ProxyEnvironmentID: &env1.ID,
+						RemoteHost:         bastionzero.PtrTo("localhost"),
+						RemotePort:         bastionzero.PtrTo(5432),
+					}),
+					testAccCheckResourceDbTargetComputedAttrProxyEnvID(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "proxy_environment_id", env1.ID),
+					resource.TestCheckNoResourceAttr(resourceName, "proxy_target_id"),
+				),
+			},
+			// Verify import works
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Verify update proxy environment ID
+			{
+				Config: testAccDbTargetConfigProxyEnvID(rName, env1.ID, env2.ID, "localhost", "5432"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDbTargetExists(resourceName, &target),
+					testAccCheckDbTargetAttributes(t, &target, &expectedDbTarget{
+						EnvironmentID:      &env1.ID,
+						Name:               &rName,
+						ProxyEnvironmentID: &env2.ID,
+						RemoteHost:         bastionzero.PtrTo("localhost"),
+						RemotePort:         bastionzero.PtrTo(5432),
+					}),
+					testAccCheckResourceDbTargetComputedAttrProxyEnvID(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "proxy_environment_id", env2.ID),
+					resource.TestCheckNoResourceAttr(resourceName, "proxy_target_id"),
+				),
+			},
+			// Verify switch from proxy environment ID --> proxy target ID
+			{
+				Config: testAccDbTargetConfigBasic(rName, env1.ID, bzeroTarget.ID, "localhost", "5432"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDbTargetExists(resourceName, &target),
+					testAccCheckDbTargetAttributes(t, &target, &expectedDbTarget{
+						EnvironmentID: &env1.ID,
+						Name:          &rName,
+						ProxyTargetID: &bzeroTarget.ID,
+						RemoteHost:    bastionzero.PtrTo("localhost"),
+						RemotePort:    bastionzero.PtrTo(5432),
+					}),
+					testAccCheckResourceDbTargetComputedAttr(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "proxy_target_id", bzeroTarget.ID),
+					resource.TestCheckNoResourceAttr(resourceName, "proxy_environment_id"),
+				),
+			},
+			// And then back proxy target ID --> proxy environment ID
+			{
+				Config: testAccDbTargetConfigProxyEnvID(rName, env1.ID, env2.ID, "localhost", "5432"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDbTargetExists(resourceName, &target),
+					testAccCheckDbTargetAttributes(t, &target, &expectedDbTarget{
+						EnvironmentID:      &env1.ID,
+						Name:               &rName,
+						ProxyEnvironmentID: &env2.ID,
+						RemoteHost:         bastionzero.PtrTo("localhost"),
+						RemotePort:         bastionzero.PtrTo(5432),
+					}),
+					testAccCheckResourceDbTargetComputedAttrProxyEnvID(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "proxy_environment_id", env2.ID),
+					resource.TestCheckNoResourceAttr(resourceName, "proxy_target_id"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccDbTarget_RemoteHost(t *testing.T) {
 	ctx := context.Background()
 	rName := acctest.RandomName()
@@ -951,6 +1047,7 @@ type expectedDbTarget struct {
 	EnvironmentID      *string
 	Name               *string
 	ProxyTargetID      *string
+	ProxyEnvironmentID *string
 	RemoteHost         *string
 	RemotePort         *int
 	DatabaseAuthConfig *dbauthconfig.DatabaseAuthenticationConfig
@@ -967,6 +1064,15 @@ func testAccCheckDbTargetAttributes(t *testing.T, target *targets.DatabaseTarget
 		}
 		if expected.ProxyTargetID != nil && *expected.ProxyTargetID != target.ProxyTargetID {
 			return fmt.Errorf("Bad proxy_target_id, expected \"%s\", got: %#v", *expected.ProxyTargetID, target.ProxyTargetID)
+		}
+		if expected.ProxyTargetID == nil && target.ProxyTargetID != "" {
+			return fmt.Errorf("Bad proxy_target_id, expected \"%s\", got: %#v", "", target.ProxyTargetID)
+		}
+		if expected.ProxyEnvironmentID != nil && *expected.ProxyEnvironmentID != target.ProxyEnvironmentID {
+			return fmt.Errorf("Bad proxy_environment_id, expected \"%s\", got: %#v", *expected.ProxyEnvironmentID, target.ProxyEnvironmentID)
+		}
+		if expected.ProxyEnvironmentID == nil && target.ProxyEnvironmentID != "" {
+			return fmt.Errorf("Bad proxy_environment_id, expected \"%s\", got: %#v", "", target.ProxyEnvironmentID)
 		}
 		if expected.RemoteHost != nil && *expected.RemoteHost != target.RemoteHost {
 			return fmt.Errorf("Bad remote_host, expected \"%s\", got: %#v", *expected.RemoteHost, target.RemoteHost)
@@ -998,6 +1104,20 @@ func testAccCheckResourceDbTargetComputedAttr(resourceName string) resource.Test
 		resource.TestMatchResourceAttr(resourceName, "id", regexp.MustCompile(acctest.UUIDV4RegexPattern)),
 		resource.TestMatchResourceAttr(resourceName, "last_agent_update", regexp.MustCompile(acctest.RFC3339RegexPattern)),
 		resource.TestCheckResourceAttrSet(resourceName, "region"),
+		acctest.CheckResourceAttrIsOneOf(resourceName, "status", bastionzero.ToStringSlice(targetstatus.TargetStatusValues())),
+		resource.TestCheckResourceAttr(resourceName, "type", string(targettype.Db)),
+	)
+}
+
+func testAccCheckResourceDbTargetComputedAttrProxyEnvID(resourceName string) resource.TestCheckFunc {
+	// When using proxy_environment_id, these computed attributes have slightly
+	// different values
+	return resource.ComposeTestCheckFunc(
+		resource.TestCheckResourceAttr(resourceName, "agent_public_key", "n/a"),
+		resource.TestCheckResourceAttr(resourceName, "agent_version", "n/a"),
+		resource.TestMatchResourceAttr(resourceName, "id", regexp.MustCompile(acctest.UUIDV4RegexPattern)),
+		resource.TestCheckNoResourceAttr(resourceName, "last_agent_update"),
+		resource.TestCheckResourceAttr(resourceName, "region", "n/a"),
 		acctest.CheckResourceAttrIsOneOf(resourceName, "status", bastionzero.ToStringSlice(targetstatus.TargetStatusValues())),
 		resource.TestCheckResourceAttr(resourceName, "type", string(targettype.Db)),
 	)
