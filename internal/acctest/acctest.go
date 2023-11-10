@@ -261,7 +261,7 @@ func CheckListOrSetHasElements(namedTFResource, listOrSetAttributeName string) r
 // by copying one for one the key and value combinations found at nameFirst in
 // the state.
 //
-// Optionally, copy certain key and value cominations by providing a whitelist
+// Optionally, copy certain key and value combinations by providing a whitelist
 // of keys. Otherwise, if keys list is empty, it is assumed all key and value
 // pairs should be asserted to exist in one of the nested objects under a list
 // or set block (specified by attr).
