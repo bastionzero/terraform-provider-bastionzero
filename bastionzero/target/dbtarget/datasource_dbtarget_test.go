@@ -44,6 +44,7 @@ func TestAccDbTargetDataSource_ID(t *testing.T) {
 					resource.TestCheckResourceAttrPair(resourceName, "environment_id", dataSourceName, "environment_id"),
 					resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "name"),
 					resource.TestCheckResourceAttrPair(resourceName, "proxy_target_id", dataSourceName, "proxy_target_id"),
+					resource.TestCheckResourceAttrPair(resourceName, "proxy_environment_id", dataSourceName, "proxy_environment_id"),
 					resource.TestCheckResourceAttrPair(resourceName, "remote_host", dataSourceName, "remote_host"),
 					resource.TestCheckResourceAttrPair(resourceName, "remote_port", dataSourceName, "remote_port"),
 					resource.TestCheckResourceAttrPair(resourceName, "database_authentication_config.authentication_type", dataSourceName, "database_authentication_config.authentication_type"),

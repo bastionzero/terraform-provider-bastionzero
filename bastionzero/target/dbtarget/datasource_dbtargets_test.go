@@ -16,6 +16,8 @@ import (
 var whitelist = []string{
 	"agent_public_key",
 	"agent_version",
+	"database_authentication_config.cloud_service_provider",
+	"database_authentication_config.database",
 	"database_authentication_config.authentication_type",
 	"database_authentication_config.label",
 	"environment_id",
@@ -23,9 +25,11 @@ var whitelist = []string{
 	"last_agent_update",
 	"name",
 	"proxy_target_id",
+	"proxy_environment_id",
 	"region",
 	"remote_host",
 	"remote_port",
+	"local_port",
 	"status",
 	"type",
 }
