@@ -804,6 +804,19 @@ func TestDbTarget_InvalidProxyTargetID(t *testing.T) {
 	})
 }
 
+func TestDbTarget_InvalidProxyEnvironmentID(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Invalid ID not permitted
+				Config:      testAccDbTargetConfigProxyEnvID("foo", uuid.New().String(), "foobar-bad-env-id", "localhost", "5432"),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			},
+		},
+	})
+}
+
 func TestDbTarget_InvalidRemoteHost(t *testing.T) {
 	resource.UnitTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestProtoV6ProviderFactories,
@@ -920,6 +933,18 @@ resource "bastionzero_db_target" "test" {
   local_port = %[6]q
 }
 `, name, envID, proxyTargetID, remoteHost, remotePort, localPort)
+}
+
+func testAccDbTargetConfigProxyEnvID(name string, envID string, proxyEnvID string, remoteHost string, remotePort string) string {
+	return fmt.Sprintf(`
+resource "bastionzero_db_target" "test" {
+  environment_id = %[2]q
+  name = %[1]q
+  proxy_environment_id = %[3]q
+  remote_host = %[4]q
+  remote_port = %[5]q
+}
+`, name, envID, proxyEnvID, remoteHost, remotePort)
 }
 
 type expectedDbTarget struct {
