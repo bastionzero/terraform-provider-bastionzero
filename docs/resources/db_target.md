@@ -19,7 +19,6 @@ Provides a BastionZero database target. Database targets configure remote access
 
 - `environment_id` (String) The target's environment's ID.
 - `name` (String) The target's name.
-- `proxy_target_id` (String) The target's proxy target's ID (ID of a [Bzero](bzero_target) or [Cluster](cluster_target) target).
 - `remote_host` (String) The target's hostname or IP address.
 - `remote_port` (Number) The port of the Db server accessible via the target. This field is required for all databases; however, if `database_authentication_config.cloud_service_provider` is equal to `GCP`, then the value will be ignored when connecting to the database.
 
@@ -27,6 +26,8 @@ Provides a BastionZero database target. Database targets configure remote access
 
 - `database_authentication_config` (Attributes) Information about the db target's database authentication configuration. If this attribute is left unconfigured, the target is configured with the default, non-passwordless database configuration. (see [below for nested schema](#nestedatt--database_authentication_config))
 - `local_port` (Number) The port of the Db daemon's localhost server that is spawned on the user's machine on connect. If this attribute is left unconfigured, an available port will be chosen when the target is connected to.
+- `proxy_environment_id` (String) The target's proxy environment's ID (ID of the backing proxy environment).
+- `proxy_target_id` (String) The target's proxy target's ID (ID of a [Bzero](bzero_target) or [Cluster](cluster_target) target).
 
 ### Read-Only
 
