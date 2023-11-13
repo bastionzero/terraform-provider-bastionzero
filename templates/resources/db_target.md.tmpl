@@ -15,8 +15,7 @@ Learn more about Db targets [here](https://docs.bastionzero.com/docs/deployment/
 either a [`proxy_target_id`](#proxy_target_id) or a
 [`proxy_environment_id`](#proxy_environment_id).
 
-~> **Warning** Be aware that _editing_ a Db target's
-[`proxy_target_id`](#proxy_target_id) or
+~> **Warning** _Modifying_ a Db target's [`proxy_target_id`](#proxy_target_id) or
 [`proxy_environment_id`](#proxy_environment_id) after initial resource creation
 may interrupt active user workflows; please consider closing all connections to
 the target before modifying either of these attributes.
@@ -34,7 +33,7 @@ can use the
 [`bastionzero_supported_database_configs`](supported_database_configs) data
 source to get a list of supported values.
 
-~> **Warning** Be aware that _editing_ a Db target's
+~> **Warning** _Modifying_ a Db target's
 [`database_authentication_config.authentication_type`](#authentication_type)
 after initial resource creation may require that the Db target is reconfigured
 as needed for the new authentication type. For example, if you change the
@@ -43,7 +42,7 @@ attribute to `ServiceAccountInjection` and
 to `GCP`, then you must also update the target's [`remote_host`](#remote_host)
 to include the `gcp://` protocol prefix.
 
-~> **Warning** Be aware that _editing_ a Db target's
+~> **Warning** _Modifying_ a Db target's
 [`database_authentication_config.database`](#database) after initial resource
 creation may require you to reconfigure the target's allowed target users as
 governed by BastionZero policy.
