@@ -1,0 +1,5 @@
+kind: FEATURES
+body: 'data-source/supported_database_configs: Get a list of all supported database authentication configs'
+time: 2023-11-14T13:53:19.661332-05:00
+custom:
+  Issues: "67"
