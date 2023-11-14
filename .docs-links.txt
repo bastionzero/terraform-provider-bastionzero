@@ -13,3 +13,5 @@ docs.bastionzero.com/docs/deployment/installing-the-agent#autodiscovery
 docs.bastionzero.com/docs/deployment/installing-the-agent#databases
 docs.bastionzero.com/docs/deployment/installing-the-agent#dynamic-access-targets
 docs.bastionzero.com/docs/deployment/installing-the-agent#step-1-agent-installation
+docs.bastionzero.com/docs/how-to-guides/passwordless-database-access/passwordless-access-to-mysql-and-postgres-on-gcp-cloud-sql
+docs.bastionzero.com/docs/how-to-guides/passwordless-database-access/passwordless-access-to-self-hosted-postgres

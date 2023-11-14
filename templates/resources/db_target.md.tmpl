@@ -25,7 +25,7 @@ the target before modifying either of these attributes.
 A Db target's
 [`database_authentication_config`](#database_authentication_config) attribute is
 optional. If left unconfigured, then the default, non-passwordless database
-configuration is provided on your behalf.
+configuration is used.
 
 -> **Note** If you don't know what combination of values to use for
 [`database_authentication_config`](#database_authentication_config), then you
@@ -36,11 +36,11 @@ source to get a list of supported values.
 ~> **Warning** _Modifying_ a Db target's
 [`database_authentication_config.authentication_type`](#authentication_type)
 after initial resource creation may require that the Db target is reconfigured
-as needed for the new authentication type. For example, if you change the
-attribute to `ServiceAccountInjection` and
+for the new authentication type. For example, if you change the attribute to
+`ServiceAccountInjection` and
 [`database_authentication_config.cloud_service_provider`](#cloud_service_provider)
 to `GCP`, then you must also update the target's [`remote_host`](#remote_host)
-to include the `gcp://` protocol prefix.
+to include a `gcp://` protocol prefix.
 
 ~> **Warning** _Modifying_ a Db target's
 [`database_authentication_config.database`](#database) after initial resource
@@ -68,9 +68,18 @@ environment is used to proxy the connection to the configured database.
 
 ### SplitCert Db target
 
+Create a Db target with SplitCert enabled; SplitCert provides passwordless
+access to databases. In this example, the Db target is configured as a
+self-hosted Postgres database. Learn more
+[here](https://docs.bastionzero.com/docs/how-to-guides/passwordless-database-access/passwordless-access-to-self-hosted-postgres).
+
 {{ tffile "examples/resources/bastionzero_db_target/splitcert.tf" }}
 
 ### Passwordless access to Postgres on GCP Cloud
+
+Create a Db target using service accounts which provides passwordless access to
+the database. Learn more
+[here](https://docs.bastionzero.com/docs/how-to-guides/passwordless-database-access/passwordless-access-to-mysql-and-postgres-on-gcp-cloud-sql).
 
 {{ tffile "examples/resources/bastionzero_db_target/gcp.tf" }}
 
