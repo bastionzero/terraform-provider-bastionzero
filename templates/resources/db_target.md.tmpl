@@ -47,6 +47,30 @@ to include a `gcp://` protocol prefix.
 creation may require you to reconfigure the target's allowed target users as
 governed by BastionZero policy.
 
+### Remote host
+
+There are some combination of values in the
+[`database_authentication_config`](#database_authentication_config) attribute
+that restrict the [`remote_host`](#remote_host) attribute; namely, there are
+instances where an expected protocol prefix string must be included.
+
+- If
+[`database_authentication_config.cloud_service_provider`](#cloud_service_provider)
+is equal to `GCP`, then [`remote_host`](#remote_host) must include a `gcp://`
+protocol prefix. 
+
+- If
+[`database_authentication_config.cloud_service_provider`](#cloud_service_provider)
+is equal to `AWS` and [`database_authentication_config.database`](#database) is
+equal to `MySQL`, then [`remote_host`](#remote_host) must include an
+`rdsmysql://` protocol prefix.
+
+- If
+[`database_authentication_config.cloud_service_provider`](#cloud_service_provider)
+is equal to `AWS` and [`database_authentication_config.database`](#database) is
+equal to `Postgres`, then [`remote_host`](#remote_host) must include an `rds://`
+protocol prefix.
+
 ## Example Usage
 
 ### Db target via proxy target
