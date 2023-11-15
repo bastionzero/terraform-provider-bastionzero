@@ -6,6 +6,7 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 // Terraform Plugin Framework variants of standard flatteners and expanders.
@@ -31,6 +32,24 @@ func ExpandFrameworkStringSet(ctx context.Context, tfSet types.Set) []string {
 	return ExpandFrameworkSet(ctx, tfSet, func(m string) string {
 		return m
 	})
+}
+
+// ExpandFrameworkObject converts a framework Object value to a value of type
+// ExpandT according to the specified map function f.
+//
+// If the framework value is null or unknown, or if an error occurs when
+// converting the object into a value of type ObjectT, nil is returned.
+func ExpandFrameworkObject[ObjectT any, ExpandT any](ctx context.Context, object types.Object, f func(ObjectT) *ExpandT) *ExpandT {
+	if object.IsNull() || object.IsUnknown() {
+		return nil
+	}
+
+	var data ObjectT
+	if object.As(ctx, &data, basetypes.ObjectAsOptions{}).HasError() {
+		return nil
+	}
+
+	return f(data)
 }
 
 // ExpandFrameworkSet converts a framework Set value to a slice of values

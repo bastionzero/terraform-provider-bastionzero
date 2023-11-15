@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -19,14 +20,17 @@ import (
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/targets"
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/users"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"golang.org/x/exp/slices"
 )
 
 const RFC3339RegexPattern = `^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])[Tt]([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\.[0-9]+)?([Zz]|([+-]([01][0-9]|2[0-3]):[0-5][0-9]))$`
@@ -257,7 +261,7 @@ func CheckListOrSetHasElements(namedTFResource, listOrSetAttributeName string) r
 // by copying one for one the key and value combinations found at nameFirst in
 // the state.
 //
-// Optionally, copy certain key and value cominations by providing a whitelist
+// Optionally, copy certain key and value combinations by providing a whitelist
 // of keys. Otherwise, if keys list is empty, it is assumed all key and value
 // pairs should be asserted to exist in one of the nested objects under a list
 // or set block (specified by attr).
@@ -384,6 +388,17 @@ func CheckAllPoliciesHaveGroupID(namedTFResource, expectedGroupID string) resour
 	}
 }
 
+// CheckResourceAttrIsOneOf ensures the Terraform state value is equal to one of
+// the supplied values.
+func CheckResourceAttrIsOneOf(name, key string, values []string) resource.TestCheckFunc {
+	return resource.TestCheckResourceAttrWith(name, key, func(value string) error {
+		if slices.Contains(values, value) {
+			return nil
+		}
+		return fmt.Errorf("%s: Attribute '%s' expected to be one of %#v, got %#v", name, key, values, value)
+	})
+}
+
 func typeof(v interface{}) string {
 	// Source: https://stackoverflow.com/a/27160765
 	return fmt.Sprintf("%T", v)
@@ -498,7 +513,25 @@ func FindNGroupsOrSkipAsPolicyGroup(t *testing.T, groups ...*policies.Group) {
 // FindNEnvironmentsOrSkip lists the environments in the BastionZero
 // organization and sets envs to the first n environments found. If there are
 // less than n environments, then the current test is skipped.
-func FindNEnvironmentsOrSkip(t *testing.T, envs ...*policies.Environment) {
+//
+// If you need the environments mapped as the policy type
+// (policies.Environment), use FindNEnvironmentsOrSkipAsPolicyEnvironment()
+// instead.
+func FindNEnvironmentsOrSkip(t *testing.T, envs ...*environments.Environment) {
+	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]environments.Environment, *http.Response, error) {
+		return client.Environments.ListEnvironments(ctx)
+	}, identity[environments.Environment], func(e environments.Environment) bool {
+		// IMPORTANT: We must filter out environments that are concurrently
+		// being created by other parallel acceptance tests because they could
+		// be deleted by the time the caller of this function uses them
+		return !strings.HasPrefix(e.Name, TestNamePrefix)
+	}, envs...)
+}
+
+// FindNEnvironmentsOrSkipAsPolicyEnvironment lists the environments in the
+// BastionZero organization and sets envs to the first n environments found. If
+// there are less than n environments, then the current test is skipped.
+func FindNEnvironmentsOrSkipAsPolicyEnvironment(t *testing.T, envs ...*policies.Environment) {
 	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]environments.Environment, *http.Response, error) {
 		return client.Environments.ListEnvironments(ctx)
 	}, func(e environments.Environment) policies.Environment {
@@ -576,18 +609,28 @@ func FindNDACTargetsOrSkip(t *testing.T, dacTargets ...*targets.DynamicAccessCon
 func FindNDbTargetsOrSkip(t *testing.T, dbTargets ...*targets.DatabaseTarget) {
 	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]targets.DatabaseTarget, *http.Response, error) {
 		return client.Targets.ListDatabaseTargets(ctx)
-	}, identity[targets.DatabaseTarget], nil, dbTargets...)
+	}, identity[targets.DatabaseTarget], func(t targets.DatabaseTarget) bool {
+		// IMPORTANT: We must filter out targets that are concurrently being
+		// created by other parallel acceptance tests because they could be
+		// deleted by the time the caller of this function uses them
+		return !strings.HasPrefix(t.Name, TestNamePrefix)
+	}, dbTargets...)
 }
 
-// FindNDbTargetsOrSkipAsPolicyTarget lists the Db targets in the BastionZero organization and
-// sets dbTargets to the first n Db targets found. If there are less than n Db
-// targets, then the current test is skipped.
+// FindNDbTargetsOrSkipAsPolicyTarget lists the Db targets in the BastionZero
+// organization and sets dbTargets to the first n Db targets found. If there are
+// less than n Db targets, then the current test is skipped.
 func FindNDbTargetsOrSkipAsPolicyTarget(t *testing.T, dbTargets ...*policies.Target) {
 	FindNAPIObjectsOrSkip(t, func(client *bzapi.Client, ctx context.Context) ([]targets.DatabaseTarget, *http.Response, error) {
 		return client.Targets.ListDatabaseTargets(ctx)
 	}, func(t targets.DatabaseTarget) policies.Target {
 		return policies.Target{ID: t.ID, Type: t.GetTargetType()}
-	}, nil, dbTargets...)
+	}, func(t targets.DatabaseTarget) bool {
+		// IMPORTANT: We must filter out targets that are concurrently being
+		// created by other parallel acceptance tests because they could be
+		// deleted by the time the caller of this function uses them
+		return !strings.HasPrefix(t.Name, TestNamePrefix)
+	}, dbTargets...)
 }
 
 // FindNWebTargetsOrSkip lists the Web targets in the BastionZero organization
@@ -661,4 +704,56 @@ func ExpandValuesCheckMapToSingleCheck[T any](resourceName string, apiObject *T,
 	}
 
 	return resource.ComposeTestCheckFunc(checkFuncs...)
+}
+
+func SafePrettyInt(value *int) string {
+	if value == nil {
+		return "<nil>"
+	} else {
+		return strconv.Itoa(*value)
+	}
+}
+
+// TerraformObjectToString returns a human-readable representation of the Object
+// value that can be used in Terraform configurations. This function is
+// equivalent to basetypes.Object.String() except that null object attributes
+// are omitted from the final string.
+func TerraformObjectToString(o types.Object) string {
+	// Source:
+	// https://github.com/hashicorp/terraform-plugin-framework/blob/3b275fbb481bd598b3e020f2560cddc70b885098/types/basetypes/object_value.go#L364-L395
+	//
+	// This function is equivalent to basetypes.Object.String() except that null
+	// object fields are omitted
+
+	if o.IsUnknown() {
+		return attr.UnknownValueString
+	}
+
+	if o.IsNull() {
+		return attr.NullValueString
+	}
+
+	// We want the output to be consistent, so we sort the output by key
+	keys := make([]string, 0, len(o.Attributes()))
+	for k := range o.Attributes() {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	var res strings.Builder
+
+	res.WriteString("{")
+	for i, k := range keys {
+		// Omit null attributes from final string representation
+		if o.Attributes()[k].IsNull() {
+			continue
+		}
+		if i != 0 {
+			res.WriteString(",")
+		}
+		res.WriteString(fmt.Sprintf(`"%s":%s`, k, o.Attributes()[k].String()))
+	}
+	res.WriteString("}")
+
+	return res.String()
 }

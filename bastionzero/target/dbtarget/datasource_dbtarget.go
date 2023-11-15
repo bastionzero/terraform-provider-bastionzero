@@ -13,8 +13,8 @@ import (
 
 func NewDbTargetDataSource() datasource.DataSource {
 	return bzdatasource.NewSingleDataSource(
-		&bzdatasource.SingleDataSourceConfig[dbTargetModel, targets.DatabaseTarget]{
-			BaseSingleDataSourceConfig: &bzdatasource.BaseSingleDataSourceConfig[dbTargetModel, targets.DatabaseTarget]{
+		&bzdatasource.SingleDataSourceConfig[dbTargetDataSourceModel, targets.DatabaseTarget]{
+			BaseSingleDataSourceConfig: &bzdatasource.BaseSingleDataSourceConfig[dbTargetDataSourceModel, targets.DatabaseTarget]{
 				RecordSchema: makeDbTargetDataSourceSchema(
 					&target.BaseTargetDataSourceAttributeOptions{
 						IsIDRequired:   true,
@@ -22,11 +22,11 @@ func NewDbTargetDataSource() datasource.DataSource {
 					}),
 				MetadataTypeName:    "db_target",
 				PrettyAttributeName: "Db target",
-				FlattenAPIModel: func(ctx context.Context, apiObject *targets.DatabaseTarget, state *dbTargetModel) (diags diag.Diagnostics) {
-					setDbTargetAttributes(ctx, state, apiObject)
+				FlattenAPIModel: func(ctx context.Context, apiObject *targets.DatabaseTarget, state *dbTargetDataSourceModel) (diags diag.Diagnostics) {
+					setDbTargetDataSourceAttributes(ctx, state, apiObject)
 					return
 				},
-				GetAPIModel: func(ctx context.Context, tfModel dbTargetModel, client *bastionzero.Client) (*targets.DatabaseTarget, error) {
+				GetAPIModel: func(ctx context.Context, tfModel dbTargetDataSourceModel, client *bastionzero.Client) (*targets.DatabaseTarget, error) {
 					target, _, err := client.Targets.GetDatabaseTarget(ctx, tfModel.ID.ValueString())
 					return target, err
 				},

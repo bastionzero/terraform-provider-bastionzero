@@ -1,3 +1,5 @@
+// Package bzpolicygen provides property based test (PBT) generators for
+// BastionZero policy API types
 package bzpolicygen
 
 import (

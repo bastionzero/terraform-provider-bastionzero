@@ -1,0 +1,117 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: "Target"
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+Learn more about Db targets [here](https://docs.bastionzero.com/docs/deployment/installing-the-agent#databases).
+
+~> **Note on proxy target/environment** A Db target _must_ be configured with
+either a [`proxy_target_id`](#proxy_target_id) or a
+[`proxy_environment_id`](#proxy_environment_id).
+
+~> **Warning** _Modifying_ a Db target's [`proxy_target_id`](#proxy_target_id) or
+[`proxy_environment_id`](#proxy_environment_id) after initial resource creation
+may interrupt active user workflows; please consider closing all connections to
+the target before modifying either of these attributes.
+
+### Database authentication configuration
+
+A Db target's
+[`database_authentication_config`](#database_authentication_config) attribute is
+optional. If left unconfigured, then the default, non-passwordless database
+configuration is used.
+
+-> **Note** If you don't know what combination of values to use for
+[`database_authentication_config`](#database_authentication_config), then you
+can use the
+[`bastionzero_supported_database_configs`](supported_database_configs) data
+source to get a list of supported values.
+
+~> **Warning** _Modifying_ a Db target's
+[`database_authentication_config.authentication_type`](#authentication_type)
+after initial resource creation may require that the Db target is reconfigured
+for the new authentication type. For example, if you change the attribute to
+`ServiceAccountInjection` and
+[`database_authentication_config.cloud_service_provider`](#cloud_service_provider)
+to `GCP`, then you must also update the target's [`remote_host`](#remote_host)
+to include a `gcp://` protocol prefix.
+
+~> **Warning** _Modifying_ a Db target's
+[`database_authentication_config.database`](#database) after initial resource
+creation may require you to reconfigure the target's allowed target users as
+governed by BastionZero policy.
+
+### Remote host
+
+There are some combination of values in the
+[`database_authentication_config`](#database_authentication_config) attribute
+that restrict the [`remote_host`](#remote_host) attribute; namely, there are
+instances where an expected protocol prefix string must be included.
+
+- If
+[`database_authentication_config.cloud_service_provider`](#cloud_service_provider)
+is equal to `GCP`, then [`remote_host`](#remote_host) must include a `gcp://`
+protocol prefix. 
+
+- If
+[`database_authentication_config.cloud_service_provider`](#cloud_service_provider)
+is equal to `AWS` and [`database_authentication_config.database`](#database) is
+equal to `MySQL`, then [`remote_host`](#remote_host) must include an
+`rdsmysql://` protocol prefix.
+
+- If
+[`database_authentication_config.cloud_service_provider`](#cloud_service_provider)
+is equal to `AWS` and [`database_authentication_config.database`](#database) is
+equal to `Postgres`, then [`remote_host`](#remote_host) must include an `rds://`
+protocol prefix.
+
+## Example Usage
+
+### Db target via proxy target
+
+Create a Db target with the default authentication configuration
+(non-passwordless), and use a Bzero agent (Linux or Windows target) to proxy the
+connection to the configured database.
+
+{{ tffile "examples/resources/bastionzero_db_target/proxy-target.tf" }}
+
+### Db target via proxy environment
+
+Create a Db target with the default authentication configuration
+(non-passwordless) and a proxy environment. When a user connects to this target,
+the Linux, Windows, or Kubernetes target with the least number of open
+connections in this environment is used to proxy the connection to the
+configured database.
+
+{{ tffile "examples/resources/bastionzero_db_target/proxy-environment.tf" }}
+
+### SplitCert Db target
+
+Create a Db target with SplitCert enabled; SplitCert provides passwordless
+access to databases. In this example, the Db target is configured as a
+self-hosted Postgres database. Learn more
+[here](https://docs.bastionzero.com/docs/how-to-guides/passwordless-database-access/passwordless-access-to-self-hosted-postgres).
+
+{{ tffile "examples/resources/bastionzero_db_target/splitcert.tf" }}
+
+### Passwordless access to Postgres on GCP Cloud
+
+Create a Db target using service accounts which provides passwordless access to
+the database. Learn more
+[here](https://docs.bastionzero.com/docs/how-to-guides/passwordless-database-access/passwordless-access-to-mysql-and-postgres-on-gcp-cloud-sql).
+
+{{ tffile "examples/resources/bastionzero_db_target/gcp.tf" }}
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Import
+
+Import is supported using the following syntax:
+
+{{ codefile "shell" "examples/resources/bastionzero_db_target/import.sh" }}

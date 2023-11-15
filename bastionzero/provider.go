@@ -181,6 +181,7 @@ func (p *BastionZeroProvider) Resources(ctx context.Context) []func() resource.R
 		proxy.NewProxyPolicyResource,
 		sessionrecording.NewSessionRecordingPolicyResource,
 		jit.NewJITPolicyResource,
+		dbtarget.NewDbTargetResource,
 	}
 }
 
@@ -199,6 +200,7 @@ func (p *BastionZeroProvider) DataSources(ctx context.Context) []func() datasour
 		clustertarget.NewClusterTargetsDataSource,
 		dbtarget.NewDbTargetDataSource,
 		dbtarget.NewDbTargetsDataSource,
+		dbtarget.NewSupportedDatabaseConfigsDataSource,
 		webtarget.NewWebTargetDataSource,
 		webtarget.NewWebTargetsDataSource,
 		dactarget.NewDacTargetDataSource,

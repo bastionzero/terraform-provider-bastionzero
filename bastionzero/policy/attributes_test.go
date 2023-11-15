@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy"
-	"github.com/bastionzero/terraform-provider-bastionzero/internal/testgen/bzpolicygen"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal/testgen/bzgen/bzpolicygen"
 	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
 )

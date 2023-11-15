@@ -2,12 +2,12 @@
 page_title: "bastionzero_environment Resource - terraform-provider-bastionzero"
 subcategory: "Environment"
 description: |-
-  Provides a BastionZero environment resource. An environment is a collection of targets.
+  Provides a BastionZero environment. An environment is a collection of targets.
 ---
 
 # bastionzero_environment (Resource)
 
-Provides a BastionZero environment resource. An environment is a collection of targets.
+Provides a BastionZero environment. An environment is a collection of targets.
 
 ~> **Note on offline target cleanup** An environment's
 [`offline_cleanup_timeout_hours`](#offline_cleanup_timeout_hours) cannot exceed

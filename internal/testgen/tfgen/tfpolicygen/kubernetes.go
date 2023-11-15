@@ -5,8 +5,8 @@ import (
 
 	"github.com/bastionzero/bastionzero-sdk-go/bastionzero/service/policies/policytype"
 	"github.com/bastionzero/terraform-provider-bastionzero/bastionzero/policy/kubernetes"
-	"github.com/bastionzero/terraform-provider-bastionzero/internal/testgen/bzpolicygen"
-	"github.com/bastionzero/terraform-provider-bastionzero/internal/testgen/tftypesgen"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal/testgen/bzgen/bzpolicygen"
+	"github.com/bastionzero/terraform-provider-bastionzero/internal/testgen/tfgen"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"pgregory.net/rapid"
 )
@@ -32,16 +32,16 @@ func PolicySchemaClusterGroupsGen() *rapid.Generator[basetypes.SetValue] {
 func KubernetesPolicySchemaGen(ctx context.Context) *rapid.Generator[kubernetes.KubernetesPolicyModel] {
 	return rapid.Custom(func(t *rapid.T) kubernetes.KubernetesPolicyModel {
 		return kubernetes.KubernetesPolicyModel{
-			ID:            tftypesgen.StringWithValueOrNullOrEmptyGen(PolicySchemaIDGen()).Draw(t, "IDOrNull"),
-			Name:          tftypesgen.StringWithValueOrNullOrEmptyGen(PolicySchemaNameGen()).Draw(t, "NameOrNull"),
-			Type:          tftypesgen.StringWithValueOrNullOrEmptyGen(PolicySchemaTypeGen(policytype.Kubernetes)).Draw(t, "TypeOrNull"),
-			Description:   tftypesgen.StringWithValueOrNullOrEmptyGen(PolicySchemaDescriptionGen()).Draw(t, "DescriptionOrNull"),
-			Subjects:      tftypesgen.SetWithValueOrNullOrEmptyGen(ctx, PolicySchemaSubjectsGen()).Draw(t, "SubjectsOrNull"),
-			Groups:        tftypesgen.SetWithValueOrNullOrEmptyGen(ctx, PolicySchemaGroupsGen()).Draw(t, "GroupsOrNull"),
-			Environments:  tftypesgen.SetWithValueOrNullOrEmptyGen(ctx, PolicySchemaEnvironmentsGen()).Draw(t, "EnvrionmentsOrNull"),
-			Clusters:      tftypesgen.SetWithValueOrNullOrEmptyGen(ctx, PolicySchemaClustersGen()).Draw(t, "ClustersOrNull"),
-			ClusterUsers:  tftypesgen.SetWithValueOrNullOrEmptyGen(ctx, PolicySchemaClusterUsersGen()).Draw(t, "ClusterUsersOrNull"),
-			ClusterGroups: tftypesgen.SetWithValueOrNullOrEmptyGen(ctx, PolicySchemaClusterGroupsGen()).Draw(t, "ClusterGroupsOrNull"),
+			ID:            tfgen.StringWithValueOrNullOrEmptyGen(PolicySchemaIDGen()).Draw(t, "IDOrNull"),
+			Name:          tfgen.StringWithValueOrNullOrEmptyGen(PolicySchemaNameGen()).Draw(t, "NameOrNull"),
+			Type:          tfgen.StringWithValueOrNullOrEmptyGen(PolicySchemaTypeGen(policytype.Kubernetes)).Draw(t, "TypeOrNull"),
+			Description:   tfgen.StringWithValueOrNullOrEmptyGen(PolicySchemaDescriptionGen()).Draw(t, "DescriptionOrNull"),
+			Subjects:      tfgen.SetWithValueOrNullOrEmptyGen(ctx, PolicySchemaSubjectsGen()).Draw(t, "SubjectsOrNull"),
+			Groups:        tfgen.SetWithValueOrNullOrEmptyGen(ctx, PolicySchemaGroupsGen()).Draw(t, "GroupsOrNull"),
+			Environments:  tfgen.SetWithValueOrNullOrEmptyGen(ctx, PolicySchemaEnvironmentsGen()).Draw(t, "EnvrionmentsOrNull"),
+			Clusters:      tfgen.SetWithValueOrNullOrEmptyGen(ctx, PolicySchemaClustersGen()).Draw(t, "ClustersOrNull"),
+			ClusterUsers:  tfgen.SetWithValueOrNullOrEmptyGen(ctx, PolicySchemaClusterUsersGen()).Draw(t, "ClusterUsersOrNull"),
+			ClusterGroups: tfgen.SetWithValueOrNullOrEmptyGen(ctx, PolicySchemaClusterGroupsGen()).Draw(t, "ClusterGroupsOrNull"),
 		}
 	})
 }

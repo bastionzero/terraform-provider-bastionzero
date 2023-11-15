@@ -1,4 +1,6 @@
-package tftypesgen
+// Package tfgen provides property based test (PBT) generators for BastionZero
+// Terraform Provider schema model types
+package tfgen
 
 import (
 	"context"
