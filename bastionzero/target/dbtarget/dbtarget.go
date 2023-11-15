@@ -226,8 +226,8 @@ func makeDbTargetResourceSchema(ctx context.Context) map[string]resource_schema.
 		},
 		"proxy_target_id": resource_schema.StringAttribute{
 			Optional:            true,
-			Description:         "The target's proxy target's ID (ID of a Bzero or Cluster target).",
-			MarkdownDescription: "The target's proxy target's ID (ID of a [Bzero](bzero_target) or [Cluster](cluster_target) target).",
+			Description:         "The target's proxy target's ID (ID of a Linux, Windows, or Kubernetes target).",
+			MarkdownDescription: "The target's proxy target's ID (ID of a [Linux](bzero_target), [Windows](bzero_target), or [Kubernetes](cluster_target) target).",
 			Validators: []validator.String{
 				bzvalidator.ValidUUIDV4(),
 			},
@@ -248,7 +248,7 @@ func makeDbTargetResourceSchema(ctx context.Context) map[string]resource_schema.
 		},
 		"remote_port": resource_schema.Int64Attribute{
 			Required:    true,
-			Description: fmt.Sprintf("The port of the %v server accessible via the target. This field is required for all databases; however, if `database_authentication_config.cloud_service_provider` is equal to `%v`, then the value will be ignored when connecting to the database.", targettype.Db, dbauthconfig.GCP),
+			Description: fmt.Sprintf("The port of the %v server accessible via the target. This field is required for all databases; however, if `database_authentication_config.cloud_service_provider` is equal to `%v`, then the value will be ignored when connecting to the database (we recommend using value `0` in this case).", targettype.Db, dbauthconfig.GCP),
 		},
 		"local_port": resource_schema.Int64Attribute{
 			Optional:    true,

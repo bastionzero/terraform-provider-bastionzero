@@ -2,12 +2,12 @@
 page_title: "bastionzero_db_target Resource - terraform-provider-bastionzero"
 subcategory: "Target"
 description: |-
-  Provides a BastionZero database target. Database targets configure remote access to database servers running on Bzero bzero_target targets or Cluster cluster_target targets.
+  Provides a BastionZero database target. Database targets configure remote access to database servers running on Linux bzero_target, Windows bzero_target, or Kubernetes cluster_target targets.
 ---
 
 # bastionzero_db_target (Resource)
 
-Provides a BastionZero database target. Database targets configure remote access to database servers running on [Bzero](bzero_target) targets or [Cluster](cluster_target) targets.
+Provides a BastionZero database target. Database targets configure remote access to database servers running on [Linux](bzero_target), [Windows](bzero_target), or [Kubernetes](cluster_target) targets.
 
 Learn more about Db targets [here](https://docs.bastionzero.com/docs/deployment/installing-the-agent#databases).
 
@@ -76,8 +76,8 @@ protocol prefix.
 ### Db target via proxy target
 
 Create a Db target with the default authentication configuration
-(non-passwordless), and use a Bzero target to proxy the connection to the
-configured database.
+(non-passwordless), and use a Bzero agent (Linux or Windows target) to proxy the
+connection to the configured database.
 
 ```terraform
 data "bastionzero_environments" "example" {}
@@ -89,7 +89,8 @@ locals {
     for each in data.bastionzero_environments.example.environments
     : each if each.name == "example-env"
   ])
-  # Find Bzero target with name "ubuntu". `proxy_target` is null if not found
+  # Find Linux or Windows target with name "ubuntu". `proxy_target` is null if
+  # not found
   proxy_target = one([
     for each in data.bastionzero_bzero_targets.example.targets
     : each if each.name == "ubuntu"
@@ -109,8 +110,9 @@ resource "bastionzero_db_target" "example" {
 
 Create a Db target with the default authentication configuration
 (non-passwordless) and a proxy environment. When a user connects to this target,
-the Bzero or Cluster target with the least number of open connections in this
-environment is used to proxy the connection to the configured database.
+the Linux, Windows, or Kubernetes target with the least number of open
+connections in this environment is used to proxy the connection to the
+configured database.
 
 ```terraform
 data "bastionzero_environments" "example" {}
@@ -152,7 +154,8 @@ locals {
     for each in data.bastionzero_environments.example.environments
     : each if each.name == "example-env"
   ])
-  # Find Bzero target with name "ubuntu". `proxy_target` is null if not found
+  # Find Linux or Windows target with name "ubuntu". `proxy_target` is null if
+  # not found
   proxy_target = one([
     for each in data.bastionzero_bzero_targets.example.targets
     : each if each.name == "ubuntu"
@@ -189,7 +192,8 @@ locals {
     for each in data.bastionzero_environments.example.environments
     : each if each.name == "example-env"
   ])
-  # Find Bzero target with name "ubuntu". `proxy_target` is null if not found
+  # Find Linux or Windows target with name "ubuntu". `proxy_target` is null if
+  # not found
   proxy_target = one([
     for each in data.bastionzero_bzero_targets.example.targets
     : each if each.name == "ubuntu"
@@ -221,14 +225,14 @@ resource "bastionzero_db_target" "example" {
 - `environment_id` (String) The target's environment's ID.
 - `name` (String) The target's name.
 - `remote_host` (String) The target's hostname or IP address.
-- `remote_port` (Number) The port of the Db server accessible via the target. This field is required for all databases; however, if `database_authentication_config.cloud_service_provider` is equal to `GCP`, then the value will be ignored when connecting to the database.
+- `remote_port` (Number) The port of the Db server accessible via the target. This field is required for all databases; however, if `database_authentication_config.cloud_service_provider` is equal to `GCP`, then the value will be ignored when connecting to the database (we recommend using value `0` in this case).
 
 ### Optional
 
 - `database_authentication_config` (Attributes) Information about the db target's database authentication configuration. If this attribute is left unconfigured, the target is configured with the default, non-passwordless database configuration. (see [below for nested schema](#nestedatt--database_authentication_config))
 - `local_port` (Number) The port of the Db daemon's localhost server that is spawned on the user's machine on connect. If this attribute is left unconfigured, an available port will be chosen when the target is connected to.
 - `proxy_environment_id` (String) The target's proxy environment's ID (ID of the backing proxy environment).
-- `proxy_target_id` (String) The target's proxy target's ID (ID of a [Bzero](bzero_target) or [Cluster](cluster_target) target).
+- `proxy_target_id` (String) The target's proxy target's ID (ID of a [Linux](bzero_target), [Windows](bzero_target), or [Kubernetes](cluster_target) target).
 
 ### Read-Only
 

@@ -7,7 +7,8 @@ locals {
     for each in data.bastionzero_environments.example.environments
     : each if each.name == "example-env"
   ])
-  # Find Bzero target with name "ubuntu". `proxy_target` is null if not found
+  # Find Linux or Windows target with name "ubuntu". `proxy_target` is null if
+  # not found
   proxy_target = one([
     for each in data.bastionzero_bzero_targets.example.targets
     : each if each.name == "ubuntu"

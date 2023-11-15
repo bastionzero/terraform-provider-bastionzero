@@ -76,8 +76,8 @@ protocol prefix.
 ### Db target via proxy target
 
 Create a Db target with the default authentication configuration
-(non-passwordless), and use a Bzero target to proxy the connection to the
-configured database.
+(non-passwordless), and use a Bzero agent (Linux or Windows target) to proxy the
+connection to the configured database.
 
 {{ tffile "examples/resources/bastionzero_db_target/proxy-target.tf" }}
 
@@ -85,8 +85,9 @@ configured database.
 
 Create a Db target with the default authentication configuration
 (non-passwordless) and a proxy environment. When a user connects to this target,
-the Bzero or Cluster target with the least number of open connections in this
-environment is used to proxy the connection to the configured database.
+the Linux, Windows, or Kubernetes target with the least number of open
+connections in this environment is used to proxy the connection to the
+configured database.
 
 {{ tffile "examples/resources/bastionzero_db_target/proxy-environment.tf" }}
 
