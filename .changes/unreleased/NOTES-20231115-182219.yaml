@@ -1,0 +1,5 @@
+kind: NOTES
+body: "Upgraded [`bastionzero-sdk-go`](https://github.com/bastionzero/bastionzero-sdk-go) to v0.10.0"
+time: 2023-11-15T18:22:19.137336-05:00
+custom:
+  Issues: "69"
