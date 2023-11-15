@@ -27,6 +27,7 @@ type dbTargetModel struct {
 	AgentPublicKey  types.String `tfsdk:"agent_public_key"`
 
 	ProxyTargetID                types.String `tfsdk:"proxy_target_id"`
+	ProxyEnvironmentID           types.String `tfsdk:"proxy_environment_id"`
 	RemoteHost                   types.String `tfsdk:"remote_host"`
 	RemotePort                   types.Int64  `tfsdk:"remote_port"`
 	LocalPort                    types.Int64  `tfsdk:"local_port"`
@@ -45,10 +46,11 @@ func (t *dbTargetModel) SetAgentVersion(value types.String)    { t.AgentVersion 
 func (t *dbTargetModel) SetRegion(value types.String)          { t.Region = value }
 func (t *dbTargetModel) SetAgentPublicKey(value types.String)  { t.AgentPublicKey = value }
 
-func (t *dbTargetModel) SetProxyTargetID(value types.String) { t.ProxyTargetID = value }
-func (t *dbTargetModel) SetRemoteHost(value types.String)    { t.RemoteHost = value }
-func (t *dbTargetModel) SetRemotePort(value types.Int64)     { t.RemotePort = value }
-func (t *dbTargetModel) SetLocalPort(value types.Int64)      { t.LocalPort = value }
+func (t *dbTargetModel) SetProxyTargetID(value types.String)      { t.ProxyTargetID = value }
+func (t *dbTargetModel) SetProxyEnvironmentID(value types.String) { t.ProxyEnvironmentID = value }
+func (t *dbTargetModel) SetRemoteHost(value types.String)         { t.RemoteHost = value }
+func (t *dbTargetModel) SetRemotePort(value types.Int64)          { t.RemotePort = value }
+func (t *dbTargetModel) SetLocalPort(value types.Int64)           { t.LocalPort = value }
 
 // setDbTargetAttributes populates the TF schema data from a db target API
 // object.

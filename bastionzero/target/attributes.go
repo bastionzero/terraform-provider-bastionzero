@@ -142,6 +142,11 @@ func BaseVirtualTargetDataSourceAttributes(targetType targettype.TargetType) map
 			Description:         "The target's proxy target's ID (ID of a Bzero or Cluster target).",
 			MarkdownDescription: "The target's proxy target's ID (ID of a [Bzero](bzero_target) or [Cluster](cluster_target) target).",
 		},
+		"proxy_environment_id": schema.StringAttribute{
+			Computed:            true,
+			Description:         "The target's proxy environment's ID (ID of the backing proxy environment).",
+			MarkdownDescription: "The target's proxy environment's ID (ID of the backing proxy environment).",
+		},
 		"remote_host": schema.StringAttribute{
 			Computed:    true,
 			Description: "The target's hostname or IP address.",
@@ -162,6 +167,8 @@ func BaseVirtualTargetDataSourceAttributes(targetType targettype.TargetType) map
 type VirtualTargetModelInterface interface {
 	// SetProxyTargetID sets the target model's proxy_target_id attribute.
 	SetProxyTargetID(value types.String)
+	// SetProxyEnvironmentID sets the target model's proxy_environment_id attribute.
+	SetProxyEnvironmentID(value types.String)
 	// SetRemoteHost sets the target model's remote_host attribute.
 	SetRemoteHost(value types.String)
 	// SetRemotePort sets the target model's remote_port attribute.
@@ -173,7 +180,19 @@ type VirtualTargetModelInterface interface {
 // SetBaseVirtualTargetAttributes populates base virtual target attributes in
 // the TF schema from a virtual target
 func SetBaseVirtualTargetAttributes(ctx context.Context, schema VirtualTargetModelInterface, virtualTarget targets.VirtualTargetInterface) {
-	schema.SetProxyTargetID(types.StringValue(virtualTarget.GetProxyTargetID()))
+	// ProxyTargetID and ProxyEnvironmentID are returned as the empty strings
+	// when they're not specified. Save these as null when they're empty
+	if virtualTarget.GetProxyTargetID() == "" {
+		schema.SetProxyTargetID(types.StringNull())
+	} else {
+		schema.SetProxyTargetID(types.StringValue(virtualTarget.GetProxyTargetID()))
+	}
+	if virtualTarget.GetProxyEnvironmentID() == "" {
+		schema.SetProxyEnvironmentID(types.StringNull())
+	} else {
+		schema.SetProxyEnvironmentID(types.StringValue(virtualTarget.GetProxyEnvironmentID()))
+	}
+
 	schema.SetRemoteHost(types.StringValue(virtualTarget.GetRemoteHost()))
 	schema.SetRemotePort(typesext.Int64PointerValue(virtualTarget.GetRemotePort().Value))
 	schema.SetLocalPort(typesext.Int64PointerValue(virtualTarget.GetLocalPort().Value))

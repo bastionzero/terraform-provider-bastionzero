@@ -14,16 +14,17 @@ import (
 
 func getValuesCheckMap(webTarget *targets.WebTarget) map[string]string {
 	valuesCheckMap := map[string]string{
-		"agent_public_key": webTarget.AgentPublicKey,
-		"agent_version":    webTarget.AgentVersion,
-		"environment_id":   webTarget.EnvironmentID,
-		"region":           webTarget.Region,
-		"status":           string(webTarget.Status),
-		"type":             string(targettype.Web),
-		"id":               webTarget.ID,
-		"name":             webTarget.Name,
-		"proxy_target_id":  webTarget.ProxyTargetID,
-		"remote_host":      webTarget.RemoteHost,
+		"agent_public_key":     webTarget.AgentPublicKey,
+		"agent_version":        webTarget.AgentVersion,
+		"environment_id":       webTarget.EnvironmentID,
+		"region":               webTarget.Region,
+		"status":               string(webTarget.Status),
+		"type":                 string(targettype.Web),
+		"id":                   webTarget.ID,
+		"name":                 webTarget.Name,
+		"proxy_target_id":      webTarget.ProxyTargetID,
+		"proxy_environment_id": webTarget.ProxyEnvironmentID,
+		"remote_host":          webTarget.RemoteHost,
 	}
 
 	if webTarget.LastAgentUpdate != nil {

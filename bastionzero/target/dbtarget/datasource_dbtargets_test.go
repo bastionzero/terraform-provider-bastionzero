@@ -15,17 +15,18 @@ import (
 
 func getValuesCheckMap(dbTarget *targets.DatabaseTarget) map[string]string {
 	valuesCheckMap := map[string]string{
-		"agent_public_key": dbTarget.AgentPublicKey,
-		"agent_version":    dbTarget.AgentVersion,
-		"environment_id":   dbTarget.EnvironmentID,
-		"is_split_cert":    fmt.Sprintf("%t", dbTarget.IsSplitCert),
-		"region":           dbTarget.Region,
-		"status":           string(dbTarget.Status),
-		"type":             string(targettype.Db),
-		"id":               dbTarget.ID,
-		"name":             dbTarget.Name,
-		"proxy_target_id":  dbTarget.ProxyTargetID,
-		"remote_host":      dbTarget.RemoteHost,
+		"agent_public_key":     dbTarget.AgentPublicKey,
+		"agent_version":        dbTarget.AgentVersion,
+		"environment_id":       dbTarget.EnvironmentID,
+		"is_split_cert":        fmt.Sprintf("%t", dbTarget.IsSplitCert),
+		"region":               dbTarget.Region,
+		"status":               string(dbTarget.Status),
+		"type":                 string(targettype.Db),
+		"id":                   dbTarget.ID,
+		"name":                 dbTarget.Name,
+		"proxy_target_id":      dbTarget.ProxyTargetID,
+		"proxy_environment_id": dbTarget.ProxyEnvironmentID,
+		"remote_host":          dbTarget.RemoteHost,
 	}
 
 	if dbTarget.LastAgentUpdate != nil {

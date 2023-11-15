@@ -81,6 +81,7 @@ Read-Only:
 - `last_agent_update` (String) The time this target's proxy agent last had a transition change in status formatted as a UTC timestamp string in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) format. Null if there has not been a single transition change.
 - `local_port` (Number) The port of the Db daemon's localhost server that is spawned on the user's machine on connect. Null if not configured.
 - `name` (String) The target's name.
+- `proxy_environment_id` (String) The target's proxy environment's ID (ID of the backing proxy environment).
 - `proxy_target_id` (String) The target's proxy target's ID (ID of a [Bzero](bzero_target) or [Cluster](cluster_target) target).
 - `region` (String) The BastionZero region that this target has connected to (follows same naming convention as AWS regions).
 - `remote_host` (String) The target's hostname or IP address.
