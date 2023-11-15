@@ -20,8 +20,8 @@ github.com/apparentlymart/go-textseg/v15 v15.0.0/go.mod h1:K8XmNZdhEBkdlyDdvbmms
 github.com/armon/go-radix v0.0.0-20180808171621-7fddfc383310/go.mod h1:ufUuZ+zHj4x4TnLV4JWEpy2hxWSpsRywHrMgIH9cCH8=
 github.com/armon/go-radix v1.0.0 h1:F4z6KzEeeQIMeLFa97iZU6vupzoecKdU5TX24SNppXI=
 github.com/armon/go-radix v1.0.0/go.mod h1:ufUuZ+zHj4x4TnLV4JWEpy2hxWSpsRywHrMgIH9cCH8=
-github.com/bastionzero/bastionzero-sdk-go v0.9.0 h1:LAekMOTwLwo8a1vQNmiGsdBqaoslkmyRdfM0iLkrDoQ=
-github.com/bastionzero/bastionzero-sdk-go v0.9.0/go.mod h1:dBa1tdf7t4mwnNCo0MMgSkKf8kO47iZ+czuiOqGRNHQ=
+github.com/bastionzero/bastionzero-sdk-go v0.10.0 h1:jPLlOEMTxHXGELXTkzU0CN0V1Om0DSp5oquUacU74cM=
+github.com/bastionzero/bastionzero-sdk-go v0.10.0/go.mod h1:dBa1tdf7t4mwnNCo0MMgSkKf8kO47iZ+czuiOqGRNHQ=
 github.com/bgentry/speakeasy v0.1.0 h1:ByYyxL9InA1OWqxJqqp2A5pYHUrCiAL6K3J+LKSsQkY=
 github.com/bgentry/speakeasy v0.1.0/go.mod h1:+zsyZBPWlz7T6j88CTgSN5bM796AkVf0kBD4zp0CCIs=
 github.com/bufbuild/protocompile v0.4.0 h1:LbFKd2XowZvQ/kajzguUp2DC9UEIQhIq77fZZlaQsNA=
