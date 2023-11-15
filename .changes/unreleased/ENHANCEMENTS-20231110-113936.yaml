@@ -1,5 +1,0 @@
-kind: ENHANCEMENTS
-body: "data-source/db_target, data-source/db_targets, data-source/web_target, data-source/web_targets: Add `proxy_environment_id` attribute"
-time: 2023-11-10T11:39:36.212326-05:00
-custom:
-  Issues: "68"
