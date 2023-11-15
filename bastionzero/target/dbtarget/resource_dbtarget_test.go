@@ -753,7 +753,7 @@ func TestAccDbTarget_AllSupportedDatabaseAuthConfig(t *testing.T) {
 	// updates the TF resource to the next supported db_auth_config, changing
 	// the remote_host if needed
 	steps := []resource.TestStep{}
-	for _, supportedConfig := range supportedDbConfigs {
+	for _, supportedConfigIter := range supportedDbConfigs {
 		var target targets.DatabaseTarget
 
 		// Why? See: https://go.dev/doc/faq#closures_and_goroutines
@@ -761,7 +761,7 @@ func TestAccDbTarget_AllSupportedDatabaseAuthConfig(t *testing.T) {
 		// Go language issue not fixed until Go 1.22: "This is because each
 		// iteration of the loop uses the same instance of the variable v, so
 		// each closure shares that single variable."
-		supportedConfig := supportedConfig // create a new 'supportedConfig' to bind in closure below.
+		supportedConfig := supportedConfigIter // create a new 'supportedConfig' to bind in closure below.
 		steps = append(steps, func() resource.TestStep {
 			remoteHost := validRemoteHost(&supportedConfig)
 
