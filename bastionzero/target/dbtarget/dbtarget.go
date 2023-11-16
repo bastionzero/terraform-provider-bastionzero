@@ -227,7 +227,7 @@ func makeDbTargetResourceSchema(ctx context.Context) map[string]resource_schema.
 		"proxy_target_id": resource_schema.StringAttribute{
 			Optional:            true,
 			Description:         "The target's proxy target's ID (ID of a Linux, Windows, or Kubernetes target).",
-			MarkdownDescription: "The target's proxy target's ID (ID of a [Linux](bzero_target), [Windows](bzero_target), or [Kubernetes](cluster_target) target).",
+			MarkdownDescription: "The target's proxy target's ID (ID of a [Linux](../data-sources/bzero_target), [Windows](../data-sources/bzero_target), or [Kubernetes](../data-sources/cluster_target) target).",
 			Validators: []validator.String{
 				bzvalidator.ValidUUIDV4(),
 			},
