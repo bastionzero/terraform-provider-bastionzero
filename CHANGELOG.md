@@ -1,3 +1,11 @@
+## v0.3.1 (March 26, 2024)
+
+NOTES:
+
+
+* Update `bastionzero_db_target` resource documentation ([#72](https://github.com/bastionzero/terraform-provider-bastionzero/issues/72)).
+
+
 ## v0.3.0 (November 15, 2023)
 
 FEATURES:
