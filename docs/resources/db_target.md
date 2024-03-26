@@ -2,12 +2,12 @@
 page_title: "bastionzero_db_target Resource - terraform-provider-bastionzero"
 subcategory: "Target"
 description: |-
-  Provides a BastionZero database target. Database targets configure remote access to database servers running on Linux bzero_target, Windows bzero_target, or Kubernetes cluster_target targets.
+  Provides a BastionZero database target. Database targets configure remote access to database servers running on Linux ../data-sources/bzero_target, Windows ../data-sources/bzero_target, or Kubernetes ../data-sources/cluster_target targets.
 ---
 
 # bastionzero_db_target (Resource)
 
-Provides a BastionZero database target. Database targets configure remote access to database servers running on [Linux](bzero_target), [Windows](bzero_target), or [Kubernetes](cluster_target) targets.
+Provides a BastionZero database target. Database targets configure remote access to database servers running on [Linux](../data-sources/bzero_target), [Windows](../data-sources/bzero_target), or [Kubernetes](../data-sources/cluster_target) targets.
 
 Learn more about Db targets [here](https://docs.bastionzero.com/docs/deployment/installing-the-agent#databases).
 
@@ -30,8 +30,8 @@ configuration is used.
 -> **Note** If you don't know what combination of values to use for
 [`database_authentication_config`](#database_authentication_config), then you
 can use the
-[`bastionzero_supported_database_configs`](supported_database_configs) data
-source to get a list of supported values.
+[`bastionzero_supported_database_configs`](../data-sources/supported_database_configs)
+data source to get a list of supported values.
 
 ~> **Warning** _Modifying_ a Db target's
 [`database_authentication_config.authentication_type`](#authentication_type)
@@ -232,7 +232,7 @@ resource "bastionzero_db_target" "example" {
 - `database_authentication_config` (Attributes) Information about the db target's database authentication configuration. If this attribute is left unconfigured, the target is configured with the default, non-passwordless database configuration. (see [below for nested schema](#nestedatt--database_authentication_config))
 - `local_port` (Number) The port of the Db daemon's localhost server that is spawned on the user's machine on connect. If this attribute is left unconfigured, an available port will be chosen when the target is connected to.
 - `proxy_environment_id` (String) The target's proxy environment's ID (ID of the backing proxy environment).
-- `proxy_target_id` (String) The target's proxy target's ID (ID of a [Linux](bzero_target), [Windows](bzero_target), or [Kubernetes](cluster_target) target).
+- `proxy_target_id` (String) The target's proxy target's ID (ID of a [Linux](../data-sources/bzero_target), [Windows](../data-sources/bzero_target), or [Kubernetes](../data-sources/cluster_target) target).
 
 ### Read-Only
 
