@@ -51,7 +51,7 @@ jobs:
   terraform-provider-release:
     name: 'Terraform Provider Release'
     needs: [release-notes]
-    uses: hashicorp/ghaction-terraform-provider-release/.github/workflows/community.yml@9b5d2ca4b85f3a54d5c4d12e7690ddad1526ff6c # v3.0.1
+    uses: hashicorp/ghaction-terraform-provider-release/.github/workflows/community.yml@393dac4dd208c749b1622323f9f0e8d26a6f26cc # v4.0.1
     secrets:
       gpg-private-key: '${{ secrets.GPG_PRIVATE_KEY }}'
       gpg-private-key-passphrase: '${{ secrets.GPG_PASSPHRASE }}'
