@@ -153,5 +153,5 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md#releasing) to learn more.
 ## License
 
 This provider is distributed under the Apache License 2.0 license found in the
-[LICENSE](./LICENSE) file, and includes [open source software](./CREDITS.md)
+[LICENSE](./LICENSE) file, and includes [open source software](https://docs.bastionzero.com/docs/credits/terraform-provider)
 under a variety of other licenses.
